@@ -1,0 +1,3 @@
+module VoshodAvtoExchange
+
+end # VoshodAvtoExchange
