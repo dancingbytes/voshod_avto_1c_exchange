@@ -4,8 +4,8 @@ VoshodAvtoExchange::Engine.routes.draw do
   # Exchange_1c
   namespace :exchange_1c do
 
-    get  'orders'      => 'orders#list'
-    post 'orders'      => 'orders#save_file'
+    post 'users'    => 'users#list'
+    post 'orders'   => 'orders#list'
 
   end # exchange_1c
 

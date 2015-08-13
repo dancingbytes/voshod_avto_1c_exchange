@@ -1,11 +1,11 @@
 # encoding: utf-8
 module Exchange_1c
 
-  class OrdersController < ::Exchange_1c::BaseController
+  class UsersController < ::Exchange_1c::BaseController
 
     def list
     end # list
 
-  end # OrdersController
+  end # UsersController
 
 end # Exchange_1c

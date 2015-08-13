@@ -6,7 +6,7 @@ require 'voshod_avto_1c_exchange/version'
 Gem::Specification.new do |spec|
 
   spec.name          = "voshod_avto_1c_exchange"
-  spec.version       = Laximo::VERSION
+  spec.version       = VoshodAvtoExchange::VERSION
   spec.authors       = ["Ivan Piliaiev"]
   spec.email         = ["piliaiev@gmail.com"]
   spec.description   = %q{Exchange 1C for v-avto.ru}
@@ -19,7 +19,7 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.required_ruby_version = '>= 1.9.3'
+  spec.required_ruby_version = '>= 2.0.0'
 
   spec.add_dependency "nokogiri", '~> 1.6'
 
