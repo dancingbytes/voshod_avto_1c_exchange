@@ -11,7 +11,13 @@ module Exchange_1c
     private
 
     def auth
-      true
+
+      return true if ::VoshodAvtoExchange::login.nil?
+
+      authenticate_or_request_with_http_basic do |login, password|
+        (login == ::VoshodAvtoExchange::login && password == ::VoshodAvtoExchange::password)
+      end
+
     end # auth
 
   end # BaseController
