@@ -2,6 +2,8 @@ require 'nokogiri'
 
 module VoshodAvtoExchange
 
+  extend self
+
   def login(v = nil)
 
     @login = v unless v.blank?
