@@ -5,7 +5,7 @@ module VoshodAvtoExchange
 
   class Engine < Rails::Engine
 
-    engine_name "voshod_avto_1c_exchange"
+    engine_name "voshod_avto_exchange"
 
   end # Engine
 

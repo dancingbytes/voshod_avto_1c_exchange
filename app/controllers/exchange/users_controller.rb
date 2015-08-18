@@ -1,9 +1,9 @@
 # encoding: utf-8
-module Exchange_1c
+module Exchange
 
-  class UsersController < ::Exchange_1c::BaseController
+  class UsersController < ::Exchange::BaseController
 
-    # POST /exchange_1c/users
+    # POST /exchange/users
     def list
 
       ::Rails.logger.tagged("/exchange/users") {

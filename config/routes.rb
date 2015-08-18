@@ -1,8 +1,10 @@
 # encoding: utf-8
 VoshodAvtoExchange::Engine.routes.draw do
 
-  # Exchange_1c
-  namespace :exchange_1c do
+  # Exchange
+  namespace :exchange do
+
+    get  'init'     => 'base#init'
 
     get  'users'    => 'base#init'
     post 'users'    => 'users#list'
@@ -10,6 +12,6 @@ VoshodAvtoExchange::Engine.routes.draw do
     get  'orders'   => 'base#init'
     post 'orders'   => 'orders#list'
 
-  end # exchange_1c
+  end # exchange
 
 end # draw

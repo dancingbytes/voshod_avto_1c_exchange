@@ -1,5 +1,5 @@
 # encoding: utf-8
-module Exchange_1c
+module Exchange
 
   class BaseController < ::ApplicationController
 
@@ -10,10 +10,10 @@ module Exchange_1c
 
     layout false
 
-    # GET|POST /exchange_1c/init
+    # GET|POST /exchange/init
     def init
 
-      ::Rails.logger.tagged("/exchange_1c/init") {
+      ::Rails.logger.tagged("/exchange/init") {
         ::Rails.logger.error(params.inspect)
       }
 
