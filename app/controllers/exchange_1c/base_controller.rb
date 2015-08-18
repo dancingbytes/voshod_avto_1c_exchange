@@ -5,8 +5,28 @@ module Exchange_1c
 
     unloadable
 
-    before_filter :auth
+#    before_filter :auth
     skip_before_filter :verify_authenticity_token
+
+    layout false
+
+    # GET|POST /exchange_1c/init
+    def init
+
+      ::Rails.logger.tagged("/exchange_1c/init") {
+        ::Rails.logger.error(params)
+      }
+
+      case params[:mode]
+        when 'checkauth'
+          render(text: "success\nexchange_1c\n#{rand(9999)}", layout: false) and return
+        when 'init'
+          render(text: "zip=no\nfile_limit=99999999999999999", layout: false) and return
+        else
+          render(text: "success", layout: false) and return
+      end
+
+    end # index
 
     private
 
