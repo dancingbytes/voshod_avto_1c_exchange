@@ -7,7 +7,7 @@ module Exchange_1c
     def list
 
       ::Rails.logger.tagged("/exchange/users") {
-        ::Rails.logger.error(params)
+        ::Rails.logger.error(params.inspect)
       }
 
       render(text: %q(<?xml version="1.0" encoding="UTF-8"?>

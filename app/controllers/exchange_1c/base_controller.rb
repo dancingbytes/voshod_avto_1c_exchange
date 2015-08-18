@@ -14,7 +14,7 @@ module Exchange_1c
     def init
 
       ::Rails.logger.tagged("/exchange_1c/init") {
-        ::Rails.logger.error(params)
+        ::Rails.logger.error(params.inspect)
       }
 
       case params[:mode]
