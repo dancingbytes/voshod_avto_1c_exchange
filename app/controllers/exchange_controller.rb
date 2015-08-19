@@ -62,7 +62,7 @@ class ExchangeController < ::ApplicationController
     date        = Time.now.strftime('%Y-%m-%d')
     time        = Time.now.strftime('%H:%M:%S')
 
-    User.limit(10).each { |user|
+    User.where(approved: false).each { |user|
 
       last_name, first_name, _ = user.contact_person.split(/\s/)
 
