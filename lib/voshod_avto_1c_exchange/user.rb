@@ -94,7 +94,7 @@ module VoshodAvtoExchange
 
         str << ::VoshodAvtoExchange::User::XML_USER % {
 
-          kid:            ::VoshodAvtoExchange.to_1c_id(user.id.to_s),
+          kid:            user.id.to_s,
           inn:            user.inn,
           date:           date,
           time:           time,
