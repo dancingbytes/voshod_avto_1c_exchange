@@ -27,6 +27,10 @@ module VoshodAvtoExchange
 
   end # to_1c_id
 
+  def to_bson_id(str)
+    str.gsub(/-/, '')[0, 24]
+  end # to_bson_id
+
 end # VoshodAvtoExchange
 
 require 'voshod_avto_1c_exchange/version'
