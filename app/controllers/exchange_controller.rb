@@ -23,6 +23,9 @@ class ExchangeController < ::ApplicationController
       when 'init'
         render(text: "zip=no\nfile_limit=99999999999999999") and return
 
+      when 'success'
+        render(text: "success") and return
+
       when 'query'
 
         case params[:type]
