@@ -28,10 +28,10 @@ class ExchangeController < ::ApplicationController
         case params[:type]
 
           when 'catalog'
-            render(xml: orders) and return
+            render(xml: orders, encoding: 'utf-8') and return
 
           when 'sale'
-            render(xml: users) and return
+            render(xml: users, encoding: 'utf-8') and return
 
         else
           render(text: "Type `#{params[:type]}` is not found") and return
