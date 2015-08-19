@@ -59,7 +59,7 @@ class ExchangeController < ::ApplicationController
     str         = ""
     first_name  = ""
     last_name   = ""
-    date        = Time.now.strftime('%d-%m-%Y')
+    date        = Time.now.strftime('%Y-%m-%d')
     time        = Time.now.strftime('%H:%M:%S')
 
     User.limit(10).each { |user|
