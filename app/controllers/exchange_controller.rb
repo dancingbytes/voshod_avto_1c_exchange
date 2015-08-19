@@ -31,7 +31,7 @@ class ExchangeController < ::ApplicationController
             render(xml: orders, encoding: 'utf-8') and return
 
           when 'sale'
-            render(xml: users, encoding: 'utf-8') and return
+            render(xml: ::VoshodAvtoExchange::User.export, encoding: 'utf-8') and return
 
         else
           render(text: "Type `#{params[:type]}` is not found") and return
@@ -53,47 +53,6 @@ class ExchangeController < ::ApplicationController
 </КоммерческаяИнформация>).freeze
 
   end # orders
-
-  def users
-
-    str         = ""
-    first_name  = ""
-    last_name   = ""
-    date        = Time.now.strftime('%Y-%m-%d')
-    time        = Time.now.strftime('%H:%M:%S')
-
-    User.where(approved: false).each { |user|
-
-      last_name, first_name, _ = user.contact_person.split(/\s/)
-
-      str << ::VoshodAvtoExchange::XML_USER % {
-
-        kid:            ::VoshodAvtoExchange.to_1c_id(user.id.to_s),
-        inn:            user.inn,
-        date:           date,
-        time:           time,
-        company:        user.company,
-        first_name:     first_name,
-        last_name:      last_name,
-        address:        user.address,
-        postcode:       "",
-        city:           "",
-        street:         "",
-        email:          user.email,
-        phone:          user.phone,
-        contact_person: user.contact_person
-
-      }
-
-    }
-
-    ::VoshodAvtoExchange::XML_BASE % {
-      date: date,
-      time: time,
-      body: str
-    }
-
-  end # users
 
   def auth
 
