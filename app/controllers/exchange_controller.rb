@@ -92,7 +92,6 @@ class ExchangeController < ::ApplicationController
 
   def auth
 
-    return true
     return true if ::VoshodAvtoExchange::login.nil?
 
     authenticate_or_request_with_http_basic do |login, password|
