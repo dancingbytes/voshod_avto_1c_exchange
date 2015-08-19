@@ -86,7 +86,11 @@ class ExchangeController < ::ApplicationController
 
     }
 
-    ::VoshodAvtoExchange::XML_BASE % { body: str }
+    ::VoshodAvtoExchange::XML_BASE % {
+      date: date,
+      time: time,
+      body: str
+    }
 
   end # users
 
