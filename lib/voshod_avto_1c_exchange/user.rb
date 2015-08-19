@@ -88,7 +88,7 @@ module VoshodAvtoExchange
       date        = Time.now.strftime('%Y-%m-%d')
       time        = Time.now.strftime('%H:%M:%S')
 
-      User.where(approved: false).each { |user|
+      ::User.where(approved: false).each { |user|
 
         last_name, first_name, _ = user.contact_person.split(/\s/)
 
