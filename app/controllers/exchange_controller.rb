@@ -3,27 +3,36 @@ class ExchangeController < ::ApplicationController
 
   unloadable
 
-  before_filter :auth
-  skip_before_filter :verify_authenticity_token
+  before_filter       :auth
+  skip_before_filter  :verify_authenticity_token
 
   layout false
 
   # GET /exchange
-  def init
+  def get
 
-    ::Rails.logger.tagged("/exchange") {
+    ::Rails.logger.tagged("/exchange/get") {
       ::Rails.logger.error(params.inspect)
     }
 
     case params[:mode]
 
       when 'checkauth'
+
+        ::Rails.logger.error("/exchange/get [checkauth]")
+
         render(text: "success\nexchange_1c\n#{rand(9999)}") and return
 
       when 'init'
+
+        ::Rails.logger.error("/exchange/get [init]")
+
         render(text: "zip=no\nfile_limit=99999999999999999") and return
 
       when 'success'
+
+        ::Rails.logger.error("/exchange/get [success]")
+
         render(text: "success") and return
 
       when 'query'
@@ -31,31 +40,97 @@ class ExchangeController < ::ApplicationController
         case params[:type]
 
           when 'catalog'
-            render(xml: orders, encoding: 'utf-8') and return
+
+            ::Rails.logger.error("/exchange/get [query: catalog]")
+
+            render(xml: ::VoshodAvtoExchange::Order.export, encoding: 'utf-8') and return
 
           when 'sale'
+
+            ::Rails.logger.error("/exchange/get [query: sale]")
+
             render(xml: ::VoshodAvtoExchange::User.export, encoding: 'utf-8') and return
 
         else
+
+          ::Rails.logger.error("/exchange/get [query: *]")
+
           render(text: "Type `#{params[:type]}` is not found") and return
+
         end
 
       else
+
+        ::Rails.logger.error("/exchange/get [get: *]")
+
         render(text: "Mode `#{params[:mode]}` is not found") and return
 
     end
 
-  end # index
+  end # get
+
+  # POST /exchange
+  def post
+
+    ::Rails.logger.tagged("/exchange/post") {
+      ::Rails.logger.error(params.inspect)
+    }
+
+    case params[:mode]
+
+      when 'checkauth'
+
+        ::Rails.logger.error("/exchange/post [checkauth]")
+
+        render(text: "success\nexchange_1c\n#{rand(9999)}") and return
+
+      when 'init'
+
+        ::Rails.logger.error("/exchange/post [init]")
+
+        render(text: "zip=no\nfile_limit=99999999999999999") and return
+
+      when 'success'
+
+        ::Rails.logger.error("/exchange/post [success]")
+
+        render(text: "success") and return
+
+      when 'query'
+
+        case params[:type]
+
+          when 'catalog'
+
+            ::Rails.logger.error("/exchange/post [query: catalog]")
+
+            render(xml: ::VoshodAvtoExchange::Order.export, encoding: 'utf-8') and return
+
+          when 'sale'
+
+            ::Rails.logger.error("/exchange/post [query: sale]")
+
+            render(text: "Type `#{params[:type]}` is not found") and return
+
+        else
+
+          ::Rails.logger.error("/exchange/post [query: *]")
+
+          render(text: "Type `#{params[:type]}` is not found") and return
+
+        end
+
+      else
+
+        ::Rails.logger.error("/exchange/post [mode: *]")
+
+        render(text: "Mode `#{params[:mode]}` is not found") and return
+
+    end
+
+  end # post
 
   private
-
-  def orders
-
-    %q(<?xml version="1.0" encoding="windows-1251"?>
-<КоммерческаяИнформация ВерсияСхемы="2.05" ДатаФормирования="2015-08-18T12:49:00" ФорматДаты="ДФ=yyyy-MM-dd; ДЛФ=DT" ФорматВремени="ДФ=ЧЧ:мм:сс; ДЛФ=T" РазделительДатаВремя="T" ФорматСуммы="ЧЦ=18; ЧДЦ=2; ЧРД=." ФорматКоличества="ЧЦ=18; ЧДЦ=2; ЧРД=.">
-</КоммерческаяИнформация>).freeze
-
-  end # orders
 
   def auth
 

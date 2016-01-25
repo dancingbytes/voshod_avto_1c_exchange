@@ -35,6 +35,7 @@ end # VoshodAvtoExchange
 
 require 'voshod_avto_1c_exchange/version'
 require 'voshod_avto_1c_exchange/user'
+require 'voshod_avto_1c_exchange/order'
 
 if defined?(::Rails)
   require 'voshod_avto_1c_exchange/engine'

@@ -1,6 +1,7 @@
 # encoding: utf-8
 VoshodAvtoExchange::Engine.routes.draw do
 
-  match 'exchange' => 'exchange#init', via: [:get, :post, :put]
+  get   'exchange' => 'exchange#get'
+  post  'exchange' => 'exchange#post'
 
 end # draw
