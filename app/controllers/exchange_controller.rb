@@ -19,21 +19,25 @@ class ExchangeController < ::ApplicationController
 
       when 'checkauth'
 
-        ::Rails.logger.error("/exchange/get [checkauth]")
-
         render(text: "success\nexchange_1c\n#{rand(9999)}") and return
 
       when 'init'
-
-        ::Rails.logger.error("/exchange/get [init]")
 
         render(text: "zip=no\nfile_limit=99999999999999999") and return
 
       when 'success'
 
-        ::Rails.logger.error("/exchange/get [success]")
+        case params[:type]
 
-        render(text: "success") and return
+          when 'sale'
+
+            render(text: "Ok") and return
+
+          else
+
+            render(text: "success") and return
+
+        end # case
 
       when 'query'
 
@@ -41,27 +45,20 @@ class ExchangeController < ::ApplicationController
 
           when 'catalog'
 
-            ::Rails.logger.error("/exchange/get [query: catalog]")
-
             render(xml: ::VoshodAvtoExchange::Order.export, encoding: 'utf-8') and return
 
+          # GET exchange?type=sale&mode=query
           when 'sale'
-
-            ::Rails.logger.error("/exchange/get [query: sale]")
 
             render(xml: ::VoshodAvtoExchange::User.export, encoding: 'utf-8') and return
 
         else
-
-          ::Rails.logger.error("/exchange/get [query: *]")
 
           render(text: "Type `#{params[:type]}` is not found") and return
 
         end
 
       else
-
-        ::Rails.logger.error("/exchange/get [get: *]")
 
         render(text: "Mode `#{params[:mode]}` is not found") and return
 
@@ -82,19 +79,13 @@ class ExchangeController < ::ApplicationController
 
       when 'checkauth'
 
-        ::Rails.logger.error("/exchange/post [checkauth]")
-
         render(text: "success\nexchange_1c\n#{rand(9999)}") and return
 
       when 'init'
 
-        ::Rails.logger.error("/exchange/post [init]")
-
         render(text: "zip=no\nfile_limit=99999999999999999") and return
 
       when 'success'
-
-        ::Rails.logger.error("/exchange/post [success]")
 
         render(text: "success") and return
 
@@ -104,27 +95,19 @@ class ExchangeController < ::ApplicationController
 
           when 'catalog'
 
-            ::Rails.logger.error("/exchange/post [query: catalog]")
-
             render(xml: ::VoshodAvtoExchange::Order.export, encoding: 'utf-8') and return
 
           when 'sale'
 
-            ::Rails.logger.error("/exchange/post [query: sale]")
-
             render(text: "Type `#{params[:type]}` is not found") and return
 
         else
-
-          ::Rails.logger.error("/exchange/post [query: *]")
 
           render(text: "Type `#{params[:type]}` is not found") and return
 
         end
 
       else
-
-        ::Rails.logger.error("/exchange/post [mode: *]")
 
         render(text: "Mode `#{params[:mode]}` is not found") and return
 
