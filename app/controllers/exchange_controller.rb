@@ -76,6 +76,8 @@ class ExchangeController < ::ApplicationController
       ::Rails.logger.error(params.inspect)
     }
 
+    save_file
+
     case params[:mode]
 
       when 'checkauth'
@@ -141,5 +143,18 @@ class ExchangeController < ::ApplicationController
     end
 
   end # auth
+
+  def save_file
+
+    return if request.body.nil? || request.body.blank?
+
+    file_name = ::File.join(::Rails.root, 'tmp', "#{rand}-#{::Time.now.to_f}.xml")
+    ::File.open(file_path, 'wb') do |f|
+      f.write request.body.read
+    end
+    ::Rails.logger.error("/exchange/post [save_file: #{file_name}]")
+
+
+  end # save_file
 
 end # ExchangeController
