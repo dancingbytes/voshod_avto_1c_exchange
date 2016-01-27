@@ -149,7 +149,7 @@ class ExchangeController < ::ApplicationController
   end # save_file
 
   def session_id
-    @session_id ||= ::Time.now.to_i
+    @session_id ||= ::SecureRandom.hex(20)
   end # session_id
 
   def operation_id
