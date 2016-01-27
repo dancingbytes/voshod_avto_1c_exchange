@@ -20,12 +20,9 @@ class ExchangeController < ::ApplicationController
     case params[:mode]
 
       when 'checkauth'
-
-        ::Rails.logger.error(" --> Create operation_id: #{session_id}")
         render(text: "success\nexchange_1c\n#{session_id}") and return
 
       when 'init'
-
         render(text: "zip=no\nfile_limit=0") and return
 
       when 'success'
@@ -38,8 +35,7 @@ class ExchangeController < ::ApplicationController
             render(text: res ? "success" : "failure\nНе параметр nexchange_1c или нет данных") and return
 
           else
-
-            render(text: "success") and return
+            render(text: "failure\nType `#{params[:type]}` is not found") and return
 
         end # case
 
@@ -54,17 +50,15 @@ class ExchangeController < ::ApplicationController
           when 'sale'
             render(xml: ::VoshodAvtoExchange::User.export(operation_id), encoding: 'utf-8') and return
 
-        else
+          else
+            render(text: "failure\nType `#{params[:type]}` is not found") and return
 
-          render(text: "failure\nType `#{params[:type]}` is not found") and return
-
-        end
+        end # case
 
       else
-
         render(text: "failure\nMode `#{params[:mode]}` is not found") and return
 
-    end
+    end # case
 
   end # get
 
@@ -77,20 +71,15 @@ class ExchangeController < ::ApplicationController
       ::Rails.logger.error(params.inspect)
     }
 
-    save_file
-
     case params[:mode]
 
       when 'checkauth'
-
         render(text: "success\nexchange_1c\n#{session_id}") and return
 
       when 'init'
-
         render(text: "zip=no\nfile_limit=0") and return
 
       when 'success'
-
         render(text: "success") and return
 
       when 'file'
@@ -100,35 +89,16 @@ class ExchangeController < ::ApplicationController
           # POST /exchange?type=sale&mode=file&filename=sdsd.xml
           when 'sale'
 
-            # Получение файла с обработкой пользовалетей
-            render(text: "success") and return
+            # Получение файла из 1С
+            res = !save_file.nil?
+            render(text: res ? "success" : "failure\nFile is not found") and return
 
           else
-
-            render(text: "success") and return
+            render(text: "failure\nType `#{params[:type]}` is not found") and return
 
         end # case
 
-      when 'query'
-
-        case params[:type]
-
-          when 'catalog'
-
-            render(xml: ::VoshodAvtoExchange::Order.export, encoding: 'utf-8') and return
-
-          when 'sale'
-
-            render(text: "failure\nType `#{params[:type]}` is not found") and return
-
-        else
-
-          render(text: "failure\nType `#{params[:type]}` is not found") and return
-
-        end
-
       else
-
         render(text: "failure\nMode `#{params[:mode]}` is not found") and return
 
     end
