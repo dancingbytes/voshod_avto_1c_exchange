@@ -50,7 +50,7 @@ class ExchangeController < ::ApplicationController
           when 'catalog'
             render(xml: ::VoshodAvtoExchange::Order.export, encoding: 'utf-8') and return
 
-          # GET exchange?type=sale&mode=query
+          # GET /exchange?type=sale&mode=query
           when 'sale'
             render(xml: ::VoshodAvtoExchange::User.export(operation_id), encoding: 'utf-8') and return
 
@@ -93,6 +93,22 @@ class ExchangeController < ::ApplicationController
 
         render(text: "success") and return
 
+      when 'file'
+
+        case params[:type]
+
+          # POST /exchange?type=sale&mode=file&filename=sdsd.xml
+          when 'sale'
+
+            # Получение файла с обработкой пользовалетей
+            render(text: "Ok") and return
+
+          else
+
+            render(text: "success") and return
+
+        end # case
+
       when 'query'
 
         case params[:type]
@@ -133,7 +149,7 @@ class ExchangeController < ::ApplicationController
 
   def save_file
 
-    self if request.body.nil? || request.body.blank?
+    return if request.body.nil? || request.body.blank?
 
     file_name  = params[:filename] || "#{rand}-#{::Time.now.to_i}.xml"
     file_path  = ::File.join(::Rails.root, 'tmp', file_name)
@@ -143,7 +159,7 @@ class ExchangeController < ::ApplicationController
     end
 
     ::Rails.logger.error("/exchange/post [save_file: #{file_path}]")
-    self
+    file_path
 
   end # save_file
 
