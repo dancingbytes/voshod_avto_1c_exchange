@@ -92,7 +92,7 @@ module VoshodAvtoExchange
       ::User.where(operation_state: 0).each { |user|
 
         # Выставляем пользовалетю индектификатор операции
-        user.set(:operation_id, operation_id)
+        user.set({ operation_id: operation_id })
 
         # Имя пользователя
         last_name, first_name, _ = user.contact_person.split(/\s/)
