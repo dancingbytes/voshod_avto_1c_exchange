@@ -11,7 +11,7 @@ class ExchangeController < ::ApplicationController
   # GET /exchange
   def get
 
-    ::Rails.logger.error("session_id: #{session_id}, operation_id: #{operation_id}")
+    ::Rails.logger.error(" --> session_id: #{session_id}, operation_id: #{operation_id}")
 
     ::Rails.logger.tagged("GET /exchange [params]") {
       ::Rails.logger.error(params.inspect)
@@ -149,7 +149,7 @@ class ExchangeController < ::ApplicationController
   end # save_file
 
   def session_id
-    session.id
+    @session_id ||= ::Time.now.to_i
   end # session_id
 
   def operation_id
