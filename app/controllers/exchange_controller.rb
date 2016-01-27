@@ -11,6 +11,8 @@ class ExchangeController < ::ApplicationController
   # GET /exchange
   def get
 
+    ::Rails.logger.error("session_id: #{session_id}, operation_id: #{operation_id}")
+
     ::Rails.logger.tagged("GET /exchange [params]") {
       ::Rails.logger.error(params.inspect)
     }
@@ -71,6 +73,8 @@ class ExchangeController < ::ApplicationController
 
   # POST /exchange
   def post
+
+    ::Rails.logger.error("session_id: #{session_id}, operation_id: #{operation_id}")
 
     ::Rails.logger.tagged("POST /exchange [params]") {
       ::Rails.logger.error(params.inspect)
