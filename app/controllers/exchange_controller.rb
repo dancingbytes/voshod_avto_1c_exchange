@@ -21,6 +21,7 @@ class ExchangeController < ::ApplicationController
 
       when 'checkauth'
 
+        ::Rails.logger.error(" --> Create operation_id: #{session_id}")
         render(text: "success\nexchange_1c\n#{session_id}") and return
 
       when 'init'
