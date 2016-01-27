@@ -91,7 +91,7 @@ class ExchangeController < ::ApplicationController
 
       when 'init'
 
-        render(text: "zip=no\nfile_limit=99999999999999999") and return
+        render(text: "zip=no\nfile_limit=0") and return
 
       when 'success'
 
