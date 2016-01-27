@@ -77,10 +77,6 @@ class ExchangeController < ::ApplicationController
       ::Rails.logger.error(params.inspect)
     }
 
-    ::Rails.logger.tagged("POST /exchange [cookies]") {
-      ::Rails.logger.error(cookies.inspect)
-    }
-
     save_file
 
     case params[:mode]
@@ -137,14 +133,17 @@ class ExchangeController < ::ApplicationController
 
   def save_file
 
-    return if request.body.nil? || request.body.blank?
+    self if request.body.nil? || request.body.blank?
 
-    file_name = ::File.join(::Rails.root, 'tmp', "#{rand}-#{::Time.now.to_f}.xml")
+    file_name  = params[:filename] || "#{rand}-#{::Time.now.to_i}.xml"
+    file_path  = ::File.join(::Rails.root, 'tmp', file_name)
+
     ::File.open(file_path, 'wb') do |f|
       f.write request.body.read
     end
-    ::Rails.logger.error("/exchange/post [save_file: #{file_name}]")
 
+    ::Rails.logger.error("/exchange/post [save_file: #{file_path}]")
+    self
 
   end # save_file
 
