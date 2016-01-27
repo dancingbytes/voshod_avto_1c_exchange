@@ -15,15 +15,15 @@ class ExchangeController < ::ApplicationController
       ::Rails.logger.error(params.inspect)
     }
 
-    ::Rails.logger.tagged("GET /exchange [cookie]") {
-      ::Rails.logger.error(cookie.inspect)
+    ::Rails.logger.tagged("GET /exchange [cookies]") {
+      ::Rails.logger.error(cookies.inspect)
     }
 
     case params[:mode]
 
       when 'checkauth'
 
-        render(text: "success\nexchange_1c\n#{rand(9999)}") and return
+        render(text: "success\nexchange_1c\n#{session_id}") and return
 
       when 'init'
 
@@ -35,7 +35,8 @@ class ExchangeController < ::ApplicationController
 
           when 'sale'
 
-            render(text: "Ok") and return
+            res = ::VoshodAvtoExchange::User.export_verify(operation_id)
+            render(text: res ? "Ok" : "Failure") and return
 
           else
 
@@ -48,13 +49,11 @@ class ExchangeController < ::ApplicationController
         case params[:type]
 
           when 'catalog'
-
             render(xml: ::VoshodAvtoExchange::Order.export, encoding: 'utf-8') and return
 
           # GET exchange?type=sale&mode=query
           when 'sale'
-
-            render(xml: ::VoshodAvtoExchange::User.export, encoding: 'utf-8') and return
+            render(xml: ::VoshodAvtoExchange::User.export(operation_id), encoding: 'utf-8') and return
 
         else
 
@@ -77,8 +76,8 @@ class ExchangeController < ::ApplicationController
       ::Rails.logger.error(params.inspect)
     }
 
-    ::Rails.logger.tagged("POST /exchange [cookie]") {
-      ::Rails.logger.error(cookie.inspect)
+    ::Rails.logger.tagged("POST /exchange [cookies]") {
+      ::Rails.logger.error(cookies.inspect)
     }
 
     save_file
@@ -87,7 +86,7 @@ class ExchangeController < ::ApplicationController
 
       when 'checkauth'
 
-        render(text: "success\nexchange_1c\n#{rand(9999)}") and return
+        render(text: "success\nexchange_1c\n#{session_id}") and return
 
       when 'init'
 
@@ -147,5 +146,13 @@ class ExchangeController < ::ApplicationController
 
 
   end # save_file
+
+  def session_id
+    session.id
+  end # session_id
+
+  def operation_id
+    cookies[:exchange_1c] || 0
+  end # operation_id
 
 end # ExchangeController

@@ -80,7 +80,7 @@ module VoshodAvtoExchange
 
     </Документ>).freeze
 
-    def export
+    def export(operation_id = 0)
 
       str         = ""
       first_name  = ""
@@ -88,8 +88,13 @@ module VoshodAvtoExchange
       date        = Time.now.strftime('%Y-%m-%d')
       time        = Time.now.strftime('%H:%M:%S')
 
-      ::User.where(approved: false).each { |user|
+      # Выбраем всех польователей на обработку
+      ::User.where(operation_state: 0).each { |user|
 
+        # Выставляем пользовалетю индектификатор операции
+        user.set(:operation_id, operation_id)
+
+        # Имя пользователя
         last_name, first_name, _ = user.contact_person.split(/\s/)
 
         str << ::VoshodAvtoExchange::User::XML_USER % {
@@ -120,6 +125,20 @@ module VoshodAvtoExchange
       }
 
     end # export
+
+    # Звкрываем экспорт пользователей
+    def export_verify(operation_id = 0)
+
+      res = ::User.where({
+        operation_state: 0,
+        operation_id:    operation_id
+      }).update_all({
+        operation_state: 1
+      })
+
+      res.modified_count > 0
+
+    end # export_verify
 
   end # User
 
