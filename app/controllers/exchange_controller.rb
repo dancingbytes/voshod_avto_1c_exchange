@@ -17,10 +17,6 @@ class ExchangeController < ::ApplicationController
       ::Rails.logger.error(params.inspect)
     }
 
-    ::Rails.logger.tagged("GET /exchange [cookies]") {
-      ::Rails.logger.error(cookies.inspect)
-    }
-
     case params[:mode]
 
       when 'checkauth'
