@@ -26,7 +26,7 @@ class ExchangeController < ::ApplicationController
 
       when 'init'
 
-        render(text: "zip=no\nfile_limit=99999999999999999") and return
+        render(text: "zip=no\nfile_limit=0") and return
 
       when 'success'
 
@@ -35,7 +35,7 @@ class ExchangeController < ::ApplicationController
           when 'sale'
 
             res = ::VoshodAvtoExchange::User.export_verify(operation_id)
-            render(text: res ? "Ok" : "Failure") and return
+            render(text: res ? "success" : "failure\nНе параметр nexchange_1c или нет данных") and return
 
           else
 
@@ -56,13 +56,13 @@ class ExchangeController < ::ApplicationController
 
         else
 
-          render(text: "Type `#{params[:type]}` is not found") and return
+          render(text: "failure\nType `#{params[:type]}` is not found") and return
 
         end
 
       else
 
-        render(text: "Mode `#{params[:mode]}` is not found") and return
+        render(text: "failure\nMode `#{params[:mode]}` is not found") and return
 
     end
 
@@ -101,7 +101,7 @@ class ExchangeController < ::ApplicationController
           when 'sale'
 
             # Получение файла с обработкой пользовалетей
-            render(text: "Ok") and return
+            render(text: "success") and return
 
           else
 
@@ -119,17 +119,17 @@ class ExchangeController < ::ApplicationController
 
           when 'sale'
 
-            render(text: "Type `#{params[:type]}` is not found") and return
+            render(text: "failure\nType `#{params[:type]}` is not found") and return
 
         else
 
-          render(text: "Type `#{params[:type]}` is not found") and return
+          render(text: "failure\nType `#{params[:type]}` is not found") and return
 
         end
 
       else
 
-        render(text: "Mode `#{params[:mode]}` is not found") and return
+        render(text: "failure\nMode `#{params[:mode]}` is not found") and return
 
     end
 
