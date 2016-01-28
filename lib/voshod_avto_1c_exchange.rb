@@ -1,8 +1,16 @@
 require 'nokogiri'
+require 'zip'
+
+require 'voshod_avto_1c_exchange/version'
+require 'voshod_avto_1c_exchange/export'
+require 'voshod_avto_1c_exchange/parser'
+require 'voshod_avto_1c_exchange/manager'
 
 module VoshodAvtoExchange
 
   extend self
+
+  FILE_LOCK = '/tmp/voshod_avto_1c_exchange.lock'.freeze
 
   def login(v = nil)
 
@@ -31,11 +39,83 @@ module VoshodAvtoExchange
     str.gsub(/-/, '')[0, 24]
   end # to_bson_id
 
-end # VoshodAvtoExchange
+  def run
 
-require 'voshod_avto_1c_exchange/version'
-require 'voshod_avto_1c_exchange/user'
-require 'voshod_avto_1c_exchange/order'
+    begin
+      f = ::File.new(::VoshodAvtoExchange::FILE_LOCK, ::File::RDWR|::File::CREAT, 0400)
+      return if f.flock(::File::LOCK_EX) === false
+    rescue ::Errno::EACCES
+      return
+    end
+
+    begin
+      ::VoshodAvtoExchange::Manager.run
+    rescue => ex
+      log ex.inspect
+    ensure
+      ::FileUtils.rm(::VoshodAvtoExchange::FILE_LOCK, force: true)
+    end
+
+  end # run
+
+  def import_dir(v = nil)
+
+    @import_dir = v unless v.blank?
+    @import_dir ||= ::File.join(::Rails.root, "tmp", "exhange_1c")
+
+    ::FileUtils.mkdir_p(@import_dir) unless ::FileTest.directory?(@import_dir)
+
+    @import_dir
+
+  end # import_dir
+
+  def log_dir(v = nil)
+
+    @log_dir = v unless v.blank?
+    @log_dir ||= ::File.join(::Rails.root, "log")
+
+    ::FileUtils.mkdir_p(@log_dir) unless ::FileTest.directory?(@log_dir)
+
+    @log_dir
+
+  end # log_dir
+
+  def log(msg = "")
+
+    (@dump_log ||= "") << "#{msg}\n"
+
+    create_logger       unless @logger
+    @logger.error(msg)  if @logger
+
+    msg
+
+  end # log
+
+  def close_logger
+
+    return unless @logger
+    @logger.close
+    @logger = nil
+
+  end # close_logger
+
+  private
+
+  def create_logger
+
+    return if @logger
+
+    log_file = ::File.open(
+      ::File.join(::VoshodAvtoExchange::log_dir, "voshod_avto_exchange.log"),
+      ::File::WRONLY | ::File::APPEND | ::File::CREAT
+    )
+    log_file.sync = true
+    @logger = ::Logger.new(log_file, 'weekly')
+    @logger
+
+  end # create_logger
+
+end # VoshodAvtoExchange
 
 if defined?(::Rails)
   require 'voshod_avto_1c_exchange/engine'

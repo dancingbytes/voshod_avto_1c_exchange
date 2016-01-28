@@ -17,7 +17,7 @@ class ExchangeController < ::ApplicationController
       ::Rails.logger.error(params.inspect)
     }
 
-    case params[:mode]
+    case mode
 
       when 'checkauth'
         render(text: "success\nexchange_1c\n#{session_id}") and return
@@ -27,36 +27,36 @@ class ExchangeController < ::ApplicationController
 
       when 'success'
 
-        case params[:type]
+        case type
 
           when 'sale'
 
-            res = ::VoshodAvtoExchange::User.export_verify(operation_id)
+            res = ::VoshodAvtoExchange::Export::User.export_verify(operation_id)
             render(text: res ? "success" : "failure\nНе параметр nexchange_1c или нет данных") and return
 
           else
-            render(text: "failure\nType `#{params[:type]}` is not found") and return
+            render(text: "failure\nType `#{type}` is not found") and return
 
         end # case
 
       when 'query'
 
-        case params[:type]
+        case type
 
           when 'catalog'
-            render(xml: ::VoshodAvtoExchange::Order.export, encoding: 'utf-8') and return
+            render(xml: ::VoshodAvtoExchange::Export::Order.export, encoding: 'utf-8') and return
 
           # GET /exchange?type=sale&mode=query
           when 'sale'
-            render(xml: ::VoshodAvtoExchange::User.export(operation_id), encoding: 'utf-8') and return
+            render(xml: ::VoshodAvtoExchange::Export::User.export(operation_id), encoding: 'utf-8') and return
 
           else
-            render(text: "failure\nType `#{params[:type]}` is not found") and return
+            render(text: "failure\nType `#{type}` is not found") and return
 
         end # case
 
       else
-        render(text: "failure\nMode `#{params[:mode]}` is not found") and return
+        render(text: "failure\nMode `#{mode}` is not found") and return
 
     end # case
 
@@ -71,7 +71,7 @@ class ExchangeController < ::ApplicationController
       ::Rails.logger.error(params.inspect)
     }
 
-    case params[:mode]
+    case mode
 
       when 'checkauth'
         render(text: "success\nexchange_1c\n#{session_id}") and return
@@ -84,7 +84,7 @@ class ExchangeController < ::ApplicationController
 
       when 'file'
 
-        case params[:type]
+        case type
 
           # POST /exchange?type=sale&mode=file&filename=sdsd.xml
           when 'sale'
@@ -94,12 +94,12 @@ class ExchangeController < ::ApplicationController
             render(text: res ? "success" : "failure\nFile is not found") and return
 
           else
-            render(text: "failure\nType `#{params[:type]}` is not found") and return
+            render(text: "failure\nType `#{type}` is not found") and return
 
         end # case
 
       else
-        render(text: "failure\nMode `#{params[:mode]}` is not found") and return
+        render(text: "failure\nMode `#{mode}` is not found") and return
 
     end
 
@@ -121,8 +121,10 @@ class ExchangeController < ::ApplicationController
 
     return if request.body.nil? || request.body.blank?
 
-    file_name  = params[:filename] || "#{rand}-#{::Time.now.to_i}.xml"
-    file_path  = ::File.join(::Rails.root, 'tmp', file_name)
+    file_path  = ::File.join(
+      ::VoshodAvtoExchange.import_dir,
+      params[:filename] || "#{rand}-#{::Time.now.to_i}.xml"
+    )
 
     ::File.open(file_path, 'wb') do |f|
       f.write request.body.read
@@ -140,5 +142,13 @@ class ExchangeController < ::ApplicationController
   def operation_id
     cookies[:exchange_1c] || 0
   end # operation_id
+
+  def mode
+    @mode ||= (params[:mode] || 'undefined')
+  end # mode
+
+  def type
+    @type ||= (params[:type] || 'undefined')
+  end # type
 
 end # ExchangeController
