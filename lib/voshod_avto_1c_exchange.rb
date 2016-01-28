@@ -7,7 +7,7 @@ module VoshodAvtoExchange
 
   extend self
 
-  FILE_LOCK = '/tmp/voshod_avto_1c_exchange.lock'.freeze
+  FILE_LOCK = ::File.join(::Rails.root, 'tmp', 'voshod_avto_1c_exchange.lock').freeze
 
   def login(v = nil)
 
