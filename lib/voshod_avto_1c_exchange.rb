@@ -79,8 +79,6 @@ module VoshodAvtoExchange
 
   def log(msg = "")
 
-    (@dump_log ||= "") << "#{msg}\n"
-
     create_logger       unless @logger
     @logger.error(msg)  if @logger
 
