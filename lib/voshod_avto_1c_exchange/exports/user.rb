@@ -1,6 +1,6 @@
 module VoshodAvtoExchange
 
-  module Export
+  module Exports
 
     module User
 
@@ -144,6 +144,6 @@ module VoshodAvtoExchange
 
     end # User
 
-  end # Export
+  end # Exports
 
 end # VoshodAvtoExchange

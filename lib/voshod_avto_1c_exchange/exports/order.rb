@@ -1,6 +1,6 @@
 module VoshodAvtoExchange
 
-  module Export
+  module Exports
 
     module Order
 
@@ -16,6 +16,6 @@ module VoshodAvtoExchange
 
     end # Order
 
-  end # Export
+  end # Exports
 
 end # VoshodAvtoExchange

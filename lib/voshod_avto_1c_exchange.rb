@@ -1,10 +1,7 @@
+require 'logger'
+require 'fileutils'
 require 'nokogiri'
 require 'zip'
-
-require 'voshod_avto_1c_exchange/version'
-require 'voshod_avto_1c_exchange/export'
-require 'voshod_avto_1c_exchange/parser'
-require 'voshod_avto_1c_exchange/manager'
 
 module VoshodAvtoExchange
 
@@ -116,6 +113,12 @@ module VoshodAvtoExchange
   end # create_logger
 
 end # VoshodAvtoExchange
+
+require 'voshod_avto_1c_exchange/version'
+require 'voshod_avto_1c_exchange/export'
+
+require 'voshod_avto_1c_exchange/parser'
+require 'voshod_avto_1c_exchange/manager'
 
 if defined?(::Rails)
   require 'voshod_avto_1c_exchange/engine'

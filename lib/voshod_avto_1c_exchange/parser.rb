@@ -24,7 +24,7 @@ module VoshodAvtoExchange
         case name
 
           when 'РегистрацияКлиентов' then
-            @parser = ::VoshodAvtoExchange::Parser::UserReg.new
+            @parser = ::VoshodAvtoExchange::Parsers::UserReg.new
 
         end # case
 

@@ -1,6 +1,6 @@
 module VoshodAvtoExchange
 
-  module Parser
+  module Parsers
 
     class UserReg
 
@@ -105,6 +105,6 @@ module VoshodAvtoExchange
 
     end # UserReg
 
-  end # Parser
+  end # Parsers
 
 end # VoshodAvtoExchange
