@@ -29,9 +29,16 @@ class ExchangeController < ::ApplicationController
 
         case type
 
+          # Заказы
+          when 'catalog'
+
+            res = ::VoshodAvtoExchange::Exports::Order.verify(operation_id)
+            render(text: res ? "success" : "failure\nНе параметр nexchange_1c или нет данных") and return
+
+          # Пользователи
           when 'sale'
 
-            res = ::VoshodAvtoExchange::Exports::User.export_verify(operation_id)
+            res = ::VoshodAvtoExchange::Exports::User.verify(operation_id)
             render(text: res ? "success" : "failure\nНе параметр nexchange_1c или нет данных") and return
 
           else
@@ -43,12 +50,14 @@ class ExchangeController < ::ApplicationController
 
         case type
 
+          # Заказы
           when 'catalog'
-            render(xml: ::VoshodAvtoExchange::Exports::Order.export, encoding: 'utf-8') and return
+            render(xml: ::VoshodAvtoExchange::Exports::Order.list(operation_id), encoding: 'utf-8') and return
 
           # GET /exchange?type=sale&mode=query
+          # Пользователи
           when 'sale'
-            render(xml: ::VoshodAvtoExchange::Exports::User.export(operation_id), encoding: 'utf-8') and return
+            render(xml: ::VoshodAvtoExchange::Exports::User.list(operation_id), encoding: 'utf-8') and return
 
           else
             render(text: "failure\nType `#{type}` is not found") and return

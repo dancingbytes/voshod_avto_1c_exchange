@@ -111,6 +111,8 @@ module VoshodAvtoExchange
 end # VoshodAvtoExchange
 
 require 'voshod_avto_1c_exchange/version'
+
+require 'voshod_avto_1c_exchange/template'
 require 'voshod_avto_1c_exchange/export'
 
 require 'voshod_avto_1c_exchange/parser'
