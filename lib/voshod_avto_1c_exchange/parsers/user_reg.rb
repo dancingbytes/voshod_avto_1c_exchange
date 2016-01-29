@@ -65,12 +65,16 @@ module VoshodAvtoExchange
         @start_parse_params = false
 
         if @parse_params.empty?
-          ::VoshodAvtoExchange.log "[РегистрацияКлиентов] Ошибка парсинга. #{tag_debug}"
+          log "[РегистрацияКлиентов] Ошибка парсинга. #{tag_debug}"
           return
         end
 
         usr = ::User.where(id: @parse_params[:id]).first
-        return unless usr
+
+        unless usr
+          log "[РегистрацияКлиентов] Клиент не найден. #{@parse_params.inspect}"
+          return
+        end
 
         # Одобрили регистрацию
         if @parse_params[:state] == "Утвержден"
@@ -102,6 +106,10 @@ module VoshodAvtoExchange
       def tag_debug
         "<#{@tags[@level]} #{@attrs.inpect} />"
       end # tag_debug
+
+      def log(msg)
+        ::VoshodAvtoExchange.log("Parsers::UserReg -> #{msg}")
+      end # log
 
     end # UserReg
 
