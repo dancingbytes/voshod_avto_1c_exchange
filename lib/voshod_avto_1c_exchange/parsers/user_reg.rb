@@ -38,6 +38,7 @@ module VoshodAvtoExchange
           when "Ид"                   then parse_params(:id)
           when "Наименование"         then parse_params(:name)
           when "Статус"               then parse_params(:state)
+          when "Инн"                  then parse_params(:inn)
 
         end # case
 
@@ -79,7 +80,8 @@ module VoshodAvtoExchange
         # Одобрили регистрацию
         if @parse_params[:state] == "Утвержден"
 
-          usr.approved = true
+          usr.approved  = true
+          usr.inn       = @parse_params[:inn] unless @parse_params[:inn].nil?
           usr.save(validate: false)
 
         # Отклонили в регистрации
