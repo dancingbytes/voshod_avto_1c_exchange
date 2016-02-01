@@ -56,7 +56,7 @@ module VoshodAvtoExchange
   def import_dir(v = nil)
 
     @import_dir = v unless v.blank?
-    @import_dir ||= ::File.join(::Rails.root, "tmp", "exhange_1c")
+    @import_dir ||= ::File.join(::Rails.root, "tmp", "exchange_1c")
 
     ::FileUtils.mkdir_p(@import_dir) unless ::FileTest.directory?(@import_dir)
 
