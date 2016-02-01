@@ -20,10 +20,10 @@ class ExchangeController < ::ApplicationController
     case mode
 
       when 'checkauth'
-        render(text: "success\nexchange_1c\n#{session_id}") and return
+        answer(text: "success\nexchange_1c\n#{session_id}")
 
       when 'init'
-        render(text: "zip=no\nfile_limit=0") and return
+        answer(text: "zip=no\nfile_limit=0")
 
       when 'success'
 
@@ -31,7 +31,7 @@ class ExchangeController < ::ApplicationController
 
           # GET /exchange?type=catalog&mode=success
           when 'catalog'
-            render(text: "failure\nType `#{type}` is not implement") and return
+            answer(text: "failure\nType `#{type}` is not implement")
 
           # GET /exchange?type=sale&mode=success
           # Пользователи
@@ -39,10 +39,10 @@ class ExchangeController < ::ApplicationController
           when 'sale'
 
             ::VoshodAvtoExchange::Exports.users_and_orders_verify(operation_id)
-            render("success") and return
+            answer(text: "success")
 
           else
-            render(text: "failure\nType `#{type}` is not found") and return
+            answer(text: "failure\nType `#{type}` is not found")
 
         end # case
 
@@ -52,23 +52,25 @@ class ExchangeController < ::ApplicationController
 
           # GET /exchange?type=catalog&mode=query
           when 'catalog'
-            render(text: "failure\nType `#{type}` is not implement") and return
+            answer(text: "failure\nType `#{type}` is not implement")
 
           # GET /exchange?type=sale&mode=query
           # Пользователи
           # Заказы
           when 'sale'
-            render(xml: ::VoshodAvtoExchange::Exports.users_and_orders(operation_id), encoding: 'utf-8') and return
+            answer(xml: ::VoshodAvtoExchange::Exports.users_and_orders(operation_id), encoding: 'utf-8')
 
           else
-            render(text: "failure\nType `#{type}` is not found") and return
+            answer(text: "failure\nType `#{type}` is not found")
 
         end # case
 
       else
-        render(text: "failure\nMode `#{mode}` is not found") and return
+        answer(text: "failure\nMode `#{mode}` is not found")
 
     end # case
+
+    render(answer) and return
 
   end # get
 
@@ -84,13 +86,13 @@ class ExchangeController < ::ApplicationController
     case mode
 
       when 'checkauth'
-        render(text: "success\nexchange_1c\n#{session_id}") and return
+        answer(text: "success\nexchange_1c\n#{session_id}")
 
       when 'init'
-        render(text: "zip=no\nfile_limit=0") and return
+        answer(text: "zip=no\nfile_limit=0")
 
       when 'success'
-        render(text: "success") and return
+        answer(text: "success")
 
       when 'file'
 
@@ -101,17 +103,19 @@ class ExchangeController < ::ApplicationController
 
             # Получение файла из 1С
             res = !save_file.nil?
-            render(text: res ? "success" : "failure\nFile is not found") and return
+            answer(text: res ? "success" : "failure\nFile is not found")
 
           else
-            render(text: "failure\nType `#{type}` is not found") and return
+            answer(text: "failure\nType `#{type}` is not found")
 
         end # case
 
       else
-        render(text: "failure\nMode `#{mode}` is not found") and return
+        answer(text: "failure\nMode `#{mode}` is not found")
 
     end
+
+    render(answer) and return
 
   end # post
 
@@ -160,5 +164,13 @@ class ExchangeController < ::ApplicationController
   def type
     @type ||= (params[:type] || 'undefined')
   end # type
+
+  def answer(text: nil, xml: nil)
+
+    @answer = { text: text  } if text
+    @answer = { xml:  xml   } if xml
+    @answer || { text: 'failure\nОбработка данных параметров не задана' }
+
+  end # answer
 
 end # ExchangeController
