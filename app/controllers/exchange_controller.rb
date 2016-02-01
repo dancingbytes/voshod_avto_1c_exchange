@@ -98,6 +98,13 @@ class ExchangeController < ::ApplicationController
 
         case type
 
+          # POST /exchange?type=catalog&mode=file&filename=sdsd.xml
+          when 'catalog'
+
+            # Получение файла из 1С
+            res = !save_file.nil?
+            answer(text: res ? "success" : "failure\nFile is not found")
+
           # POST /exchange?type=sale&mode=file&filename=sdsd.xml
           when 'sale'
 
