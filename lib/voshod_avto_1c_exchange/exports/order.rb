@@ -6,7 +6,7 @@ module VoshodAvtoExchange
 
       extend self
 
-      def list(operation_id = 0)
+      def list(operation_id = 0, doc: true)
 
         str   = ""
         date  = Time.now.strftime('%Y-%m-%d')
@@ -60,11 +60,11 @@ module VoshodAvtoExchange
         } # each
 
         # Итоговый документ
-        ::VoshodAvtoExchange::Template::XML_BASE % {
+        doc ? (::VoshodAvtoExchange::Template::XML_BASE % {
           date: date,
           time: time,
           body: str
-        }
+        }) : str
 
       end # list
 

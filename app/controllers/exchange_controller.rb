@@ -29,17 +29,17 @@ class ExchangeController < ::ApplicationController
 
         case type
 
-          # Заказы
+          # GET /exchange?type=catalog&mode=success
           when 'catalog'
+            render(text: "failure\nType `#{type}` is not implement") and return
 
-            res = ::VoshodAvtoExchange::Exports::Order.verify(operation_id)
-            render(text: res ? "success" : "failure\nНе параметр nexchange_1c или нет данных") and return
-
+          # GET /exchange?type=sale&mode=success
           # Пользователи
+          # Заказы
           when 'sale'
 
-            res = ::VoshodAvtoExchange::Exports::User.verify(operation_id)
-            render(text: res ? "success" : "failure\nНе параметр nexchange_1c или нет данных") and return
+            ::VoshodAvtoExchange::Exports.users_and_orders_verify(operation_id)
+            render("success") and return
 
           else
             render(text: "failure\nType `#{type}` is not found") and return
@@ -50,14 +50,15 @@ class ExchangeController < ::ApplicationController
 
         case type
 
-          # Заказы
+          # GET /exchange?type=catalog&mode=query
           when 'catalog'
-            render(xml: ::VoshodAvtoExchange::Exports::Order.list(operation_id), encoding: 'utf-8') and return
+            render(text: "failure\nType `#{type}` is not implement") and return
 
           # GET /exchange?type=sale&mode=query
           # Пользователи
+          # Заказы
           when 'sale'
-            render(xml: ::VoshodAvtoExchange::Exports::User.list(operation_id), encoding: 'utf-8') and return
+            render(xml: ::VoshodAvtoExchange::Exports.users_and_orders(operation_id), encoding: 'utf-8') and return
 
           else
             render(text: "failure\nType `#{type}` is not found") and return
