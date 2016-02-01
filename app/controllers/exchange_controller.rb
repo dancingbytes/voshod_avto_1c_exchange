@@ -58,7 +58,7 @@ class ExchangeController < ::ApplicationController
           # Пользователи
           # Заказы
           when 'sale'
-            answer(xml: ::VoshodAvtoExchange::Exports.users_and_orders(operation_id), encoding: 'utf-8')
+            answer(xml: ::VoshodAvtoExchange::Exports.users_and_orders(operation_id))
 
           else
             answer(text: "failure\nType `#{type}` is not found")
@@ -167,8 +167,8 @@ class ExchangeController < ::ApplicationController
 
   def answer(text: nil, xml: nil)
 
-    @answer = { text: text  } if text
-    @answer = { xml:  xml   } if xml
+    @answer = { text: text } if text
+    @answer = { xml:  xml, encoding: 'utf-8' } if xml
     @answer || { text: 'failure\nОбработка данных параметров не задана' }
 
   end # answer
