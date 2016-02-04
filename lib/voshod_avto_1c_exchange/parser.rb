@@ -1,8 +1,13 @@
+require 'voshod_avto_1c_exchange/parsers/base'
 require 'voshod_avto_1c_exchange/parsers/user_reg'
+require 'voshod_avto_1c_exchange/parsers/user_price'
 
+#
+# Фабрика по выбору парсера обработки данных
+#
 module VoshodAvtoExchange
 
-  # Класс-шаблон по разбору товарных xml-файлов
+  # Класс-шаблон по разбору xml-файлов
   class Parser < ::Nokogiri::XML::SAX::Document
 
     def self.parse(file)
@@ -26,6 +31,9 @@ module VoshodAvtoExchange
           when 'РегистрацияКлиентов' then
             @parser = ::VoshodAvtoExchange::Parsers::UserReg.new
 
+          when 'Контрагент' then
+            @parser = ::VoshodAvtoExchange::Parsers::UserPrice.new
+
         end # case
 
       end # unless
@@ -36,27 +44,27 @@ module VoshodAvtoExchange
     end # start_element
 
     def end_element(name)
-      @parser.end_element(name) if @parser
+      @parser.try(:end_element, name)
     end # end_element
 
     def characters(str)
-      @parser.characters(str)   if @parser
+      @parser.try(:characters, str)
     end # characters
-
-    def error(str)
-      @parser.error(str)   if @parser
-    end # error
-
-    def warning(str)
-      @parser.warning(str) if @parser
-    end # warning
 
     def end_document
 
-      @parser.end_document if @parser
+      @parser.try(:end_document)
       @parser = nil
 
     end # end_document
+
+    def error(string)
+      ::VoshodAvtoExchange.log "[XML Errors] #{string}"
+    end # error
+
+    def warning(string)
+      ::VoshodAvtoExchange.log "[XML Warnings] #{string}"
+    end # warning
 
   end # Parser
 
