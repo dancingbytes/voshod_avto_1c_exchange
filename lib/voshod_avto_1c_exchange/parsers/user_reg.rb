@@ -25,10 +25,7 @@ module VoshodAvtoExchange
 
         case name
 
-          when "РегистрацияКлиентов"  then
-            stop_parse_params
-            save_data
-
+          when "РегистрацияКлиентов"  then save_data
           when "Ид"                   then parse_params(:id)
           when "Наименование"         then parse_params(:name)
           when "Статус"               then parse_params(:state)
@@ -40,21 +37,29 @@ module VoshodAvtoExchange
 
       private
 
+      def start_parse_params
+        @params = {}
+      end # start_parse_params
+
+      def parse_params(name)
+        @params[name] = tag_value
+      end # parse_params
+
+      def params
+        @params || {}
+      end # params
+
       def save_data
 
         if params.empty?
-          log "[РегистрацияКлиентов] Ошибка парсинга. #{tag_debug}"
-          return
+          log("[РегистрацияКлиентов] Ошибка парсинга. #{tag_debug}") and return
         end
 
-        usr = ::User.where(id: @parse_params[:id]).first
+        usr = ::User.where(id: params[:id]).first
 
         unless usr
-          log "[РегистрацияКлиентов] Клиент не найден. #{params.inspect}"
-          return
+          log("[РегистрацияКлиентов] Клиент не найден. #{params.inspect}") and return
         end
-
-        puts "--> #{params}"
 
         # Одобрили регистрацию
         if params[:state] == "Утвержден"

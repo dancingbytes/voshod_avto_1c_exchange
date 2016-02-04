@@ -58,7 +58,7 @@ module VoshodAvtoExchange
                 f.file? ? "#{rand}-#{::Time.now.to_f}-#{f.name}" : f.name
               )
 
-              ::FileUtils.rm_rf f_path if ::File.exist?(f_path)
+              ::FileUtils.rm_rf(f_path) if ::File.exist?(f_path)
               ::FileUtils.mkdir_p(::File.dirname(f_path))
 
               zip_file.extract(f, f_path)
