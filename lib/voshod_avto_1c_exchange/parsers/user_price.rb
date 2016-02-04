@@ -5,7 +5,7 @@ module VoshodAvtoExchange
 
   module Parsers
 
-    class UserPrice << Base
+    class UserPrice < Base
 
       def start_element(name, attrs = [])
 

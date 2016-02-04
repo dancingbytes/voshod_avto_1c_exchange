@@ -5,7 +5,7 @@ module VoshodAvtoExchange
 
   module Parsers
 
-    class UserReg << Base
+    class UserReg < Base
 
       def start_element(name, attrs = [])
 
