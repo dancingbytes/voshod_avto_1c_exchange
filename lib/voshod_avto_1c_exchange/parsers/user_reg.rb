@@ -7,13 +7,16 @@ module VoshodAvtoExchange
 
     class UserReg < Base
 
+      P_ERROR = %Q(Ошибка парсинга.\n%{tag}).freeze
+      F_ERROR = %Q(Клиент не найден.\n%{pr}).freeze
+
       def start_element(name, attrs = [])
 
         super
 
         case name
 
-          when "РегистрацияКлиентов" then start_parse_params
+          when "РегистрацияКлиентов".freeze then start_parse_params
 
         end # case
 
@@ -25,11 +28,11 @@ module VoshodAvtoExchange
 
         case name
 
-          when "РегистрацияКлиентов"  then save_data
-          when "Ид"                   then parse_params(:id)
-          when "Наименование"         then parse_params(:name)
-          when "Статус"               then parse_params(:state)
-          when "Инн"                  then parse_params(:inn)
+          when "РегистрацияКлиентов".freeze  then save_data
+          when "Ид".freeze                   then parse_params(:id)
+          when "Наименование".freeze         then parse_params(:name)
+          when "Статус".freeze               then parse_params(:state)
+          when "Инн".freeze                  then parse_params(:inn)
 
         end # case
 
@@ -52,24 +55,24 @@ module VoshodAvtoExchange
       def save_data
 
         if params.empty?
-          log("[РегистрацияКлиентов] Ошибка парсинга. #{tag_debug}") and return
+          log(P_ERROR % { tag: tag_debug }) and return
         end
 
         usr = ::User.where(id: params[:id]).first
 
         unless usr
-          log("[РегистрацияКлиентов] Клиент не найден. #{params.inspect}") and return
+          log(F_ERROR % { pr: params.inspect }) and return
         end
 
         # Одобрили регистрацию
-        if params[:state] == "Утвержден"
+        if params[:state] == "Утвержден".freeze
 
           usr.approved  = true
           usr.inn       = params[:inn] unless params[:inn].nil?
           usr.save(validate: false)
 
         # Отклонили в регистрации
-        elsif params[:state] == "Отклонен"
+        elsif params[:state] == "Отклонен".freeze
 
           usr.approved = false
           usr.save(validate: false)

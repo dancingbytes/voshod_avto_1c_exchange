@@ -14,10 +14,10 @@ module VoshodAvtoExchange
       }.freeze
 
       D_ERROR = %Q(Дубль правил цен.
-        Пользователь: %{id}
-        Вид правила:  %{rule_type}
-        Ид правила:   %{rule_id}
-        Ид типа цены: %{price_id}
+        Пользователь:   %{id}
+        Вид правила:    %{rule_type}
+        Ид правила:     %{rule_id}
+        Ид типа цены:   %{price_id}
         Процент cкидки: %{persent_discount}
       ).freeze
 
@@ -31,10 +31,10 @@ module VoshodAvtoExchange
 
         case name
 
-          when  "Контрагент"  then
+          when  "Контрагент".freeze  then
             start_user
 
-          when "Правило"      then
+          when "Правило".freeze      then
             start_rule
 
         end # case
@@ -47,21 +47,21 @@ module VoshodAvtoExchange
 
         case name
 
-          when "Контрагент"           then
+          when "Контрагент".freeze           then
             stop_user
 
-          when "Правило"              then
+          when "Правило".freeze              then
             stop_rule
 
-          when "ПроцентСкидкиНаценки" then
+          when "ПроцентСкидкиНаценки".freeze then
             parse_persent_discount
 
-          when "Ид"                   then
+          when "Ид".freeze                   then
             parse_user_params(:user_id)
             parse_type_price
             parse_rule_id
 
-          when "ВидПравила"           then
+          when "ВидПравила".freeze           then
             parse_rule_type
 
         end # case
@@ -149,15 +149,15 @@ module VoshodAvtoExchange
       end # parse_user_params
 
       def user?
-        tag == "Контрагент"
+        tag == "Контрагент".freeze
       end # user?
 
       def nom_price_group?
-        tag == "НоменклатурнаяЦеноваяГруппа"
+        tag == "НоменклатурнаяЦеноваяГруппа".freeze
       end # nom_price_group?
 
       def type_price?
-        tag == "ТипЦен"
+        tag == "ТипЦен".freeze
       end # type_price?
 
       def rule?

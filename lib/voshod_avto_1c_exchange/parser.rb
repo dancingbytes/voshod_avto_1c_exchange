@@ -1,6 +1,7 @@
 require 'voshod_avto_1c_exchange/parsers/base'
 require 'voshod_avto_1c_exchange/parsers/user_reg'
 require 'voshod_avto_1c_exchange/parsers/user_price'
+require 'voshod_avto_1c_exchange/parsers/chel_import'
 
 #
 # Фабрика по выбору парсера обработки данных
@@ -28,11 +29,14 @@ module VoshodAvtoExchange
 
         case name
 
-          when 'РегистрацияКлиентов' then
+          when 'РегистрацияКлиентов'.freeze then
             @parser = ::VoshodAvtoExchange::Parsers::UserReg.new
 
-          when 'Контрагент' then
+          when 'Контрагент'.freeze          then
             @parser = ::VoshodAvtoExchange::Parsers::UserPrice.new
+
+          # 1c (import)
+          when 'Классификатор'.freeze       then init_1c8_import
 
         end # case
 
@@ -44,11 +48,27 @@ module VoshodAvtoExchange
     end # start_element
 
     def end_element(name)
-      @parser.try(:end_element, name)
+
+      if @parser
+        @parser.end_element(name)
+      else
+
+        case name
+
+          # 1c8 (import)
+          when 'Ид'.freeze  then parser_1c8_import
+
+        end
+
+      end # if
+
     end # end_element
 
     def characters(str)
+
+      @str = str
       @parser.try(:characters, str)
+
     end # characters
 
     def end_document
@@ -65,6 +85,27 @@ module VoshodAvtoExchange
     def warning(string)
       ::VoshodAvtoExchange.log "[XML Warnings] #{string}"
     end # warning
+
+    private
+
+    def init_1c8_import
+      @init_1c8_import = true
+    end # init_1c8_import
+
+    def parser_1c8_import
+
+      return unless @init_1c8_import
+      @init_1c8_import = false
+
+      case @str
+
+        # id выгрузки 1С Челябинск
+        when "db996b9e-3d2f-11e1-84e7-00237d443107".freeze then
+          @parser = ::VoshodAvtoExchange::Parsers::ChelImport.new(@str)
+
+      end # case
+
+    end # parser_1c8_import
 
   end # Parser
 

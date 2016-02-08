@@ -7,7 +7,7 @@ module VoshodAvtoExchange
 
     class Base
 
-      def initialize
+      def initialize(*args)
 
         @str    = ""
         @level  = 0
@@ -32,6 +32,9 @@ module VoshodAvtoExchange
       def characters(str)
         @str << squish_str(str) unless str.blank?
       end # characters
+
+      def end_document
+      end # end_document
 
       private
 
@@ -58,7 +61,7 @@ module VoshodAvtoExchange
       alias :value :tag_value
 
       def tag_debug
-        "<#{tag} #{attrs.inpect}>#{tag_value}</#{tag}>"
+        "<#{tag} #{attrs.inspect}>#{tag_value}</#{tag}>"
       end # tag_debug
 
       def log(msg)

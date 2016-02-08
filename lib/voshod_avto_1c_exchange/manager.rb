@@ -25,7 +25,7 @@ module VoshodAvtoExchange
       files.sort{ |a, b| ::File.new(a).mtime <=> ::File.new(b).atime }.each do |xml_file|
 
         ::VoshodAvtoExchange::Parser.parse(xml_file)
-        ::FileUtils.rm_rf(xml_file)
+        # ::FileUtils.rm_rf(xml_file)
 
       end # each
 
