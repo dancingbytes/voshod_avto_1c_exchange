@@ -90,11 +90,11 @@ module VoshodAvtoExchange
     end # end_document
 
     def error(string)
-      ::VoshodAvtoExchange.log "[XML Errors] #{string}"
+      ::VoshodAvtoExchange.log("[XML Errors] #{string}", self.class.name)
     end # error
 
     def warning(string)
-      ::VoshodAvtoExchange.log "[XML Warnings] #{string}"
+      ::VoshodAvtoExchange.log("[XML Warnings] #{string}", self.class.name)
     end # warning
 
     private

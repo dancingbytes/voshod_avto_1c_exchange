@@ -7,6 +7,8 @@ module VoshodAvtoExchange
 
   extend self
 
+  LOG_F = %Q([%{time}] %{name}\n%{msg}).freeze
+
   def login(v = nil)
 
     @login = v unless v.blank?
@@ -75,10 +77,15 @@ module VoshodAvtoExchange
 
   end # log_dir
 
-  def log(msg = "")
+  def log(msg = "", name = "")
 
-    create_logger       unless @logger
-    @logger.error(msg)  if @logger
+    create_logger unless @logger
+
+    @logger << (LOG_F % {
+      time:   ::Time.now,
+      name:   name,
+      msg:    msg
+    }) if @logger
 
     msg
 
@@ -91,6 +98,24 @@ module VoshodAvtoExchange
     @logger = nil
 
   end # close_logger
+
+  def humanize_time(secs)
+
+    [
+      [60,    :сек],
+      [60,    :мин],
+      [24,    :ч],
+      [1000,  :д]
+    ].freeze.map { |count, name|
+
+      if secs > 0
+        secs, n = secs.divmod(count)
+        "#{n.to_i} #{name}"
+      end
+
+    }.compact.reverse.join(' ')
+
+  end # humanize_time
 
   private
 

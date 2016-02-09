@@ -65,7 +65,7 @@ module VoshodAvtoExchange
       end # tag_debug
 
       def log(msg)
-        ::VoshodAvtoExchange.log("\n[#{self.class.name}] #{msg}")
+        ::VoshodAvtoExchange.log(msg, self.class.name)
       end # log
 
       def squish_str(str)

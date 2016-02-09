@@ -4,6 +4,16 @@ module VoshodAvtoExchange
 
     extend self
 
+    STAT_INFO_S = %Q(
+      [Обработка файла]: %{file}
+      [Время старта]:    %{time}
+    ).freeze
+
+    STAT_INFO_E = %Q(
+      [Завершена обработка файла]: %{file}
+      [Затрачено времени]:         %{time}
+    ).freeze
+
     def run
 
       extract_zip_files
@@ -17,6 +27,10 @@ module VoshodAvtoExchange
       ::VoshodAvtoExchange::import_dir
     end # import_dir
 
+    def log(msg)
+      ::VoshodAvtoExchange.log(msg, self.name)
+    end # log
+
     def processing
 
       files = ::Dir.glob( ::File.join(import_dir, "**", "*.xml") )
@@ -24,7 +38,20 @@ module VoshodAvtoExchange
       # Сортируем по дате последнего доступа по-возрастанию
       files.sort{ |a, b| ::File.new(a).mtime <=> ::File.new(b).atime }.each do |xml_file|
 
+        start = ::Time.now.to_i
+
+        log(STAT_INFO_S % {
+          file: xml_file,
+          time: ::Time.now
+        })
+
         ::VoshodAvtoExchange::Parser.parse(xml_file)
+
+        log(STAT_INFO_E % {
+          file: xml_file,
+          time: ::VoshodAvtoExchange::humanize_time(::Time.now.to_i - start)
+        })
+
         ::FileUtils.rm_rf(xml_file)
 
       end # each
