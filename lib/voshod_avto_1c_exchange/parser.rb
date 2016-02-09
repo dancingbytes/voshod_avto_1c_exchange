@@ -2,6 +2,7 @@ require 'voshod_avto_1c_exchange/parsers/base'
 require 'voshod_avto_1c_exchange/parsers/user_reg'
 require 'voshod_avto_1c_exchange/parsers/user_price'
 require 'voshod_avto_1c_exchange/parsers/chel_import'
+require 'voshod_avto_1c_exchange/parsers/chel_offers'
 
 #
 # Фабрика по выбору парсера обработки данных
@@ -19,7 +20,10 @@ module VoshodAvtoExchange
     end # self.parse
 
     def initialize
-      @parser = nil
+
+      @parser   = nil
+      @doc_info = {}
+
     end # new
 
     def start_element(name, attrs = [])
@@ -29,14 +33,20 @@ module VoshodAvtoExchange
 
         case name
 
+          when 'КоммерческаяИнформация'.freeze then
+            parse_doc_info(::Hash[attrs])
+
           when 'РегистрацияКлиентов'.freeze then
-            @parser = ::VoshodAvtoExchange::Parsers::UserReg.new
+            @parser = ::VoshodAvtoExchange::Parsers::UserReg.new(doc_info: doc_info)
 
           when 'Контрагент'.freeze          then
-            @parser = ::VoshodAvtoExchange::Parsers::UserPrice.new
+            @parser = ::VoshodAvtoExchange::Parsers::UserPrice.new(doc_info: doc_info)
 
           # 1c (import)
           when 'Классификатор'.freeze       then init_1c8_import
+
+          # 1c (offers)
+          when 'ПакетПредложений'.freeze    then init_1c8_offers(::Hash[attrs])
 
         end # case
 
@@ -55,8 +65,9 @@ module VoshodAvtoExchange
 
         case name
 
-          # 1c8 (import)
-          when 'Ид'.freeze  then parser_1c8_import
+          when 'Ид'.freeze  then
+            parser_1c8_import
+            parser_1c8_offers
 
         end
 
@@ -88,9 +99,24 @@ module VoshodAvtoExchange
 
     private
 
+    def parse_doc_info(attrs)
+      @doc_info = attrs
+    end # parse_doc_info
+
+    def doc_info
+      @doc_info || {}
+    end # doc_info
+
     def init_1c8_import
       @init_1c8_import = true
     end # init_1c8_import
+
+    def init_1c8_offers(attrs)
+
+      @init_1c8_offers  = true
+      @attrs_1c8_offers = attrs
+
+    end # init_1c8_offers
 
     def parser_1c8_import
 
@@ -100,12 +126,40 @@ module VoshodAvtoExchange
       case @str
 
         # id выгрузки 1С Челябинск
-        when "db996b9e-3d2f-11e1-84e7-00237d443107".freeze then
-          @parser = ::VoshodAvtoExchange::Parsers::ChelImport.new(@str)
+        when "db996b9e-3d2f-11e1-84e7-00237d443107".freeze,
+             "db996b9e-3d2f-11e1-84e7-00237d443107#".freeze then
+
+          @parser = ::VoshodAvtoExchange::Parsers::ChelImport.new(
+            provider_id:  @str,
+            doc_info:     doc_info
+          )
 
       end # case
 
     end # parser_1c8_import
+
+    def parser_1c8_offers
+
+      return unless @init_1c8_offers
+      @init_1c8_offers = false
+
+      case @str
+
+        # id выгрузки 1С Челябинск
+        when "db996b9e-3d2f-11e1-84e7-00237d443107".freeze,
+             "db996b9e-3d2f-11e1-84e7-00237d443107#".freeze then
+
+          @parser = ::VoshodAvtoExchange::Parsers::ChelOffers.new(
+            provider_id:  @str,
+            i_attrs:      @attrs_1c8_offers,
+            doc_info:     doc_info
+          )
+
+      end # case
+
+      @attrs_1c8_offers = nil
+
+    end # parser_1c8_offers
 
   end # Parser
 

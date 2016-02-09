@@ -15,13 +15,15 @@ module VoshodAvtoExchange
         %{msg}
       ).freeze
 
-      def initialize(provider_id = nil)
+      def initialize(
+        provider_id:  nil,
+        doc_info:     {}
+      )
 
         super
 
         @provider_id = provider_id
-
-        start_all
+        @doc_info    = doc_info
         start_catalogs
 
       end # new
@@ -45,8 +47,9 @@ module VoshodAvtoExchange
 
           when "Каталог".freeze then
             update_mode
-            # save_catalogs_list
+            save_catalogs_list
             start_items
+            start_work_with_items
 
           when "Товар".freeze then
             start_item
@@ -188,7 +191,7 @@ module VoshodAvtoExchange
       end # up_catalog_level
 
       def down_catalog_level
-        @catalog_level  -= 1
+        @catalog_level -= 1
       end # down_catalog_level
 
       def start_subcatalogs_group
@@ -302,6 +305,7 @@ module VoshodAvtoExchange
       def start_item
 
         return unless @start_items
+
         @start_item = true
         @item       = {
           p_id:         @provider_id,
@@ -323,19 +327,19 @@ module VoshodAvtoExchange
       end # for_item?
 
       def item_only?
-        (for_item? && tag == "Товар")
+        for_item? && tag == "Товар".freeze
       end # item_only?
 
       def item_catalog?
-        (for_item? && tag == "Группы")
+        for_item? && tag == "Группы".freeze
       end # item_catalog?
 
       def item_character?
-        (for_item? && tag == "ЗначенияСвойства")
+        for_item? && tag == "ЗначенияСвойства".freeze
       end # item_character?
 
       def item_param?
-        (for_item? && tag == "ЗначениеРеквизита")
+        for_item? && tag == "ЗначениеРеквизита".freeze
       end # item_param?
 
       def parse_item(key, val = nil)
@@ -377,13 +381,19 @@ module VoshodAvtoExchange
         @item_character[key] = tag_value if item_character?
       end # parse_item_character
 
+      def time_stamp
+
+        return @time_stamp unless @time_stamp.nil?
+        @time_stamp = @doc_info["ДатаФормирования"].try(:to_time).try(:utc).try(:to_i) || 0
+
+      end # time_stamp
+
       def save_item
 
         return if @item.nil? || @item.empty?
 
         item = ::Item.find_or_initialize_by(
 
-          raw:        @full_update,
           p_id:       @item[:p_id],
           p_item_id:  @item[:id]
 
@@ -417,6 +427,7 @@ module VoshodAvtoExchange
         #    ext_param
 =end
 
+        item.raw          = false
         item.p_catalog_id = @item[:catalog_id]
         item.nom_group    = @item[:nom_group]
         item.price_group  = @item[:price_group]
@@ -441,15 +452,21 @@ module VoshodAvtoExchange
       end # save_item
 
       #
-      # Начало операции по обработке данных
+      # Начало обработки товаров
       #
-      def start_all
+      def start_work_with_items
 
-        # Удалем все сырые данные
-        ::Catalog.by_provider(@provider_id).raw.delete_all
-        ::Item.by_provider(@provider_id).raw.delete_all
+        # При полной обработке данных, помечаем все товары как "сырые",
+        # что бы в дальнейшем понять какие товары нужно удалит из каталога
+        if @full_update
 
-      end # start_all
+          ::Item.
+            by_provider(@provider_id).
+            update_all({ raw: true })
+
+        end # if
+
+      end # start_work_with_items
 
       #
       # Окончание операции по обработке данных
@@ -459,14 +476,30 @@ module VoshodAvtoExchange
         if @full_update
 
           # Удаляем все актуальные данные
-          ::Catalog.by_provider(@provider_id).actual.delete_all
-          ::Item.by_provider(@provider_id).actual.delete_all
+          ::Catalog.
+            by_provider(@provider_id).
+            actual.
+            delete_all
 
           # Все "сырые" данные делаем актуальными
-          ::Catalog.by_provider(@provider_id).raw.update_all({ raw: false })
-          ::Item.by_provider(@provider_id).raw.update_all({ raw: false })
+          ::Catalog.
+            by_provider(@provider_id).
+            raw.
+            update_all({ raw: false })
 
-        end
+          # Удалем все товары у которых не указан каталог
+          ::Item.
+            by_provider(@provider_id).
+            where({ p_catalog_id: nil }).
+            delete_all
+
+          # Удаляем все товары, которые не были обработаны
+          ::Item.
+            by_provider(@provider_id).
+            raw.
+            delete_all
+
+        end # if
 
       end # final_all
 
