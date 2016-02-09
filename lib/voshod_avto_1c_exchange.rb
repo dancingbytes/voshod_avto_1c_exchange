@@ -7,8 +7,6 @@ module VoshodAvtoExchange
 
   extend self
 
-  LOG_F = %Q([%{time}] %{name}\n%{msg}).freeze
-
   def login(v = nil)
 
     @login = v unless v.blank?
@@ -80,13 +78,7 @@ module VoshodAvtoExchange
   def log(msg = "", name = "")
 
     create_logger unless @logger
-
-    @logger << (LOG_F % {
-      time:   ::Time.now,
-      name:   name,
-      msg:    msg
-    }) if @logger
-
+    @logger.log(::Logger::INFO, msg, name) if @logger
     msg
 
   end # log
