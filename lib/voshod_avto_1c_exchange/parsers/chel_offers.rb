@@ -121,6 +121,7 @@ module VoshodAvtoExchange
 
         @start_item = true
         @item       = {
+          p_id:         @provider_id,
           prices:       {},
           meta_prices:  {}
         }

@@ -130,7 +130,7 @@ module VoshodAvtoExchange
              "db996b9e-3d2f-11e1-84e7-00237d443107#".freeze then
 
           @parser = ::VoshodAvtoExchange::Parsers::ChelImport.new(
-            provider_id:  @str,
+            provider_id:  "db996b9e-3d2f-11e1-84e7-00237d443107",
             doc_info:     doc_info
           )
 
@@ -150,7 +150,7 @@ module VoshodAvtoExchange
              "db996b9e-3d2f-11e1-84e7-00237d443107#".freeze then
 
           @parser = ::VoshodAvtoExchange::Parsers::ChelOffers.new(
-            provider_id:  @str,
+            provider_id:  "db996b9e-3d2f-11e1-84e7-00237d443107",
             i_attrs:      @attrs_1c8_offers,
             doc_info:     doc_info
           )
