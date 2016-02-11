@@ -121,7 +121,8 @@ module VoshodAvtoExchange
 
         @start_item = true
         @item       = {
-          prices: {}
+          prices:       {},
+          meta_prices:  {}
         }
 
       end # start_item
@@ -158,10 +159,9 @@ module VoshodAvtoExchange
 
         return if @item_price.nil? || @item_price.empty?
 
-        @item[:prices][@item_price[:id]] = {
-          value: @item_price[:value].try(:to_f),
-          name:  @types_of_prices[@item_price[:id]] || 'Неизвестно'
-        }
+        @item[:prices][@item_price[:id]]      = @item_price[:value].try(:to_f)
+        @item[:meta_prices][@item_price[:id]] = @types_of_prices[@item_price[:id]] || 'Неизвестно'
+
 
       end # stop_item_price
 
@@ -194,8 +194,10 @@ module VoshodAvtoExchange
 
         )
 
-        item.prices   = item[:prices]
-        item.count    = item[:count].try(:to_i) || 0
+        item.updated_at   = ::Time.now
+        item.prices       = @item[:prices]
+        item.meta_prices  = @item[:meta_prices]
+        item.count        = @item[:count].try(:to_i) || 0
 
         log(S_I_ERROR % {
           msg: item.errors.full_messages

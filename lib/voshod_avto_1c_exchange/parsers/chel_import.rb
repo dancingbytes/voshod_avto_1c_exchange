@@ -262,7 +262,6 @@ module VoshodAvtoExchange
         # true  -- полное обновление каталогов
         # false -- частичное обновление каталогов
         #
-
         @catalogs_list.each do |catalog|
 
           cat = ::Catalog.find_or_initialize_by(
@@ -278,7 +277,7 @@ module VoshodAvtoExchange
 
           log(S_C_ERROR % {
             msg: cat.errors.full_messages
-          }) unless cat.save
+          }) unless cat.with(safe: true).save
 
         end # each
 
@@ -428,6 +427,7 @@ module VoshodAvtoExchange
 =end
 
         item.raw          = false
+        item.updated_at   = ::Time.now
         item.p_catalog_id = @item[:catalog_id]
         item.nom_group    = @item[:nom_group]
         item.price_group  = @item[:price_group]
@@ -447,7 +447,7 @@ module VoshodAvtoExchange
 
         log(S_I_ERROR % {
           msg: item.errors.full_messages
-        }) unless item.save
+        }) unless item.with(safe: true).save
 
       end # save_item
 
@@ -461,6 +461,7 @@ module VoshodAvtoExchange
         if @full_update
 
           ::Item.
+            with(safe: true).
             by_provider(@provider_id).
             update_all({ raw: true })
 
@@ -475,18 +476,6 @@ module VoshodAvtoExchange
 
         if @full_update
 
-          # Удаляем все актуальные данные
-          ::Catalog.
-            by_provider(@provider_id).
-            actual.
-            delete_all
-
-          # Все "сырые" данные делаем актуальными
-          ::Catalog.
-            by_provider(@provider_id).
-            raw.
-            update_all({ raw: false })
-
           # Удалем все товары у которых не указан каталог
           ::Item.
             by_provider(@provider_id).
@@ -498,6 +487,23 @@ module VoshodAvtoExchange
             by_provider(@provider_id).
             raw.
             delete_all
+
+          # Удаляем все актуальные данные
+          ::Catalog.
+            with(safe: true).
+            by_provider(@provider_id).
+            actual.
+            delete_all
+
+          # Все "сырые" данные делаем актуальными
+          ::Catalog.
+            with(safe: true).
+            by_provider(@provider_id).
+            raw.
+            update_all({ raw: false })
+
+          ::Catalog.with(safe: true).update_all(lft: nil, rgt: nil)
+          ::Catalog.with(safe: true).rebuild!
 
         end # if
 
