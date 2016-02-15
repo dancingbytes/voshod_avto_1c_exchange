@@ -274,10 +274,11 @@ module VoshodAvtoExchange
 
           cat.p_parent_id = catalog[:parent_id]
           cat.name        = catalog[:name]
+          cat.init_parent
 
           log(S_C_ERROR % {
             msg: cat.errors.full_messages
-          }) unless cat.with(safe: true).save
+          }) unless cat.save
 
         end # each
 
@@ -447,7 +448,7 @@ module VoshodAvtoExchange
 
         log(S_I_ERROR % {
           msg: item.errors.full_messages
-        }) unless item.with(safe: true).save
+        }) unless item.save
 
       end # save_item
 
@@ -461,7 +462,6 @@ module VoshodAvtoExchange
         if @full_update
 
           ::Item.
-            with(safe: true).
             by_provider(@provider_id).
             update_all({ raw: true })
 
@@ -490,20 +490,18 @@ module VoshodAvtoExchange
 
           # Удаляем все актуальные данные
           ::Catalog.
-            with(safe: true).
             by_provider(@provider_id).
             actual.
             delete_all
 
           # Все "сырые" данные делаем актуальными
           ::Catalog.
-            with(safe: true).
             by_provider(@provider_id).
             raw.
             update_all({ raw: false })
 
-          ::Catalog.with(safe: true).update_all(lft: nil, rgt: nil)
-          ::Catalog.with(safe: true).rebuild!
+          ::Catalog.update_all({ lft: nil, rgt: nil })
+          ::Catalog.rebuild!
 
         end # if
 

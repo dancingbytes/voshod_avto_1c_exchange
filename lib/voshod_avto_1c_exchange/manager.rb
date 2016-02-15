@@ -80,7 +80,7 @@ module VoshodAvtoExchange
               # будут перезатираться
 
               f_path = ::File.join(
-                dir,
+                import_dir,
                 "#{i}",
                 f.file? ? "#{rand}-#{::Time.now.to_f}-#{f.name}" : f.name
               )
@@ -96,7 +96,8 @@ module VoshodAvtoExchange
 
           ::FileUtils.rm_rf(zip)
 
-        rescue
+        rescue => e
+          log(e)
         end
 
       end # Dir.glob
