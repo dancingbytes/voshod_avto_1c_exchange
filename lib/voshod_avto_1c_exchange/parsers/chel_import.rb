@@ -47,7 +47,7 @@ module VoshodAvtoExchange
 
           when "Каталог".freeze then
             update_mode
-            save_catalogs_list
+            stop_wotk_with_catalogs
             start_items
             start_work_with_items
 
@@ -79,8 +79,8 @@ module VoshodAvtoExchange
             parse_id_items_feature
 
             # Товары
-            parse_item(:id)         if item_only?
-            parse_item(:catalog_id) if item_catalog?
+            parse_item(:id)           if item_only?
+            parse_item(:p_catalog_id) if item_catalog?
             parse_item_character(:key)
 
           when "Наименование".freeze    then
@@ -157,10 +157,6 @@ module VoshodAvtoExchange
 
       end # end_element
 
-      def end_document
-        final_all
-      end # end_document
-
       private
 
       #
@@ -172,13 +168,15 @@ module VoshodAvtoExchange
         @catalog          = {}
         @catalog_level    = 0
         @catalog_parents  = []
-        @catalogs_list    = []
+        @catalogs_meta    = {}
 
         # Характеристики товаров
         @items_features   = {}
 
         # Способ обновления товаров и каталогов
         @full_update      = false
+
+        start_work_with_catalogs
 
       end # start_parse_catalogs
 
@@ -204,8 +202,8 @@ module VoshodAvtoExchange
 
         @start_catalog_group = true
         @catalog = {
-          parent_id:  @catalog_parents[@catalog_level-1],
-          p_id:       @provider_id
+          p_parent_id:  @catalog_parents[@catalog_level-1],
+          p_id:         @provider_id
         }
 
       end # start_catalog_group
@@ -231,8 +229,8 @@ module VoshodAvtoExchange
 
         return if @saved_catalog_id   == @prev_saved_catalog_id
 
-        # Добавляем каталог в список
-        @catalogs_list << @catalog
+        # Сохраняем каталог в базе
+        save_catalog
 
       end # add_catalog
 
@@ -255,35 +253,6 @@ module VoshodAvtoExchange
         @items_feature_name = tag_value if general_items_feature?
       end # parse_name_items_feature
 
-      def save_catalogs_list
-
-        #
-        # Если значение @full_update:
-        # true  -- полное обновление каталогов
-        # false -- частичное обновление каталогов
-        #
-        @catalogs_list.each do |catalog|
-
-          cat = ::Catalog.find_or_initialize_by(
-
-            raw:          @full_update,
-            p_id:         catalog[:p_id],
-            p_catalog_id: catalog[:id]
-
-          )
-
-          cat.p_parent_id = catalog[:parent_id]
-          cat.name        = catalog[:name]
-          cat.init_parent
-
-          log(S_C_ERROR % {
-            msg: cat.errors.full_messages
-          }) unless cat.save
-
-        end # each
-
-      end # save_catalogs_list
-
       #
       # Способ обновления данных
       #
@@ -299,7 +268,10 @@ module VoshodAvtoExchange
       end # start_items
 
       def stop_items
+
         @start_items = false
+        stop_work_with_items
+
       end # stop_items
 
       def start_item
@@ -388,6 +360,33 @@ module VoshodAvtoExchange
 
       end # time_stamp
 
+      def save_catalog
+
+        return if @catalog.nil? || @catalog.empty?
+
+        cat = ::Catalog.find_or_initialize_by(
+
+          p_id:         @catalog[:p_id],
+          p_catalog_id: @catalog[:id]
+
+        )
+
+        # Сохраняем инднтификатор текущего каталога
+        @catalogs_meta[@catalog[:id]] = cat.id.to_s
+
+        # Выбираем идентификатор родительского каталога
+        cat.parent_id   = @catalogs_meta[@catalog[:p_parent_id]]
+
+        cat.raw         = false
+        cat.p_parent_id = @catalog[:p_parent_id]
+        cat.name        = @catalog[:name]
+
+        log(S_C_ERROR % {
+          msg: cat.errors.full_messages
+        }) unless cat.save
+
+      end # save_catalog
+
       def save_item
 
         return if @item.nil? || @item.empty?
@@ -429,7 +428,7 @@ module VoshodAvtoExchange
 
         item.raw          = false
         item.updated_at   = ::Time.now
-        item.p_catalog_id = @item[:catalog_id]
+        item.p_catalog_id = @item[:p_catalog_id]
         item.nom_group    = @item[:nom_group]
         item.price_group  = @item[:price_group]
         item.mog          = @item[:mog]
@@ -453,26 +452,50 @@ module VoshodAvtoExchange
       end # save_item
 
       #
+      # Начало обработки каталогов
+      #
+      def start_work_with_catalogs
+
+        # При полной обработке данных, помечаем все каталоги как "сырые",
+        # что бы в дальнейшем понять какие каталоги нужно удалит из каталога
+        ::Catalog.
+          by_provider(@provider_id).
+          update_all({ raw: true })
+
+      end # start_work_with_catalogs
+
+      #
+      # Окончание обработки каталогов
+      #
+      def stop_wotk_with_catalogs
+
+        # Все "сырые" данные удаляем
+        @full_update && ::Catalog.
+          by_provider(@provider_id).
+          raw.
+          destroy_all
+
+        ::Catalog.rebuild!
+
+      end # stop_wotk_with_catalogs
+
+      #
       # Начало обработки товаров
       #
       def start_work_with_items
 
         # При полной обработке данных, помечаем все товары как "сырые",
         # что бы в дальнейшем понять какие товары нужно удалит из каталога
-        if @full_update
-
-          ::Item.
-            by_provider(@provider_id).
-            update_all({ raw: true })
-
-        end # if
+         ::Item.
+          by_provider(@provider_id).
+          update_all({ raw: true })
 
       end # start_work_with_items
 
       #
-      # Окончание операции по обработке данных
+      # Окончание обработки товаров
       #
-      def final_all
+      def stop_work_with_items # final_all
 
         if @full_update
 
@@ -488,24 +511,9 @@ module VoshodAvtoExchange
             raw.
             delete_all
 
-          # Удаляем все актуальные данные
-          ::Catalog.
-            by_provider(@provider_id).
-            actual.
-            delete_all
-
-          # Все "сырые" данные делаем актуальными
-          ::Catalog.
-            by_provider(@provider_id).
-            raw.
-            update_all({ raw: false })
-
-          ::Catalog.update_all({ lft: nil, rgt: nil })
-          ::Catalog.rebuild!
-
         end # if
 
-      end # final_all
+      end # stop_work_with_items
 
     end # ChelImport
 
