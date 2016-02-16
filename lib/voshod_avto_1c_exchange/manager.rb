@@ -49,7 +49,7 @@ module VoshodAvtoExchange
 
         log(STAT_INFO_E % {
           file: xml_file,
-          time: ::VoshodAvtoExchange::humanize_time(::Time.now.to_i - start)
+          time: ::VoshodAvtoExchange::Util::humanize_time(::Time.now.to_i - start)
         })
 
         ::FileUtils.rm_rf(xml_file)

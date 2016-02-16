@@ -398,34 +398,6 @@ module VoshodAvtoExchange
 
         )
 
-=begin
-        :p_id=>"db996b9e-3d2f-11e1-84e7-00237d443107",
-        :params=>{
-          "ВидНоменклатуры"=>"Оптовый товар",
-          "ТипНоменклатуры"=>"Товар",
-          "Полное наименование"=>"Аккумулятор BOSCH S3 56 А/ч о.п ток 480 242х175х190",
-          "Вес"=>"14.19"
-        },
-        :characters=>{
-          "Марка"=>"BOSCH"
-        },
-        :id=>"b55a1516-38e0-11e3-afa4-003048f6ad92",
-        :department=>"ГАЗ",
-        :barcode=>"2000100907504",
-        :mog=>"19268g",
-        :name=>"Аккумулятор BOSCH S3 56 А/ч о.п ток 480 242х175х190",
-        :contry_code=>"724",
-        :contry_name=>"ИСПАНИЯ",
-        :vendor=>"АКБ BOSCH",
-        :price_group=>"fb8e53e8-d848-11e4-bf5f-003048f6ad92",
-        :nom_group=>"f6c7fa61-e27e-11e2-a6bd-003048f6ad92",
-        :unit_code=>"796",
-        :unit=>"шт",
-        :catalog_id=>"b55a166e-38e0-11e3-afa4-003048f6ad92"
-        #
-        #    ext_param
-=end
-
         item.raw          = false
         item.updated_at   = ::Time.now
         item.p_catalog_id = @item[:p_catalog_id]
@@ -444,6 +416,9 @@ module VoshodAvtoExchange
         item.contry_code  = @item[:contry_code]
         item.contry_name  = @item[:contry_name]
         item.weight       = @item[:params]["Вес"].try(:to_f)
+
+        # Разбираем кроссы товара
+        item.crosses      = parse_crosses("#{@item[:ext_param]} / #{@item[:vendor_mog]}")
 
         log(S_I_ERROR % {
           msg: item.errors.full_messages
@@ -514,6 +489,16 @@ module VoshodAvtoExchange
         end # if
 
       end # stop_work_with_items
+
+      def parse_crosses(crosses = nil)
+
+        (crosses || "").
+          split(/\s\/\s|\n|\r|\t|\,|\;/).
+          map { |el| ::VoshodAvtoExchange::Util::clean_whitespaces!(el) }.
+          delete_if { |el| el.blank? || el.length > 40 }.
+          uniq
+
+      end # parse_crosses
 
     end # ChelImport
 
