@@ -418,7 +418,7 @@ module VoshodAvtoExchange
         item.weight       = @item[:params]["Вес"].try(:to_f)
 
         # Разбираем кроссы товара
-        item.crosses      = parse_crosses("#{@item[:ext_param]} / #{@item[:vendor_mog]}")
+        item.crosses      = parse_crosses(@item[:ext_param])
 
         log(S_I_ERROR % {
           msg: item.errors.full_messages
