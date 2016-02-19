@@ -7,6 +7,8 @@ module VoshodAvtoExchange
 
     class ChelImport < Base
 
+      CROSS_RE  = /[\-\.\s]/.freeze
+
       S_C_ERROR = %Q(Ошибка сохранения каталога в базу.
         %{msg}
       ).freeze
@@ -412,13 +414,12 @@ module VoshodAvtoExchange
         item.unit_code    = @item[:unit_code]
         item.gtd          = @item[:gtd]
         item.barcode      = @item[:barcode]
-        item.department   = @item[:department]
         item.contry_code  = @item[:contry_code]
         item.contry_name  = @item[:contry_name]
         item.weight       = @item[:params]["Вес"].try(:to_f)
 
         # Разбираем кроссы товара
-        item.crosses      = parse_crosses(@item[:ext_param])
+        item.crosses      = parse_crosses(@item[:ext_param]) if @item[:department] == 'Иномарки'.freeze
 
         log(S_I_ERROR % {
           msg: item.errors.full_messages
@@ -470,7 +471,7 @@ module VoshodAvtoExchange
       #
       # Окончание обработки товаров
       #
-      def stop_work_with_items # final_all
+      def stop_work_with_items
 
         if @full_update
 
@@ -494,8 +495,11 @@ module VoshodAvtoExchange
 
         (crosses || "").
           split(/\s\/\s|\n|\r|\t|\,|\;/).
-          map { |el| ::VoshodAvtoExchange::Util::clean_whitespaces!(el) }.
-          delete_if { |el| el.blank? || el.length > 40 }.
+          map { |el|
+            ::VoshodAvtoExchange::Util::clean_whitespaces!(el)
+            el.gsub!(CROSS_RE, "")
+          }.
+          delete_if { |el| el.blank? || el =~ /\(комплект\)/ }.
           uniq
 
       end # parse_crosses
