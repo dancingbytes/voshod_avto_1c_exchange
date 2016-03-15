@@ -4,6 +4,8 @@ module VoshodAvtoExchange
 
     extend self
 
+    CROSS_RE = /[\-\.\s]/.freeze
+
     def to_1c_id(str)
 
       uid = str.to_s.ljust(32, '0')
@@ -34,10 +36,15 @@ module VoshodAvtoExchange
     end # humanize_time
 
     def clean_whitespaces(str)
+
+      return if str.class != String
       clean_whitespaces!(str.clone)
+
     end # clean_whitespaces
 
     def clean_whitespaces!(str)
+
+      return if str.class != String
 
       str.sub!(/\A\s+/, "")
       str.sub!(/\s+\z/, "")
@@ -45,6 +52,17 @@ module VoshodAvtoExchange
       str
 
     end # clean_whitespaces
+
+    def clear_cross_num(str)
+
+      return if str.class != String
+
+      nstr = str.downcase
+      clean_whitespaces!(nstr)
+      nstr.gsub!(CROSS_RE, '')
+      nstr
+
+    end # clear_cross_num
 
   end # Util
 

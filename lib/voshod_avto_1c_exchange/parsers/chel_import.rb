@@ -7,8 +7,6 @@ module VoshodAvtoExchange
 
     class ChelImport < Base
 
-      CROSS_RE  = /[\-\.\s]/.freeze
-
       S_C_ERROR = %Q(Ошибка сохранения каталога в базу.
         %{msg}
       ).freeze
@@ -405,21 +403,21 @@ module VoshodAvtoExchange
         item.p_catalog_id = @item[:p_catalog_id]
         item.nom_group    = @item[:nom_group]
         item.price_group  = @item[:price_group]
-        item.mog          = @item[:mog]
-        item.name         = @item[:name]
-        item.vendor_mog   = @item[:vendor_mog]
-        item.vendor       = @item[:vendor]
+        item.mog          = prepare(@item[:mog])
+        item.name         = prepare(@item[:name])
+
+        item.kind_of      = @item[:department] == 'Иномарки'.freeze ? 1 : 0
+        item.oenum        = prepare_cross(@item[:vendor_mog])
+
+        item.vendor       = prepare(@item[:vendor])
         item.brand        = @item[:characters]["Марка"]
         item.unit         = @item[:unit]
         item.unit_code    = @item[:unit_code]
-        item.gtd          = @item[:gtd]
+        item.gtd          = prepare(@item[:gtd])
         item.barcode      = @item[:barcode]
         item.contry_code  = @item[:contry_code]
-        item.contry_name  = @item[:contry_name]
+        item.contry_name  = prepare(@item[:contry_name])
         item.weight       = @item[:params]["Вес"].try(:to_f)
-
-        # Разбираем кроссы товара
-        item.crosses      = parse_crosses(@item[:ext_param]) if @item[:department] == 'Иномарки'.freeze
 
         log(S_I_ERROR % {
           msg: item.errors.full_messages
@@ -491,18 +489,13 @@ module VoshodAvtoExchange
 
       end # stop_work_with_items
 
-      def parse_crosses(crosses = nil)
+      def prepare(str)
+        ::VoshodAvtoExchange::Util::clean_whitespaces(str)
+      end # prepare
 
-        (crosses || "").
-          split(/\s\/\s|\n|\r|\t|\,|\;/).
-          map { |el|
-            ::VoshodAvtoExchange::Util::clean_whitespaces!(el)
-            el.gsub!(CROSS_RE, "")
-          }.
-          delete_if { |el| el.blank? || el =~ /\(комплект\)/ }.
-          uniq
-
-      end # parse_crosses
+      def prepare_cross(str)
+        ::VoshodAvtoExchange::Util::clear_cross_num(str)
+      end # prepare_cross
 
     end # ChelImport
 
