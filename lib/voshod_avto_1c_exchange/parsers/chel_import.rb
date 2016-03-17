@@ -116,7 +116,7 @@ module VoshodAvtoExchange
             parse_item(:mog) if item_only?
 
           when "АртикулПроизводителя".freeze then
-            parse_item(:vendor_mog) if item_only?
+            parse_item(:oem_num) if item_only?
 
           when "НомерГТД".freeze then
             parse_item(:gtd) if item_only?
@@ -131,7 +131,7 @@ module VoshodAvtoExchange
             parse_item(:contry_name) if item_only?
 
           when "Производитель".freeze then
-            parse_item(:vendor) if item_only?
+            parse_item(:oem_brand) if item_only?
 
           when "ЦеноваяГруппа".freeze then
             parse_item(:price_group, attrs["ИД"]) if item_only?
@@ -403,20 +403,20 @@ module VoshodAvtoExchange
         item.p_catalog_id = @item[:p_catalog_id]
         item.nom_group    = @item[:nom_group]
         item.price_group  = @item[:price_group]
-        item.mog          = prepare(@item[:mog])
-        item.name         = prepare(@item[:name])
+        item.mog          = @item[:mog]
+        item.name         = @item[:name]
 
         item.kind_of      = @item[:department] == 'Иномарки'.freeze ? 1 : 0
-        item.oenum        = prepare_cross(@item[:vendor_mog])
+        item.oem_num      = @item[:oem_num]
+        item.oem_brand    = @item[:oem_brand]
 
-        item.vendor       = prepare(@item[:vendor])
         item.brand        = @item[:characters]["Марка"]
         item.unit         = @item[:unit]
         item.unit_code    = @item[:unit_code]
-        item.gtd          = prepare(@item[:gtd])
+        item.gtd          = @item[:gtd]
         item.barcode      = @item[:barcode]
         item.contry_code  = @item[:contry_code]
-        item.contry_name  = prepare(@item[:contry_name])
+        item.contry_name  = @item[:contry_name]
         item.weight       = @item[:params]["Вес"].try(:to_f)
 
         log(S_I_ERROR % {
@@ -488,14 +488,6 @@ module VoshodAvtoExchange
         end # if
 
       end # stop_work_with_items
-
-      def prepare(str)
-        ::VoshodAvtoExchange::Util::clean_whitespaces(str)
-      end # prepare
-
-      def prepare_cross(str)
-        ::VoshodAvtoExchange::Util::clear_cross_num(str)
-      end # prepare_cross
 
     end # ChelImport
 

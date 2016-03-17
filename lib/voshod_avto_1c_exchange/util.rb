@@ -53,17 +53,6 @@ module VoshodAvtoExchange
 
     end # clean_whitespaces
 
-    def clear_cross_num(str)
-
-      return if str.class != String
-
-      nstr = str.downcase
-      clean_whitespaces!(nstr)
-      nstr.gsub!(CROSS_RE, '')
-      nstr
-
-    end # clear_cross_num
-
   end # Util
 
 end # VoshodAvtoExchange
