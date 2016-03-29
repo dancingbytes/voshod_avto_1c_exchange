@@ -64,6 +64,10 @@ module VoshodAvtoExchange
           when "ВидПравила".freeze           then
             parse_rule_type
 
+          when "Наименование".freeze         then
+            parse_rule_good_name
+            parse_price_type_name
+
         end # case
 
       end # end_element
@@ -103,8 +107,10 @@ module VoshodAvtoExchange
 
           }) unless pr.new_record?
 
-          pr.price_id =  rule[:price_id]
-          pr.value    =  rule[:persent_discount].try(:to_i) || 0
+          pr.price_id   =  rule[:price_id]
+          pr.value      =  rule[:persent_discount].try(:to_i) || 0
+          pr.nom_name   = rule[:rule_good_name]
+          pr.price_name = rule[:price_type_name]
 
           log(S_ERROR % {
             msg: pr.errors.full_messages
@@ -143,6 +149,14 @@ module VoshodAvtoExchange
       def parse_rule_id
         @rule_params[:rule_id]    = tag_value if rule? && nom_price_group?
       end # parse_rule_id
+
+      def parse_rule_good_name
+        @rule_params[:rule_good_name]  = tag_value if rule? && nom_price_group?
+      end # parse_rule_good_name
+
+      def parse_price_type_name
+        @rule_params[:price_type_name]  = tag_value if rule? && type_price?
+      end # parse_price_type_name
 
       def parse_user_params(name)
         @user_params[name] = tag_value if user?
