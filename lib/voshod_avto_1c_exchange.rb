@@ -23,13 +23,14 @@ module VoshodAvtoExchange
 
   alias :pass :password
 
-  def sidekiq_work_with_file(file_path)
+  def sidekiq_work_with_file(file_path, key: nil)
 
     ::SidekiqQuery.create({
 
       jid:  ::Exchange1CWorker.perform_async(file_path),
       tag:  "1С",
-      name: "Обработка данных из 1С"
+      name: "Обработка данных из 1С",
+      key:  key
 
     })
 
