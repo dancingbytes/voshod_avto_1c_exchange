@@ -406,7 +406,6 @@ module VoshodAvtoExchange
         item.mog          = @item[:mog]
         item.name         = @item[:name]
 
-        item.kind_of      = @item[:department] == 'Иномарки'.freeze ? 1 : 0
         item.oem_num      = @item[:oem_num]
         item.oem_brand    = @item[:oem_brand]
 

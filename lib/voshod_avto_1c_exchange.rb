@@ -23,6 +23,18 @@ module VoshodAvtoExchange
 
   alias :pass :password
 
+  def sidekiq_work_with_file(file_path)
+
+    ::SidekiqQuery.create({
+
+      jid:  ::Exchange1CWorker.perform_async(file_path),
+      tag:  "1С",
+      name: "Обработка данных из 1С"
+
+    })
+
+  end # sidekiq_work_with_file
+
   def run(file_lock = ::File.join(::Rails.root, "tmp", 'voshod_avto_1c_exchange.lock'))
 
     begin

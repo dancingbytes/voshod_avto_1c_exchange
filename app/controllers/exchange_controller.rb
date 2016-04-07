@@ -142,7 +142,7 @@ class ExchangeController < ::ApplicationController
 
     return if request.body.nil? || request.body.blank?
 
-    file_path  = ::File.join(
+    file_path = ::File.join(
       ::VoshodAvtoExchange.import_dir,
       params[:filename] || "#{rand}-#{::Time.now.to_i}.xml"
     )
@@ -150,6 +150,8 @@ class ExchangeController < ::ApplicationController
     ::File.open(file_path, 'wb') do |f|
       f.write request.body.read
     end
+
+    ::VoshodAvtoExchange.sidekiq_work_with_file(file_path)
 
     ::Rails.logger.error("/exchange/post [save_file: #{file_path}]")
     file_path
