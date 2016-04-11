@@ -33,7 +33,7 @@ module VoshodAvtoExchange
     def start_element(name, attrs = [])
 
       @line += 1
-      @clb(@line, "Обработка выгрузки...")
+      @clb.call(@line, "Обработка выгрузки...")
 
       # Если парсер не установлен -- пытаемся его выбрать
       unless @parser
