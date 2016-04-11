@@ -63,7 +63,7 @@ module VoshodAvtoExchange
       completed_clb:  nil
     )
 
-    ::VoshodAvtoExchange::Manager.run(
+    ::VoshodAvtoExchange::Manager.sidekiq_run(
       file_path:      file_path,
       init_clb:       init_clb,
       start_clb:      start_clb,
