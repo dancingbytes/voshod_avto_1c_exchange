@@ -27,10 +27,10 @@ module VoshodAvtoExchange
 
     ::SidekiqQuery.create({
 
-      jid:  ::Exchange1CWorker.perform_async(file_path),
+      jid:  ::ExchangeWorker.perform_async(file_path),
       tag:  "1С",
       name: "Обработка данных из 1С",
-      key:  key
+      key:  key || 0
 
     })
 
