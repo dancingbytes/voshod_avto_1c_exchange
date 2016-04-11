@@ -7,20 +7,23 @@ module VoshodAvtoExchange
 
     def self.count(file_name)
 
-      @lines = 0
+      total = 0
 
       parser  = ::Nokogiri::XML::SAX::Parser.new(
-        new(->(lines) { @lines = lines })
+        new(->(lines) { total = lines })
       )
       parser.parse_file(file_name)
 
-      @lines
+      total
 
     end # self.count
 
-    def initialize(clb = nil)
+    def initialize(clb)
+
       @lines  = 0
-      @clb    = ->(lines) {} unless clb.is_a?(::Proc)
+      clb     = ->(lines) {} unless clb.is_a?(::Proc)
+      @clb    = clb
+
     end # initialize
 
     def start_element(name, attrs = [])
