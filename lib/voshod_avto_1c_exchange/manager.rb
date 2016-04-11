@@ -17,9 +17,50 @@ module VoshodAvtoExchange
     def run
 
       extract_zip_files
-      processing
+      process_all
 
     end # run
+
+    def sidekiq_run(
+      file_path:,
+      init_clb:       nil,
+      start_clb:      nil,
+      process_clb:    nil,
+      completed_clb:  nil
+    )
+
+      init_clb      = ->(msg) {}        unless init_clb.is_a?(::Proc)
+      start_clb     = ->(total, msg) {} unless start_clb.is_a?(::Proc)
+      process_clb   = ->(index, msg) {} unless process_clb.is_a?(::Proc)
+      completed_clb = ->(total) {}      unless completed_clb.is_a?(::Proc)
+
+      # Распаковываем zip архив, если таковой пришел.
+      # Подготавливаем список файлов к обработке
+      files = []
+      if is_zip?(file_path)
+        init_clb.call("Распаковка: #{file_path}")
+        files = extract_zip_file(file_path)
+      else
+        files = [file_path]
+      end
+
+      init_clb.call("Подсчет...")
+
+      total = 0
+      files.each { |fl|
+        total += count_lines(fl)
+      }
+
+      start_clb.call(total, "Начало обработки.")
+
+      line = 0
+      files.each { |fl|
+        line += process_file(fl, process_clb, line)
+      }
+
+      completed_clb(total, "Обработка завершена.")
+
+    end # sidekiq_run
 
     private
 
@@ -31,80 +72,110 @@ module VoshodAvtoExchange
       ::VoshodAvtoExchange.log(msg, self.name)
     end # log
 
-    def processing
+    # Обработка всех файлов в заданой директории
+    def process_all
 
       files = ::Dir.glob( ::File.join(import_dir, "**", "*.xml") )
 
       # Сортируем по дате последнего доступа по-возрастанию
       files.sort{ |a, b| ::File.new(a).mtime <=> ::File.new(b).atime }.each do |xml_file|
-
-        start = ::Time.now.to_i
-
-        log(STAT_INFO_S % {
-          file: xml_file,
-          time: ::Time.now
-        })
-
-        ::VoshodAvtoExchange::Parser.parse(xml_file)
-
-        log(STAT_INFO_E % {
-          file: xml_file,
-          time: ::VoshodAvtoExchange::Util::humanize_time(::Time.now.to_i - start)
-        })
-
-        ::FileUtils.rm_rf(xml_file)
-
+        process_file(xml_file)
       end # each
 
       self
 
-    end # processing
+    end # process_all
+
+    # Обработка файла
+    def process_file(file_name, clb = nil, line = 0)
+
+      start = ::Time.now.to_i
+
+      log(STAT_INFO_S % {
+        file: file_name,
+        time: ::Time.now
+      })
+
+      ::VoshodAvtoExchange::Parser.parse(file_name, clb, line)
+
+      log(STAT_INFO_E % {
+        file: file_name,
+        time: ::VoshodAvtoExchange::Util::humanize_time(::Time.now.to_i - start)
+      })
+
+      ::FileUtils.rm_rf(file_name)
+
+      self
+
+    end # process_file
+
+    # Число строк в файле
+    def count_lines(file_name)
+      ::VoshodAvtoExchange::LineCounter.count(file_name)
+    end # count_lines
 
     # Ищем и распаковываем все zip-архивы, после - удаляем
     def extract_zip_files
 
-      i     = 0
       files = ::Dir.glob( ::File.join(import_dir, "**", "*.zip") )
 
       files.each do |zip|
-
-        i+= 1
-        begin
-
-          ::Zip::File.open(zip) { |zip_file|
-
-            zip_file.each { |f|
-
-              # Создаем дополнительную вложенность т.к. 1С 8 выгружает всегда одни и теже
-              # навания файлов, и если таких выгрузок будет много, то при распковке файлы
-              # будут перезатираться
-
-              f_path = ::File.join(
-                import_dir,
-                "#{i}",
-                f.file? ? "#{rand}-#{::Time.now.to_f}-#{f.name}" : f.name
-              )
-
-              ::FileUtils.rm_rf(f_path) if ::File.exist?(f_path)
-              ::FileUtils.mkdir_p(::File.dirname(f_path))
-
-              zip_file.extract(f, f_path)
-
-            } # each
-
-          } # open
-
-          ::FileUtils.rm_rf(zip)
-
-        rescue => e
-          log(e)
-        end
-
+        extract_zip_file(zip)
       end # Dir.glob
 
       self
 
     end # extract_zip_files
+
+    def extract_zip_file(file_name)
+
+      files = []
+      begin
+
+        ::Zip::File.open(zip) { |zip_file|
+
+          zip_file.each { |f|
+
+            # Создаем дополнительную вложенность т.к. 1С 8 выгружает всегда одни и теже
+            # навания файлов, и если таких выгрузок будет много, то при распковке файлы
+            # будут перезатираться
+
+            f_path = ::File.join(
+              import_dir,
+              f.file? ? "#{rand}-#{::Time.now.to_f}-#{f.name}" : f.name
+            )
+
+            files << f_path
+
+            ::FileUtils.rm_rf(f_path) if ::File.exist?(f_path)
+            ::FileUtils.mkdir_p(::File.dirname(f_path))
+
+            zip_file.extract(f, f_path)
+
+          } # each
+
+        } # open
+
+        ::FileUtils.rm_rf(zip)
+
+      rescue => e
+        log(e)
+      end
+
+      files
+
+    end # extract_zip_file
+
+    def is_zip?(file_name)
+
+      begin
+        ::Zip::File.open(zip) { |zip_file| }
+        true
+      rescue
+        false
+      end
+
+    end # is_zip?
 
   end # Manager
 

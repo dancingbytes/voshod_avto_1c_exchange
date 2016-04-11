@@ -55,6 +55,24 @@ module VoshodAvtoExchange
 
   end # run
 
+  def sidekiq_run(
+      file_path:,
+      init_clb:       nil,
+      start_clb:      nil,
+      process_clb:    nil,
+      completed_clb:  nil
+    )
+
+    ::VoshodAvtoExchange::Manager.run(
+      file_path:      file_path,
+      init_clb:       init_clb,
+      start_clb:      start_clb,
+      process_clb:    process_clb,
+      completed_clb:  completed_clb
+    )
+
+  end # sidekiq_run
+
   def import_dir(v = nil)
 
     @import_dir = v unless v.blank?
@@ -118,6 +136,7 @@ require 'voshod_avto_1c_exchange/util'
 require 'voshod_avto_1c_exchange/template'
 require 'voshod_avto_1c_exchange/export'
 
+require 'voshod_avto_1c_exchange/line_count'
 require 'voshod_avto_1c_exchange/parser'
 require 'voshod_avto_1c_exchange/manager'
 

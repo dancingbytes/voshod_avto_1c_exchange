@@ -12,21 +12,28 @@ module VoshodAvtoExchange
   # Класс-шаблон по разбору xml-файлов
   class Parser < ::Nokogiri::XML::SAX::Document
 
-    def self.parse(file)
+    def self.parse(file, clb = nil, counter = 0)
 
-      parser  = ::Nokogiri::XML::SAX::Parser.new(new)
+      parser  = ::Nokogiri::XML::SAX::Parser.new(
+        new(clb, counter)
+      )
       parser.parse_file(file)
 
     end # self.parse
 
-    def initialize
+    def initialize(clb = nil, counter = 0)
 
-      @parser   = nil
-      @doc_info = {}
+      @parser     = nil
+      @doc_info   = {}
+      @line       = counter
+      @clb        = ->(line, msg) {} unless clb.is_a?(::Proc)
 
     end # new
 
     def start_element(name, attrs = [])
+
+      @line += 1
+      @clb(@line, "Обработка выгрузки...")
 
       # Если парсер не установлен -- пытаемся его выбрать
       unless @parser

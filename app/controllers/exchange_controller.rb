@@ -144,7 +144,7 @@ class ExchangeController < ::ApplicationController
 
     file_path = ::File.join(
       ::VoshodAvtoExchange.import_dir,
-      params[:filename] || "#{rand}-#{::Time.now.to_i}.xml"
+      "#{rand}-#{::Time.now.to_f}-#{params[:filename]}" || "#{rand}-#{::Time.now.to_f}.xml"
     )
 
     ::File.open(file_path, 'wb') do |f|
