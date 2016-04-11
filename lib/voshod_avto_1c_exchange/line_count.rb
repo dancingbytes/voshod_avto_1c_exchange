@@ -27,17 +27,20 @@ module VoshodAvtoExchange
     end # initialize
 
     def start_element(name, attrs = [])
-      @lines += 1
     end # start_element
 
     def end_element(name)
+      @lines += 1
     end # end_element
 
     def characters(str)
     end # characters
 
     def end_document
+
+      @lines += 1
       @clb.call(@lines)
+
     end # end_document
 
 end # Parsers

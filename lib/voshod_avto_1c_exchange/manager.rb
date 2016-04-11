@@ -34,14 +34,13 @@ module VoshodAvtoExchange
       process_clb   = ->(index, msg) {} unless process_clb.is_a?(::Proc)
       completed_clb = ->(total) {}      unless completed_clb.is_a?(::Proc)
 
-      # Распаковываем zip архив, если таковой пришел.
+      # Распаковываем zip архив, если такой имеется.
       # Подготавливаем список файлов к обработке
-      files = []
-      if is_zip?(file_path)
+      files = if is_zip?(file_path)
         init_clb.call("Распаковка: #{file_path}")
-        files = extract_zip_file(file_path)
+        extract_zip_file(file_path)
       else
-        files = [file_path]
+        [file_path]
       end
 
       init_clb.call("Подсчет...")
@@ -58,7 +57,9 @@ module VoshodAvtoExchange
         line += process_file(fl, process_clb, line)
       }
 
-      completed_clb(total, "Обработка завершена.")
+      completed_clb.call(total, "Обработка завершена.")
+
+      self
 
     end # sidekiq_run
 
@@ -89,6 +90,8 @@ module VoshodAvtoExchange
     # Обработка файла
     def process_file(file_name, clb = nil, line = 0)
 
+      return 0 unless File.exists?(file_name)
+
       start = ::Time.now.to_i
 
       log(STAT_INFO_S % {
@@ -96,7 +99,7 @@ module VoshodAvtoExchange
         time: ::Time.now
       })
 
-      ::VoshodAvtoExchange::Parser.parse(file_name, clb, line)
+      lines = ::VoshodAvtoExchange::Parser.parse(file_name, clb, line)
 
       log(STAT_INFO_E % {
         file: file_name,
@@ -105,13 +108,16 @@ module VoshodAvtoExchange
 
       ::FileUtils.rm_rf(file_name)
 
-      self
+      lines
 
     end # process_file
 
     # Число строк в файле
     def count_lines(file_name)
+
+      return 0 unless File.exists?(file_name)
       ::VoshodAvtoExchange::LineCounter.count(file_name)
+
     end # count_lines
 
     # Ищем и распаковываем все zip-архивы, после - удаляем
@@ -132,7 +138,7 @@ module VoshodAvtoExchange
       files = []
       begin
 
-        ::Zip::File.open(zip) { |zip_file|
+        ::Zip::File.open(file_name) { |zip_file|
 
           zip_file.each { |f|
 
@@ -169,7 +175,7 @@ module VoshodAvtoExchange
     def is_zip?(file_name)
 
       begin
-        ::Zip::File.open(zip) { |zip_file| }
+        ::Zip::File.open(file_name) { |zip_file| }
         true
       rescue
         false

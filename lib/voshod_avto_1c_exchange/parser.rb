@@ -14,26 +14,30 @@ module VoshodAvtoExchange
 
     def self.parse(file, clb = nil, counter = 0)
 
+      total = 0
       parser  = ::Nokogiri::XML::SAX::Parser.new(
-        new(clb, counter)
+        new(clb, counter, ->(lines) { total = lines })
       )
       parser.parse_file(file)
+      total
 
     end # self.parse
 
-    def initialize(clb = nil, counter = 0)
+    def initialize(clb = nil, counter = 0, final_clb = nil)
 
       @parser     = nil
       @doc_info   = {}
       @line       = counter
-      @clb        = ->(line, msg) {} unless clb.is_a?(::Proc)
+
+      clb         = ->(line, msg) {} unless clb.is_a?(::Proc)
+      final_clb   = ->(line) {}      unless final_clb.is_a?(::Proc)
+
+      @clb        = clb
+      @final_clb  = final_clb
 
     end # new
 
     def start_element(name, attrs = [])
-
-      @line += 1
-      @clb.call(@line, "Обработка выгрузки...")
 
       # Если парсер не установлен -- пытаемся его выбрать
       unless @parser
@@ -80,6 +84,9 @@ module VoshodAvtoExchange
 
       end # if
 
+      @line += 1
+      @clb.call(@line, "Обработка выгрузки...")
+
     end # end_element
 
     def characters(str)
@@ -93,6 +100,10 @@ module VoshodAvtoExchange
 
       @parser.try(:end_document)
       @parser = nil
+
+      @line += 1
+      @clb.call(@line, "Обработка выгрузки... #{@line}")
+      @final_clb.call(@line)
 
     end # end_document
 
