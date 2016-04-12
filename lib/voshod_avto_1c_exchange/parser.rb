@@ -12,7 +12,7 @@ module VoshodAvtoExchange
   # Класс-шаблон по разбору xml-файлов
   class Parser < ::Nokogiri::XML::SAX::Document
 
-    STAT_INFO_S = %Q("Обработано: %{s} из %{e}").freeze
+    STAT_INFO_S = %Q(Обработано: %{s} из %{e}).freeze
 
     def self.parse(
       file,
