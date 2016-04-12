@@ -12,9 +12,10 @@ module VoshodAvtoExchange
   # Класс-шаблон по разбору xml-файлов
   class Parser < ::Nokogiri::XML::SAX::Document
 
-    STAT_INFO_S = %Q(Обработано: %{s} из %{e}).freeze
+    STAT_INFO_S = %Q(Обработано: %{s} из %{e}. [%{fn}]).freeze
 
     def self.parse(
+      # Файл обработки
       file,
       # Колбек вызова счетчика
       clb: nil,
@@ -29,6 +30,7 @@ module VoshodAvtoExchange
       total = 0
       parser  = ::Nokogiri::XML::SAX::Parser.new(
         new(
+          file_name:  ::File.basename(file),
           clb:        clb,
           cstart:     cstart,
           tlines:     tlines,
@@ -40,11 +42,14 @@ module VoshodAvtoExchange
 
     end # self.parse
 
-    def initialize(clb: nil, cstart: 0, tlines: 0, final_clb: nil)
+    def initialize(file_name: nil, clb: nil, cstart: 0, tlines: 0, final_clb: nil)
 
       @parser       = nil
       @doc_info     = {}
-      @line         = cstart
+
+      @file_name    = file_name
+      @line         = 0
+      @cstart       = 0
 
       clb           = ->(line, msg) {} unless clb.is_a?(::Proc)
       final_clb     = ->(line) {}      unless final_clb.is_a?(::Proc)
@@ -58,7 +63,7 @@ module VoshodAvtoExchange
       @counter_step = 100 if @counter_step < 100
 
       # Всего строк для обработки
-      @total_lines  = cstart + tlines
+      @total_lines  = tlines
 
       info_progress
 
@@ -131,8 +136,8 @@ module VoshodAvtoExchange
 
       @line += 1
 
-      @clb.call(@line, "Документ обработан.")
-      @final_clb.call(@line)
+      @clb.call(@cstart + @line, "Документ обработан.")
+      @final_clb.call(@cstart + @line)
 
     end # end_document
 
@@ -210,9 +215,10 @@ module VoshodAvtoExchange
 
     def info_progress
 
-      @clb.call(@line, STAT_INFO_S % {
-        s: @line.indent,
-        e: @total_lines.indent
+      @clb.call(@cstart + @line, STAT_INFO_S % {
+        fn: @file_name,
+        s:  @line.indent,
+        e:  @total_lines.indent
       })
       self
 
