@@ -45,16 +45,21 @@ module VoshodAvtoExchange
 
       init_clb.call("Подсчет...")
 
-      total = 0
+      # Массив вида: название файла --> число строк
+      hfl = {}
       files.each { |fl|
-        total += count_lines(fl)
+        # Число строк в файле
+        hfl[fl] = count_lines(fl)
       }
+
+      # Итоговое число строк
+      total = hfl.values.sum
 
       start_clb.call(total, "Начало обработки.")
 
       line = 0
       files.each { |fl|
-        line += process_file(fl, process_clb, line)
+        line += process_file(fl, process_clb, line, hfl[fl])
       }
 
       completed_clb.call(total, "Обработка завершена.")
@@ -88,7 +93,7 @@ module VoshodAvtoExchange
     end # process_all
 
     # Обработка файла
-    def process_file(file_name, clb = nil, line = 0)
+    def process_file(file_name, clb = nil, line = 0, total_lines = 0)
 
       return 0 unless File.exists?(file_name)
 
@@ -99,7 +104,11 @@ module VoshodAvtoExchange
         time: ::Time.now
       })
 
-      lines = ::VoshodAvtoExchange::Parser.parse(file_name, clb, line)
+      lines = ::VoshodAvtoExchange::Parser.parse(file_name,
+        clb:    clb,
+        cstart: line,
+        tlines: total_lines
+      )
 
       log(STAT_INFO_E % {
         file: file_name,

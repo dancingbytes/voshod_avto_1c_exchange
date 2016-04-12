@@ -12,28 +12,55 @@ module VoshodAvtoExchange
   # Класс-шаблон по разбору xml-файлов
   class Parser < ::Nokogiri::XML::SAX::Document
 
-    def self.parse(file, clb = nil, counter = 0)
+    STAT_INFO_S = %Q("Обработано: %{s} из %{e}").freeze
+
+    def self.parse(
+      file,
+      # Колбек вызова счетчика
+      clb: nil,
+
+      # Начало отсчета счетчика
+      cstart: 0,
+
+      # Всего строк для обработки
+      tlines: 0
+    )
 
       total = 0
       parser  = ::Nokogiri::XML::SAX::Parser.new(
-        new(clb, counter, ->(lines) { total = lines })
+        new(
+          clb:        clb,
+          cstart:     cstart,
+          tlines:     tlines,
+          final_clb:  ->(lines) { total = lines }
+        )
       )
       parser.parse_file(file)
       total
 
     end # self.parse
 
-    def initialize(clb = nil, counter = 0, final_clb = nil)
+    def initialize(clb: nil, cstart: 0, tlines: 0, final_clb: nil)
 
-      @parser     = nil
-      @doc_info   = {}
-      @line       = counter
+      @parser       = nil
+      @doc_info     = {}
+      @line         = cstart
 
-      clb         = ->(line, msg) {} unless clb.is_a?(::Proc)
-      final_clb   = ->(line) {}      unless final_clb.is_a?(::Proc)
+      clb           = ->(line, msg) {} unless clb.is_a?(::Proc)
+      final_clb     = ->(line) {}      unless final_clb.is_a?(::Proc)
 
-      @clb        = clb
-      @final_clb  = final_clb
+      @clb          = clb
+      @final_clb    = final_clb
+
+      # Через какой промеужток идет обнволение счетчика
+      # Если обновлять счетчик на каждом теге -- замедляет работу
+      @counter_step = (tlines / 150)
+      @counter_step = 100 if @counter_step < 100
+
+      # Всего строк для обработки
+      @total_lines  = tlines
+
+      info_progress
 
     end # new
 
@@ -85,7 +112,8 @@ module VoshodAvtoExchange
       end # if
 
       @line += 1
-      @clb.call(@line, "Обработка выгрузки...")
+
+      info_progress if @line % @counter_step == 0
 
     end # end_element
 
@@ -102,7 +130,8 @@ module VoshodAvtoExchange
       @parser = nil
 
       @line += 1
-      @clb.call(@line, "Обработка выгрузки... #{@line}")
+
+      @clb.call(@line, "Документ обработан.")
       @final_clb.call(@line)
 
     end # end_document
@@ -178,6 +207,16 @@ module VoshodAvtoExchange
       @attrs_1c8_offers = nil
 
     end # parser_1c8_offers
+
+    def info_progress
+
+      @clb.call(@line, STAT_INFO_S % {
+        s: @line.indent,
+        e: @total_lines.indent
+      })
+      self
+
+    end # info_progress
 
   end # Parser
 

@@ -383,7 +383,7 @@ module VoshodAvtoExchange
 
         log(S_C_ERROR % {
           msg: cat.errors.full_messages
-        }) unless cat.save
+        }) unless (cat.save rescue false)
 
       end # save_catalog
 
@@ -420,7 +420,7 @@ module VoshodAvtoExchange
 
         log(S_I_ERROR % {
           msg: item.errors.full_messages
-        }) unless item.save
+        }) unless (item.save rescue false)
 
       end # save_item
 

@@ -114,7 +114,7 @@ module VoshodAvtoExchange
 
           log(S_ERROR % {
             msg: pr.errors.full_messages
-          }) unless pr.save
+          }) unless (pr.save rescue false)
 
         end # each
 

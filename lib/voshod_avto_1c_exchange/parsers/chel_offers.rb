@@ -202,7 +202,7 @@ module VoshodAvtoExchange
 
         log(S_I_ERROR % {
           msg: item.errors.full_messages
-        }) unless item.save
+        }) unless (item.save rescue false)
 
       end # save_item
 

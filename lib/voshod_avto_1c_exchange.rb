@@ -29,7 +29,7 @@ module VoshodAvtoExchange
 
       jid:  ::ExchangeWorker.perform_async(file_path),
       tag:  "1С",
-      name: "Обработка данных из 1С",
+      name: "Выгрузка данных из 1С",
       key:  key || 0
 
     })
