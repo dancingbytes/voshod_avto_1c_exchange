@@ -54,11 +54,11 @@ module VoshodAvtoExchange
 
       # Через какой промеужток идет обнволение счетчика
       # Если обновлять счетчик на каждом теге -- замедляет работу
-      @counter_step = (tlines / 150)
+      @counter_step = (tlines / 100)
       @counter_step = 100 if @counter_step < 100
 
       # Всего строк для обработки
-      @total_lines  = tlines
+      @total_lines  = cstart + tlines
 
       info_progress
 
