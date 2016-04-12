@@ -49,7 +49,7 @@ module VoshodAvtoExchange
 
       @file_name    = file_name
       @line         = 0
-      @cstart       = 0
+      @cstart       = cstart
 
       clb           = ->(line, msg) {} unless clb.is_a?(::Proc)
       final_clb     = ->(line) {}      unless final_clb.is_a?(::Proc)
