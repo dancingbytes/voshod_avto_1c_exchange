@@ -37,7 +37,7 @@ module VoshodAvtoExchange
       # Распаковываем zip архив, если такой имеется.
       # Подготавливаем список файлов к обработке
       files = if is_zip?(file_path)
-        init_clb.call("Распаковка: #{file_path}")
+        init_clb.call("Распаковка: #{::File.basename(file_path)}")
         extract_zip_file(file_path)
       else
         [file_path]
