@@ -171,10 +171,10 @@ module VoshodAvtoExchange
 
         } # open
 
-        ::FileUtils.rm_rf(zip)
+        ::FileUtils.rm_rf(file_name)
 
       rescue => e
-        log(e)
+        log(e.backtrace.join("\n"))
       end
 
       files

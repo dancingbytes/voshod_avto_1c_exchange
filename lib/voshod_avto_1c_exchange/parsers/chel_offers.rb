@@ -200,9 +200,19 @@ module VoshodAvtoExchange
         item.meta_prices  = @item[:meta_prices]
         item.count        = @item[:count].try(:to_i) || 0
 
-        log(S_I_ERROR % {
-          msg: item.errors.full_messages
-        }) unless (item.save rescue false)
+        begin
+
+          log(S_I_ERROR % {
+            msg: item.errors.full_messages
+          }) unless item.save
+
+        rescue => ex
+
+          log(S_I_ERROR % {
+            msg: ex.backtrace.join("\n")
+          })
+
+        end
 
       end # save_item
 

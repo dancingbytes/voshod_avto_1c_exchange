@@ -112,9 +112,19 @@ module VoshodAvtoExchange
           pr.nom_name   = rule[:rule_good_name]
           pr.price_name = rule[:price_type_name]
 
-          log(S_ERROR % {
-            msg: pr.errors.full_messages
-          }) unless (pr.save rescue false)
+          begin
+
+            log(S_ERROR % {
+              msg: pr.errors.full_messages
+            }) unless pr.save
+
+          rescue => ex
+
+            log(S_ERROR % {
+              msg: ex.backtrace.join("\n")
+            })
+
+          end
 
         end # each
 

@@ -10,6 +10,13 @@ module VoshodAvtoExchange
       P_ERROR = %Q(Ошибка парсинга.\n%{tag}).freeze
       F_ERROR = %Q(Клиент не найден.\n%{pr}).freeze
 
+      S_ERROR = %Q(Ошибка сохранения правил цен в базе.
+        %{msg}
+      ).freeze
+
+      ACCEPTED = 'Утвержден'.freeze
+      REJECTED = 'Отклонен'.freeze
+
       def start_element(name, attrs = [])
 
         super
@@ -65,17 +72,25 @@ module VoshodAvtoExchange
         end
 
         # Одобрили регистрацию
-        if params[:state] == "Утвержден".freeze
+        if params[:state] == ACCEPTED
 
           usr.approved  = true
           usr.inn       = params[:inn] unless params[:inn].nil?
-          usr.save(validate: false)
 
         # Отклонили в регистрации
-        elsif params[:state] == "Отклонен".freeze
+        elsif params[:state] == REJECTED
 
           usr.approved = false
+
+        end
+
+        begin
           usr.save(validate: false)
+        rescue => ex
+
+          log(S_ERROR % {
+            msg: ex.backtrace.join("\n")
+          })
 
         end
 

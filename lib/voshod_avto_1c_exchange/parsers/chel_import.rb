@@ -381,9 +381,20 @@ module VoshodAvtoExchange
         cat.p_parent_id = @catalog[:p_parent_id]
         cat.name        = @catalog[:name]
 
-        log(S_C_ERROR % {
-          msg: cat.errors.full_messages
-        }) unless (cat.save rescue false)
+        begin
+
+          log(S_C_ERROR % {
+            msg: cat.errors.full_messages
+          }) unless cat.save
+
+        rescue => ex
+
+          log(S_C_ERROR % {
+            msg: ex.backtrace.join("\n")
+          })
+
+        end
+
 
       end # save_catalog
 
@@ -418,9 +429,19 @@ module VoshodAvtoExchange
         item.contry_name  = @item[:contry_name]
         item.weight       = @item[:params]["Вес"].try(:to_f)
 
-        log(S_I_ERROR % {
-          msg: item.errors.full_messages
-        }) unless (item.save rescue false)
+        begin
+
+          log(S_I_ERROR % {
+            msg: item.errors.full_messages
+          }) unless item.save
+
+        rescue => ex
+
+          log(S_I_ERROR % {
+            msg: ex.backtrace.join("\n")
+          })
+
+        end
 
       end # save_item
 
