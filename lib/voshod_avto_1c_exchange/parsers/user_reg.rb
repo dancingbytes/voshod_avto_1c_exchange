@@ -85,7 +85,19 @@ module VoshodAvtoExchange
         end
 
         begin
+
+          usr.operation_state = 2
           usr.save(validate: false)
+
+          # Отправляем результат проверки регистрации
+          if usr.approved?
+            # Если пользователю подтверждена регистрация
+            usr.send_approve_request
+          elsif rejected?
+            # Если отказали
+            usr.send_reject_request
+          end
+
         rescue => ex
 
           log(S_ERROR % {
