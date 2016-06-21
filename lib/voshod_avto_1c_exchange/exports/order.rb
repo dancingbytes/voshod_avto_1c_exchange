@@ -45,6 +45,8 @@ module VoshodAvtoExchange
           str << ::VoshodAvtoExchange::Template::ORDER % {
 
             kid:          order.id.to_s,
+            date:         order.created_at.strftime('%Y-%m-%d'),
+            time:         order.created_at.strftime('%H:%M:%S'),
             price:        order.amount,
             uid:          order.user_id.to_s,
             company:      order.user.try(:company),
