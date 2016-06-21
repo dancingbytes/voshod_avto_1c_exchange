@@ -20,9 +20,6 @@ module VoshodAvtoExchange
           # Выставляем индектификатор операции
           user.set({ operation_id: operation_id })
 
-          # Имя пользователя
-          last_name, first_name, _ = user.contact_person.split(/\s/)
-
           # Формируем карточку пользователя
           str << ::VoshodAvtoExchange::Template::USER % {
 
@@ -31,13 +28,13 @@ module VoshodAvtoExchange
             date:           date,
             time:           time,
             company:        user.company,
-            first_name:     first_name,
-            last_name:      last_name,
+            first_name:     user.first_name,
+            last_name:      user.last_name,
             address:        user.address,
             postcode:       "",
             city:           "",
             street:         "",
-            email:          user.email,
+            email:          user.login,
             phone:          user.phone,
             contact_person: user.contact_person
 
