@@ -20,7 +20,7 @@ module VoshodAvtoExchange
 
             cistr << ::VoshodAvtoExchange::Template::ORDER_ITEM % {
 
-              item_id:          cart_item.item_id.to_s,
+              item_id:          cart_item.p_item_id.to_s,
               item_mog:         cart_item.oem_num,
               item_name:        cart_item.name,
               item_contry_code: "643",
