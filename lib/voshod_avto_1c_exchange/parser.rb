@@ -1,6 +1,8 @@
 require 'voshod_avto_1c_exchange/parsers/base'
+
 require 'voshod_avto_1c_exchange/parsers/user_reg'
 require 'voshod_avto_1c_exchange/parsers/user_price'
+require 'voshod_avto_1c_exchange/parsers/order'
 require 'voshod_avto_1c_exchange/parsers/chel_import'
 require 'voshod_avto_1c_exchange/parsers/chel_offers'
 
@@ -27,7 +29,7 @@ module VoshodAvtoExchange
       tlines: 0
     )
 
-      total = 0
+      total   = 0
       parser  = ::Nokogiri::XML::SAX::Parser.new(
         new(
           file_name:  ::File.basename(file),

@@ -8,7 +8,6 @@ module VoshodAvtoExchange
     class Order < Base
 
       P_ERROR = %Q(Ошибка парсинга.\n%{tag}).freeze
-      F_ERROR = %Q(Клиент не найден.\n%{pr}).freeze
 
       S_ERROR = %Q(Ошибка сохранения информации по номенклатуре заказа в базе.
         %{msg}
@@ -116,6 +115,10 @@ module VoshodAvtoExchange
             msg: "Заказ #{@order_params[:order_id]} не найден"
           }) and return
 
+        end
+
+        if item_params.empty?
+          log(P_ERROR % { tag: tag_debug }) and return
         end
 
         ci = ::CartItem.find_or_initialize_by({
