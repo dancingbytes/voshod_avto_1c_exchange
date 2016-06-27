@@ -7,6 +7,8 @@ module VoshodAvtoExchange
 
   extend self
 
+  TAG = '1С_EXCHANGE'.freeze
+
   def login(v = nil)
 
     @login = v unless v.blank?
@@ -23,12 +25,32 @@ module VoshodAvtoExchange
 
   alias :pass :password
 
+  def status(key: nil)
+
+    sq = ::SidekiqQuery.
+      where({
+        key: key || 0,
+        tag: ::VoshodAvtoExchange::TAG
+      }).
+      first
+
+    {
+
+      message:    sq.try(:message)    || '',
+      progress:   sq.try(:progress)   || 0,
+      completed:  sq.try(:completed?) || false,
+      status:     sq.try(:status)     || 'undefined'
+
+    }.to_json
+
+  end # status
+
   def sidekiq_work_with_file(file_path, key: nil)
 
     ::SidekiqQuery.create({
 
       jid:  ::ExchangeWorker.perform_async(file_path),
-      tag:  "1С",
+      tag:  ::VoshodAvtoExchange::TAG,
       name: "Выгрузка данных из 1С",
       key:  key || 0
 
