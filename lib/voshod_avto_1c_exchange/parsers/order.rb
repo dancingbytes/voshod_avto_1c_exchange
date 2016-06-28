@@ -148,6 +148,9 @@ module VoshodAvtoExchange
           msg: ci.errors.full_messages
         }) unless ci.save
 
+        # Помечаем заказ обоаботанным
+        order.set(operation_state: 2) if order.operation_state < 2
+
       end # save_item
 
     end # Order < Base
