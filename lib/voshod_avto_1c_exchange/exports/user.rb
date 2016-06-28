@@ -30,10 +30,6 @@ module VoshodAvtoExchange
             company:        user.company,
             first_name:     user.first_name,
             last_name:      user.last_name,
-            address:        user.address,
-            postcode:       "",
-            city:           "",
-            street:         "",
             email:          user.login,
             phone:          user.phone,
             contact_person: user.contact_person

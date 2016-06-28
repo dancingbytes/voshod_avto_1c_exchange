@@ -17,7 +17,7 @@ module VoshodAvtoExchange
       # Выбираем все заказы
       str     << ::VoshodAvtoExchange::Exports::Order.list(operation_id, doc: false)
 
-      # Выбираем всех польхователей на регистрацию
+      # Выбираем всех пользователей на регистрацию
       str     << ::VoshodAvtoExchange::Exports::User.list(operation_id, doc: false)
 
       ::VoshodAvtoExchange::Template::XML_BASE % {
