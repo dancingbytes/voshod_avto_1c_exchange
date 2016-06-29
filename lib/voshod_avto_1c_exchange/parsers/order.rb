@@ -117,7 +117,7 @@ module VoshodAvtoExchange
 
         end
 
-        if item_params.empty?
+        if @item_params.empty?
           log(P_ERROR % { tag: tag_debug }) and return
         end
 
