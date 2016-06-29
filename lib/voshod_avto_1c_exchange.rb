@@ -7,8 +7,7 @@ module VoshodAvtoExchange
 
   extend self
 
-  TAG       = '1С_EXCHANGE'.freeze
-  FILE_LOCK = ::File.join(::Rails.root, 'tmp', 'voshod_avto_1c_exchange.lock').freeze
+  TAG = '1С_EXCHANGE'.freeze
 
   def login(v = nil)
 
@@ -62,8 +61,10 @@ module VoshodAvtoExchange
 
   def run
 
+    file_lock = ::File.join(::Rails.root, 'tmp', 'voshod_avto_1c_exchange.lock').freeze
+
     begin
-      f = ::File.new(FILE_LOCK, ::File::RDWR|::File::CREAT, 0400)
+      f = ::File.new(file_lock, ::File::RDWR|::File::CREAT, 0400)
       return if f.flock(::File::LOCK_EX) === false
     rescue ::Errno::EACCES
       return
@@ -74,7 +75,7 @@ module VoshodAvtoExchange
     rescue => ex
       log ex.inspect
     ensure
-      ::FileUtils.rm(FILE_LOCK, force: true)
+      ::FileUtils.rm(file_lock, force: true)
     end
 
     self
