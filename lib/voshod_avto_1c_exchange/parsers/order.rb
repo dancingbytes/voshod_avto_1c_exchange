@@ -151,6 +151,9 @@ module VoshodAvtoExchange
         # Помечаем заказ обоаботанным
         order.set(operation_state: 2) if order.operation_state < 2
 
+        # Обновляем дату последнего изменения
+        order.touch
+
       end # save_item
 
     end # Order < Base

@@ -44,20 +44,22 @@ module VoshodAvtoExchange
           # Формируем заказ
           str << ::VoshodAvtoExchange::Template::ORDER % {
 
-            kid:          order.id.to_s,
-            date:         order.created_at.strftime('%Y-%m-%d'),
-            time:         order.created_at.strftime('%H:%M:%S'),
-            price:        order.amount,
-            uid:          order.user_id.to_s,
-            company:      order.user.try(:company),
-            full_company: order.user.try(:full_company),
-            payment_date: date,
-            items:        items,
-            number_1c:    "",
-            data_1c:      date,
-            detete_1c:    false,
-            hold_on_1c:   false,
-            comment:      order.comment
+            kid:              order.id.to_s,
+            date:             order.created_at.strftime('%Y-%m-%d'),
+            time:             order.created_at.strftime('%H:%M:%S'),
+            price:            order.amount,
+            uid:              order.user_id.to_s,
+            company:          order.user.try(:company),
+            full_company:     order.user.try(:full_company),
+            payment_date:     date,
+            items:            items,
+            number_1c:        "",
+            data_1c:          date,
+            detete_1c:        false,
+            hold_on_1c:       false,
+            comment:          order.comment,
+            delivery_address: "",
+            delivery_type:    "Самовывоз"
 
           }
 
