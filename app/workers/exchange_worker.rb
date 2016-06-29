@@ -6,7 +6,7 @@ class ExchangeWorker
 
   def perform(file_path)
 
-    ::VoshodAvtoExchange.sidekiq_run(
+    ::VoshodAvtoExchange::Manager.sidekiq_run(
 
       file_path: file_path,
 

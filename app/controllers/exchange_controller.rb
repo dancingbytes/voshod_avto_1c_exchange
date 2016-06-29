@@ -152,11 +152,10 @@ class ExchangeController < ::ApplicationController
     end
 
     # Создаем задачу по обработке файла
-    ::VoshodAvtoExchange.sidekiq_work_with_file(file_path,
-      key: operation_id
-    )
+    ::VoshodAvtoExchange.run_async(file_path, key: operation_id)
 
     ::Rails.logger.error("/exchange/post [save_file: #{file_path}]")
+
     file_path
 
   end # save_file

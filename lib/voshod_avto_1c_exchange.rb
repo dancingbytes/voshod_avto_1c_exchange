@@ -7,7 +7,8 @@ module VoshodAvtoExchange
 
   extend self
 
-  TAG = '1С_EXCHANGE'.freeze
+  TAG       = '1С_EXCHANGE'.freeze
+  FILE_LOCK = ::File.join(::Rails.root, 'tmp', 'voshod_avto_1c_exchange.lock').freeze
 
   def login(v = nil)
 
@@ -45,7 +46,7 @@ module VoshodAvtoExchange
 
   end # status
 
-  def sidekiq_work_with_file(file_path, key: nil)
+  def run_async(file_path, key: nil)
 
     ::SidekiqQuery.create({
 
@@ -55,13 +56,14 @@ module VoshodAvtoExchange
       key:  key || 0
 
     })
+    self
 
-  end # sidekiq_work_with_file
+  end # run_async
 
-  def run(file_lock = ::File.join(::Rails.root, "tmp", 'voshod_avto_1c_exchange.lock'))
+  def run
 
     begin
-      f = ::File.new(file_lock, ::File::RDWR|::File::CREAT, 0400)
+      f = ::File.new(FILE_LOCK, ::File::RDWR|::File::CREAT, 0400)
       return if f.flock(::File::LOCK_EX) === false
     rescue ::Errno::EACCES
       return
@@ -72,28 +74,12 @@ module VoshodAvtoExchange
     rescue => ex
       log ex.inspect
     ensure
-      ::FileUtils.rm(file_lock, force: true)
+      ::FileUtils.rm(FILE_LOCK, force: true)
     end
 
+    self
+
   end # run
-
-  def sidekiq_run(
-      file_path:,
-      init_clb:       nil,
-      start_clb:      nil,
-      process_clb:    nil,
-      completed_clb:  nil
-    )
-
-    ::VoshodAvtoExchange::Manager.sidekiq_run(
-      file_path:      file_path,
-      init_clb:       init_clb,
-      start_clb:      start_clb,
-      process_clb:    process_clb,
-      completed_clb:  completed_clb
-    )
-
-  end # sidekiq_run
 
   def import_dir(v = nil)
 

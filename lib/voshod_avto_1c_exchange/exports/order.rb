@@ -56,7 +56,8 @@ module VoshodAvtoExchange
             number_1c:    "",
             data_1c:      date,
             detete_1c:    false,
-            hold_on_1c:   false
+            hold_on_1c:   false,
+            comment:      order.comment
 
           }
 
