@@ -41,6 +41,15 @@ module VoshodAvtoExchange
           # Выставляем индектификатор операции
           order.set({ operation_id: operation_id })
 
+          # Формируем даныне по доставке
+          delivery_address = "",
+          delivery_type    = "Самовывоз"
+
+          if oder.delivery_type == 1
+            delivery_address = order.delivery_address
+            delivery_type    = "Доставка"
+          end
+
           # Формируем заказ
           str << ::VoshodAvtoExchange::Template::ORDER % {
 
@@ -51,15 +60,18 @@ module VoshodAvtoExchange
             uid:              order.user_id.to_s,
             company:          order.user.try(:company),
             full_company:     order.user.try(:full_company),
-            payment_date:     date,
+
             items:            items,
+
+            payment_date:     date,
             number_1c:        "",
             data_1c:          date,
             detete_1c:        false,
             hold_on_1c:       false,
+
             comment:          order.comment,
-            delivery_address: "",
-            delivery_type:    "Самовывоз"
+            delivery_address: delivery_address,
+            delivery_type:    delivery_type
 
           }
 
