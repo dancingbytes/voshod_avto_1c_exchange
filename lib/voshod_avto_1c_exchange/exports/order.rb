@@ -45,7 +45,7 @@ module VoshodAvtoExchange
           delivery_address = "",
           delivery_type    = "Самовывоз"
 
-          if oder.delivery_type == 1
+          if order.delivery_type == 1
             delivery_address = order.delivery_address
             delivery_type    = "Доставка"
           end
