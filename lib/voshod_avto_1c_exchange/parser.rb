@@ -225,8 +225,8 @@ module VoshodAvtoExchange
 
       @clb.call(@cstart + @line, STAT_INFO_S % {
         fn: @file_name,
-        s:  @line.indent,
-        e:  @total_lines.indent
+        s:  @line,
+        e:  @total_lines
       })
       self
 
