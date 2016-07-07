@@ -63,6 +63,12 @@ module VoshodAvtoExchange
           when "Статус".freeze        then
             parse_item_params(:state_name)
 
+          when "АдресДоставки".freeze  then
+            parse_item_params(:delivery_address)
+
+          when "ДатаДоставки".freeze  then
+            parse_item_params(:delivery_at)
+
           when "Коэффициент".freeze   then
             parse_item_params(:in_pack)
 
@@ -143,6 +149,9 @@ module VoshodAvtoExchange
         ci.price          = @item_params[:price]
         ci.total_price    = @item_params[:total_price]
         ci.count          = @item_params[:count]
+
+        ci.delivery_address = @item_params[:delivery_address]
+        ci.delivery_at      = @item_params[:delivery_at].try(:to_time)
 
         log(S_ERROR % {
           msg: ci.errors.full_messages
