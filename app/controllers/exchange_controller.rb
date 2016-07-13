@@ -11,11 +11,11 @@ class ExchangeController < ::ApplicationController
   # GET /exchange
   def get
 
-    ::Rails.logger.error(" --> session_id: #{session_id}, operation_id: #{operation_id}")
+    # ::Rails.logger.info(" --> session_id: #{session_id}, operation_id: #{operation_id}")
 
-    ::Rails.logger.tagged("GET /exchange [params]") {
-      ::Rails.logger.error(params.inspect)
-    }
+    # ::Rails.logger.tagged("GET /exchange [params]") {
+    #   ::Rails.logger.info(params.inspect)
+    # }
 
     case mode
 
@@ -77,11 +77,11 @@ class ExchangeController < ::ApplicationController
   # POST /exchange
   def post
 
-    ::Rails.logger.error("session_id: #{session_id}, operation_id: #{operation_id}")
+    # ::Rails.logger.info("session_id: #{session_id}, operation_id: #{operation_id}")
 
-    ::Rails.logger.tagged("POST /exchange [params]") {
-      ::Rails.logger.error(params.inspect)
-    }
+    # ::Rails.logger.tagged("POST /exchange [params]") {
+    #   ::Rails.logger.info(params.inspect)
+    # }
 
     case mode
 
@@ -154,7 +154,7 @@ class ExchangeController < ::ApplicationController
     # Создаем задачу по обработке файла
     ::VoshodAvtoExchange.run_async(file_path, key: operation_id)
 
-    ::Rails.logger.error("/exchange/post [save_file: #{file_path}]")
+    # ::Rails.logger.info("/exchange/post [save_file: #{file_path}]")
 
     file_path
 
