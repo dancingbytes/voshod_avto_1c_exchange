@@ -410,7 +410,7 @@ module VoshodAvtoExchange
         )
 
         item.raw          = false
-        item.updated_at   = ::Time.now
+        item.updated_at   = ::Time.now.utc
         item.p_catalog_id = @item[:p_catalog_id]
         item.nom_group    = @item[:nom_group]
         item.price_group  = @item[:price_group]
@@ -433,7 +433,7 @@ module VoshodAvtoExchange
 
           log(S_I_ERROR % {
             msg: item.errors.full_messages
-          }) unless item.save
+          }) unless item.upsert
 
         rescue => ex
 
@@ -464,12 +464,21 @@ module VoshodAvtoExchange
       def stop_wotk_with_catalogs
 
         # Все "сырые" данные удаляем
-        @full_update && ::Catalog.
-          by_provider(@provider_id).
-          raw.
-          destroy_all
+        if @full_update
 
-        ::Catalog.rebuild!
+          ::Catalog.
+            by_provider(@provider_id).
+            raw.
+            destroy_all
+
+          ::Catalog.set({
+            lft: 0,
+            rgt: 0
+          })
+
+          ::Catalog.rebuild!
+
+        end # if
 
       end # stop_wotk_with_catalogs
 
@@ -497,13 +506,13 @@ module VoshodAvtoExchange
           ::Item.
             by_provider(@provider_id).
             where({ p_catalog_id: nil }).
-            delete_all
+            destroy_all
 
           # Удаляем все товары, которые не были обработаны
           ::Item.
             by_provider(@provider_id).
             raw.
-            delete_all
+            destroy_all
 
         end # if
 

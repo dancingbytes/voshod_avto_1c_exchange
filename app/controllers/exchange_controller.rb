@@ -11,11 +11,10 @@ class ExchangeController < ::ApplicationController
   # GET /exchange
   def get
 
-    # ::Rails.logger.info(" --> session_id: #{session_id}, operation_id: #{operation_id}")
-
-    # ::Rails.logger.tagged("GET /exchange [params]") {
-    #   ::Rails.logger.info(params.inspect)
-    # }
+    ::Rails.logger.tagged("[GET] /exchange [params]") {
+      ::Rails.logger.info(" --> session_id: #{session_id}, operation_id: #{operation_id}")
+      ::Rails.logger.info(params.inspect)
+    }
 
     case mode
 
@@ -65,6 +64,21 @@ class ExchangeController < ::ApplicationController
 
         end # case
 
+      # Узнаем, пришел ли файл выгрузки
+      when 'import'
+
+        file_name = ::File.join(
+          ::VoshodAvtoExchange.import_dir,
+          "#{operation_id}-#{params[:filename]}"
+        )
+
+        if ::File.exists?(file_name)
+          answer(text: "success")
+        else
+          answer(text: "failure\nFile `#{params[:filename]}` is not found")
+        end
+
+      # На все остальное отвечаем ошибкой
       else
         answer(text: "failure\nMode `#{mode}` is not found")
 
@@ -77,11 +91,10 @@ class ExchangeController < ::ApplicationController
   # POST /exchange
   def post
 
-    # ::Rails.logger.info("session_id: #{session_id}, operation_id: #{operation_id}")
-
-    # ::Rails.logger.tagged("POST /exchange [params]") {
-    #   ::Rails.logger.info(params.inspect)
-    # }
+    ::Rails.logger.tagged("[POST] /exchange [params]") {
+      ::Rails.logger.info("session_id: #{session_id}, operation_id: #{operation_id}")
+      ::Rails.logger.info(params.inspect)
+    }
 
     case mode
 
@@ -117,10 +130,11 @@ class ExchangeController < ::ApplicationController
 
         end # case
 
+      # На все остальное отвечаем ошибкой
       else
         answer(text: "failure\nMode `#{mode}` is not found")
 
-    end
+    end # case
 
     render(answer) and return
 
@@ -144,7 +158,7 @@ class ExchangeController < ::ApplicationController
 
     file_path = ::File.join(
       ::VoshodAvtoExchange.import_dir,
-      "#{rand}-#{::Time.now.to_f}-#{params[:filename]}" || "#{rand}-#{::Time.now.to_f}.xml"
+      "#{operation_id}-#{params[:filename]}" || "#{operation_id}-#{::Time.now.to_f}.xml"
     )
 
     ::File.open(file_path, 'wb') do |f|
@@ -180,7 +194,7 @@ class ExchangeController < ::ApplicationController
 
     @answer = { text: text } if text
     @answer = { xml:  xml, encoding: 'utf-8' } if xml
-    @answer || { text: 'failure\nОбработка данных параметров не задана' }
+    @answer || { text: 'failure\nОбработка параметров не задана' }
 
   end # answer
 
