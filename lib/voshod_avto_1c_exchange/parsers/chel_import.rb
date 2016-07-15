@@ -478,6 +478,12 @@ module VoshodAvtoExchange
 
           ::Catalog.rebuild!
 
+        else
+
+          ::Catalog.
+            by_provider(@provider_id).
+            update_all({ raw: true })
+
         end # if
 
       end # stop_work_with_catalogs
@@ -489,7 +495,7 @@ module VoshodAvtoExchange
 
         # При полной обработке данных, помечаем все товары как "сырые",
         # что бы в дальнейшем понять какие товары нужно удалит из каталога
-         ::Item.
+        ::Item.
           by_provider(@provider_id).
           update_all({ raw: true })
 
@@ -513,6 +519,12 @@ module VoshodAvtoExchange
             by_provider(@provider_id).
             raw.
             destroy_all
+
+        else
+
+          ::Item.
+            by_provider(@provider_id).
+            update_all({ raw: true })
 
         end # if
 
