@@ -482,7 +482,7 @@ module VoshodAvtoExchange
 
           ::Catalog.
             by_provider(@provider_id).
-            update_all({ raw: true })
+            update_all({ raw: false })
 
         end # if
 
@@ -524,7 +524,7 @@ module VoshodAvtoExchange
 
           ::Item.
             by_provider(@provider_id).
-            update_all({ raw: true })
+            update_all({ raw: false })
 
         end # if
 
