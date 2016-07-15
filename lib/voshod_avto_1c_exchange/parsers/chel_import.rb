@@ -472,8 +472,8 @@ module VoshodAvtoExchange
             destroy_all
 
           ::Catalog.update_all({
-            lft: 0,
-            rgt: 0
+            lft: nil,
+            rgt: nil
           })
 
           ::Catalog.rebuild!
