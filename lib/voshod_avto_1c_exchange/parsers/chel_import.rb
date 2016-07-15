@@ -47,7 +47,7 @@ module VoshodAvtoExchange
 
           when "Каталог".freeze then
             update_mode
-            stop_wotk_with_catalogs
+            stop_work_with_catalogs
             start_items
             start_work_with_items
 
@@ -461,7 +461,7 @@ module VoshodAvtoExchange
       #
       # Окончание обработки каталогов
       #
-      def stop_wotk_with_catalogs
+      def stop_work_with_catalogs
 
         # Все "сырые" данные удаляем
         if @full_update
@@ -471,7 +471,7 @@ module VoshodAvtoExchange
             raw.
             destroy_all
 
-          ::Catalog.set({
+          ::Catalog.update_all({
             lft: 0,
             rgt: 0
           })
@@ -480,7 +480,7 @@ module VoshodAvtoExchange
 
         end # if
 
-      end # stop_wotk_with_catalogs
+      end # stop_work_with_catalogs
 
       #
       # Начало обработки товаров
