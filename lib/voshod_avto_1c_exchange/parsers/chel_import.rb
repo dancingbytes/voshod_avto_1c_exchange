@@ -257,7 +257,15 @@ module VoshodAvtoExchange
       # Способ обновления данных
       #
       def update_mode
-        @full_update = ["true", true].include?(attrs["СодержитТолькоИзменения"])
+
+        @full_update = ["false", false].include?(attrs["СодержитТолькоИзменения"])
+
+        if @full_update
+          log("[Тип выгрузки] Полное обновление")
+        else
+          log("[Тип выгрузки] Частичное обновление")
+        end
+
       end # update_mode
 
       #
