@@ -21,7 +21,6 @@ module VoshodAvtoExchange
 
         @provider_id = provider_id
         @doc_info    = doc_info
-        @full_update = ["true", true].include?(i_attrs["СодержитТолькоИзменения"])
         start_all
 
       end # new
@@ -204,7 +203,7 @@ module VoshodAvtoExchange
 
           log(S_I_ERROR % {
             msg: item.errors.full_messages
-          }) unless item.save
+          }) unless item.upsert
 
         rescue => ex
 
