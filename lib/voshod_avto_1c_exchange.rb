@@ -55,28 +55,30 @@ module VoshodAvtoExchange
       key:  key || 0
 
     })
+
     self
 
   end # run_async
 
-  def run
+  def run_async_all(key: nil)
 
-    file_lock = ::File.join(::Rails.root, 'tmp', 'voshod_avto_1c_exchange.lock').freeze
+    files = ::Dir.glob( ::File.join(import_dir, '**', '{*.xml,*.zip}') )
 
-    begin
-      f = ::File.new(file_lock, ::File::RDWR|::File::CREAT, 0400)
-      return if f.flock(::File::LOCK_EX) === false
-    rescue ::Errno::EACCES
-      return
-    end
+    # Сортируем по дате последнего доступа по-возрастанию
+    files.sort { |a, b|
+      ::File.new(a).mtime <=> ::File.new(b).atime
+    }.each do |file_path|
 
-    begin
-      ::VoshodAvtoExchange::Manager.run
-    rescue => ex
-      log ex.inspect
-    ensure
-      ::FileUtils.rm(file_lock, force: true)
-    end
+      ::SidekiqQuery.create({
+
+        jid:  ::ExchangeWorker.perform_async(file_path),
+        tag:  ::VoshodAvtoExchange::TAG,
+        name: "Выгрузка данных из 1С",
+        key:  key || 0
+
+      })
+
+    end # each
 
     self
 

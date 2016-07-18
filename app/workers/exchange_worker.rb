@@ -9,7 +9,7 @@ class ExchangeWorker
     # Ждем 3 секунды и начинаем работу
     sleep 3
 
-    ::VoshodAvtoExchange::Manager.sidekiq_run(
+    ::VoshodAvtoExchange::Manager.run(
 
       file_path: file_path,
 

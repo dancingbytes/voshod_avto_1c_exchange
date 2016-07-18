@@ -208,7 +208,7 @@ module VoshodAvtoExchange
         rescue => ex
 
           log(S_I_ERROR % {
-            msg: ex.backtrace.join("\n")
+            msg: [ex.message].push(ex.backtrace).join("\n")
           })
 
         end

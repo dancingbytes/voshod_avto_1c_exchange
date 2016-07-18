@@ -257,15 +257,7 @@ module VoshodAvtoExchange
       # Способ обновления данных
       #
       def update_mode
-
         @full_update = ["false", false].include?(attrs["СодержитТолькоИзменения"])
-
-        if @full_update
-          log("[Тип выгрузки] Полное обновление")
-        else
-          log("[Тип выгрузки] Частичное обновление")
-        end
-
       end # update_mode
 
       #
@@ -398,7 +390,7 @@ module VoshodAvtoExchange
         rescue => ex
 
           log(S_C_ERROR % {
-            msg: ex.backtrace.join("\n")
+            msg: [ex.message].push(ex.backtrace).join("\n")
           })
 
         end
@@ -446,7 +438,7 @@ module VoshodAvtoExchange
         rescue => ex
 
           log(S_I_ERROR % {
-            msg: ex.backtrace.join("\n")
+            msg: [ex.message].push(ex.backtrace).join("\n")
           })
 
         end

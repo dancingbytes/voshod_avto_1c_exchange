@@ -14,14 +14,7 @@ module VoshodAvtoExchange
       [Затрачено времени]:         %{time}
     ).freeze
 
-    def run
-
-      extract_zip_files
-      process_all
-
-    end # run
-
-    def sidekiq_run(
+    def run(
       file_path:,
       init_clb:       nil,
       start_clb:      nil,
@@ -66,7 +59,7 @@ module VoshodAvtoExchange
 
       self
 
-    end # sidekiq_run
+    end # run
 
     private
 
@@ -77,20 +70,6 @@ module VoshodAvtoExchange
     def log(msg)
       ::VoshodAvtoExchange.log(msg, self.name)
     end # log
-
-    # Обработка всех файлов в заданой директории
-    def process_all
-
-      files = ::Dir.glob( ::File.join(import_dir, "**", "*.xml") )
-
-      # Сортируем по дате последнего доступа по-возрастанию
-      files.sort{ |a, b| ::File.new(a).mtime <=> ::File.new(b).atime }.each do |xml_file|
-        process_file(xml_file)
-      end # each
-
-      self
-
-    end # process_all
 
     # Обработка файла
     def process_file(file_name, clb = nil, line = 0, total_lines = 0)
