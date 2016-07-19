@@ -515,6 +515,12 @@ module VoshodAvtoExchange
             raw.
             destroy_all
 
+          # Удаляем поисковый индекс
+          ::Anubis.sql("TRUNCATE RTINDEX items")
+
+          # Обвновляем поисковый индекс
+          ::Item.all.map(&:insert_sphinx)
+
         else
 
           ::Item.
