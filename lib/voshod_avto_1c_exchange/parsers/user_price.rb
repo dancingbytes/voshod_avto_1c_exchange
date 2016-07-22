@@ -107,8 +107,8 @@ module VoshodAvtoExchange
 
           }) unless pr.new_record?
 
-          pr.price_id   =  rule[:price_id]
-          pr.value      =  rule[:persent_discount].try(:to_i) || 0
+          pr.price_id   = rule[:price_id]
+          pr.value      = rule[:persent_discount] || 0
           pr.nom_name   = rule[:rule_good_name]
           pr.price_name = rule[:price_type_name]
 
@@ -121,7 +121,7 @@ module VoshodAvtoExchange
           rescue => ex
 
             log(S_ERROR % {
-              msg: ex.backtrace.join("\n")
+              msg: [ex.message].push(ex.backtrace).join("\n")
             })
 
           end
