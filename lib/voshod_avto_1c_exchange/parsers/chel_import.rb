@@ -420,7 +420,6 @@ module VoshodAvtoExchange
         item.oem_num      = @item[:oem_num]
         item.oem_brand    = @item[:oem_brand]
 
-        item.brand        = @item[:characters]["Марка"]
         item.unit         = @item[:unit]
         item.unit_code    = @item[:unit_code]
         item.gtd          = @item[:gtd]
