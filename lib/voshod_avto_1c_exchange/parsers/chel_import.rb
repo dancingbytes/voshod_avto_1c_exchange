@@ -514,14 +514,14 @@ module VoshodAvtoExchange
             raw.
             destroy_all
 
-          # Удаляем поисковый индекс
-          ::Anubis.sql("TRUNCATE RTINDEX items")
+          ::SidekiqQuery.create({
 
-          # Обновляем поисковый индекс
-          ::Item.all.map(&:insert_sphinx)
+            jid:  ::FullUpdateWorker.perform_async,
+            tag:  ::VoshodAvtoExchange::TAG,
+            name: "Полное обновление данных",
+            key:  0
 
-          # Генерим прайс
-          ::PriceList.generate
+          })
 
         else
 
