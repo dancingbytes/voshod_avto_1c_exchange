@@ -517,10 +517,19 @@ module VoshodAvtoExchange
 
           ::SidekiqQuery.create({
 
-            jid:  ::FullUpdateWorker.perform_async,
+            jid:  ::SearchUpdateWorker.perform_async,
             tag:  ::VoshodAvtoExchange::TAG,
-            name: "Полное обновление данных",
+            name: "Обновление поискового индекса",
             key:  0
+
+          })
+
+          ::SidekiqQuery.create({
+
+            jid:  ::PriceGenerateWorker.perform_async,
+            tag:  ::VoshodAvtoExchange::TAG,
+            name: "Генерация прайса",
+            key:  1
 
           })
 
