@@ -427,6 +427,7 @@ module VoshodAvtoExchange
         item.contry_code  = @item[:contry_code]
         item.contry_name  = @item[:contry_name]
         item.weight       = @item[:params]["Вес"].try(:to_f)
+        item.department   = @item[:department]
 
         begin
 
