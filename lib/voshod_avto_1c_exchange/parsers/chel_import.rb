@@ -515,15 +515,19 @@ module VoshodAvtoExchange
             raw.
             destroy_all
 
-          ::SidekiqQuery.create({
+          #
+          # TODO: Полная переиндексация работает криво. Пока выключим.
+          #
+          # ::SidekiqQuery.create({
+          #
+          #  jid:  ::SearchUpdateWorker.perform_async,
+          #  tag:  ::VoshodAvtoExchange::TAG,
+          #  name: "Обновление поискового индекса",
+          #  key:  0
+          #
+          # })
 
-            jid:  ::SearchUpdateWorker.perform_async,
-            tag:  ::VoshodAvtoExchange::TAG,
-            name: "Обновление поискового индекса",
-            key:  0
-
-          })
-
+          # Генерация прайс-листа
           ::SidekiqQuery.create({
 
             jid:  ::PriceGenerateWorker.perform_async,
