@@ -93,7 +93,7 @@ module VoshodAvtoExchange
           if usr.approved?
             # Если пользователю подтверждена регистрация
             usr.send_approve_request
-          elsif rejected?
+          elsif usr.rejected?
             # Если отказали
             usr.send_reject_request
           end
