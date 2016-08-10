@@ -74,13 +74,13 @@ module VoshodAvtoExchange
         # Одобрили регистрацию
         if params[:state] == ACCEPTED
 
-          usr.approved  = true
-          usr.inn       = params[:inn] unless params[:inn].nil?
+          usr.approve_state = 1
+          usr.inn           = params[:inn] unless params[:inn].nil?
 
         # Отклонили в регистрации
         elsif params[:state] == REJECTED
 
-          usr.approved = false
+          usr.approve_state = 2
 
         end
 
