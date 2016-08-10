@@ -6,9 +6,6 @@ class SearchUpdateWorker
 
   def perform
 
-    # Удаляем поисковый индекс
-    ::Anubis.sql("TRUNCATE RTINDEX items")
-
     # Обновляем поисковый индекс
     ::Item.all.map(&:insert_sphinx)
 
