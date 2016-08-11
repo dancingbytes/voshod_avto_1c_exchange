@@ -133,6 +133,9 @@ module VoshodAvtoExchange
           when "Производитель".freeze then
             parse_item(:oem_brand) if item_only?
 
+          when "ПоисковыеТеги".freeze then
+            parse_item(:search_tags) if item_only?
+
           when "ЦеноваяГруппа".freeze then
             parse_item(:price_group, attrs["ИД"]) if item_only?
 
@@ -428,6 +431,8 @@ module VoshodAvtoExchange
         item.contry_name  = @item[:contry_name]
         item.weight       = @item[:params]["Вес"].try(:to_f)
         item.department   = @item[:department]
+
+        item.search_tags  = @item[:search_tags]
 
         begin
 
