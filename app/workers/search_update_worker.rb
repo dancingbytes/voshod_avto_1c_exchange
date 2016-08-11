@@ -7,7 +7,7 @@ class SearchUpdateWorker
   def perform
 
     # Обновляем поисковый индекс
-    ::Item.all.map(&:insert_sphinx)
+    ::Item.insert_sphinx_by_page
 
     ensure
       ::SidekiqQuery.close(self.jid)
