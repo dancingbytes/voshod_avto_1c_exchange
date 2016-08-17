@@ -11,10 +11,10 @@ class ExchangeController < ::ApplicationController
   # GET /exchange
   def get
 
-    # ::Rails.logger.tagged("[GET] /exchange [params]") {
-    #  ::Rails.logger.info(" --> session_id: #{session_id}, operation_id: #{operation_id}")
-    #  ::Rails.logger.info(params.inspect)
-    # }
+    ::Rails.logger.tagged("[GET] /exchange [params]") {
+      ::Rails.logger.info(" --> session_id: #{session_id}, operation_id: #{operation_id}")
+      ::Rails.logger.info(params.inspect)
+    }
 
     case mode
 
@@ -91,10 +91,10 @@ class ExchangeController < ::ApplicationController
   # POST /exchange
   def post
 
-    # ::Rails.logger.tagged("[POST] /exchange [params]") {
-    #  ::Rails.logger.info("session_id: #{session_id}, operation_id: #{operation_id}")
-    #  ::Rails.logger.info(params.inspect)
-    # }
+    ::Rails.logger.tagged("[POST] /exchange [params]") {
+      ::Rails.logger.info("session_id: #{session_id}, operation_id: #{operation_id}")
+      ::Rails.logger.info(params.inspect)
+    }
 
     case mode
 
