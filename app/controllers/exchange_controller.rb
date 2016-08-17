@@ -12,8 +12,8 @@ class ExchangeController < ::ApplicationController
   def get
 
     ::Rails.logger.tagged("[GET] /exchange [params]") {
-      ::Rails.logger.info(" --> session_id: #{session_id}, operation_id: #{operation_id}")
-      ::Rails.logger.info(params.inspect)
+      ::Rails.logger.warn(" --> session_id: #{session_id}, operation_id: #{operation_id}")
+      ::Rails.logger.warn(params.inspect)
     }
 
     case mode
@@ -92,8 +92,8 @@ class ExchangeController < ::ApplicationController
   def post
 
     ::Rails.logger.tagged("[POST] /exchange [params]") {
-      ::Rails.logger.info("session_id: #{session_id}, operation_id: #{operation_id}")
-      ::Rails.logger.info(params.inspect)
+      ::Rails.logger.warn("session_id: #{session_id}, operation_id: #{operation_id}")
+      ::Rails.logger.warn(params.inspect)
     }
 
     case mode
@@ -168,7 +168,7 @@ class ExchangeController < ::ApplicationController
     # Создаем задачу по обработке файла
     ::VoshodAvtoExchange.run_async(file_path, key: operation_id)
 
-    ::Rails.logger.info("/exchange/post [save_file: #{file_path}]")
+    ::Rails.logger.warn("/exchange/post [save_file: #{file_path}]")
 
     file_path
 
