@@ -60,6 +60,17 @@ module VoshodAvtoExchange
 
   end # run_async
 
+  def exist_job?(key: nil)
+
+    ::SidekiqQuery.where({
+
+      tag:  ::VoshodAvtoExchange::TAG,
+      key:  key
+
+    }).exists?
+
+  end # exist_job?
+
   def run_async_all(key: nil)
 
     files = ::Dir.glob( ::File.join(import_dir, '**', '{*.xml,*.zip}') )

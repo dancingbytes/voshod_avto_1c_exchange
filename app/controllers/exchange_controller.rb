@@ -12,8 +12,8 @@ class ExchangeController < ::ApplicationController
   def get
 
     ::Rails.logger.tagged("[GET] /exchange [params]") {
-      ::Rails.logger.warn(" --> session_id: #{session_id}, operation_id: #{operation_id}")
-      ::Rails.logger.warn(params.inspect)
+      ::Rails.logger.info(" --> session_id: #{session_id}, operation_id: #{operation_id}")
+      ::Rails.logger.info(params.inspect)
     }
 
     case mode
@@ -67,12 +67,7 @@ class ExchangeController < ::ApplicationController
       # Узнаем, пришел ли файл выгрузки
       when 'import'
 
-        file_name = ::File.join(
-          ::VoshodAvtoExchange.import_dir,
-          "#{operation_id}-#{params[:filename]}"
-        )
-
-        if ::File.exists?(file_name)
+        if ::VoshodAvtoExchange.exist_job?(key: operation_id)
           answer(text: "success")
         else
           answer(text: "failure\nFile `#{params[:filename]}` is not found")
@@ -92,8 +87,8 @@ class ExchangeController < ::ApplicationController
   def post
 
     ::Rails.logger.tagged("[POST] /exchange [params]") {
-      ::Rails.logger.warn("session_id: #{session_id}, operation_id: #{operation_id}")
-      ::Rails.logger.warn(params.inspect)
+      ::Rails.logger.info("session_id: #{session_id}, operation_id: #{operation_id}")
+      ::Rails.logger.info(params.inspect)
     }
 
     case mode
@@ -168,7 +163,7 @@ class ExchangeController < ::ApplicationController
     # Создаем задачу по обработке файла
     ::VoshodAvtoExchange.run_async(file_path, key: operation_id)
 
-    ::Rails.logger.warn("/exchange/post [save_file: #{file_path}]")
+    ::Rails.logger.info("/exchange/post [save_file: #{file_path}]")
 
     file_path
 
@@ -179,7 +174,7 @@ class ExchangeController < ::ApplicationController
   end # session_id
 
   def operation_id
-    cookies[:exchange_1c] || 0
+    cookies[:exchange_1c] || params[:exchange_1c] || 0
   end # operation_id
 
   def mode

@@ -6,9 +6,6 @@ class ExchangeWorker
 
   def perform(file_path)
 
-    # Ждем 3 секунды и начинаем работу
-    sleep 3
-
     ::VoshodAvtoExchange::Manager.run(
 
       file_path: file_path,
