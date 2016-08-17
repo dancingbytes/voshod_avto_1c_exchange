@@ -22,7 +22,7 @@ class ExchangeController < ::ApplicationController
         answer(text: "success\nexchange_1c\n#{session_id}")
 
       when 'init'
-        answer(text: "zip=no\nfile_limit=0")
+        answer(text: "zip=yes\nfile_limit=0")
 
       when 'success'
 
