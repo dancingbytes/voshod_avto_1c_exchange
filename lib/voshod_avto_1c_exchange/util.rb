@@ -19,7 +19,7 @@ module VoshodAvtoExchange
 
     def humanize_time(secs)
 
-      [
+      res = [
         [60,    :сек],
         [60,    :мин],
         [24,    :ч],
@@ -32,6 +32,8 @@ module VoshodAvtoExchange
         end
 
       }.compact.reverse.join(' ')
+
+      res.blank? ? '0 сек' : res
 
     end # humanize_time
 
