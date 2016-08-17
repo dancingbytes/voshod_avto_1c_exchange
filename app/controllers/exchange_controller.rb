@@ -168,7 +168,7 @@ class ExchangeController < ::ApplicationController
     # Создаем задачу по обработке файла
     ::VoshodAvtoExchange.run_async(file_path, key: operation_id)
 
-    # ::Rails.logger.info("/exchange/post [save_file: #{file_path}]")
+    ::Rails.logger.info("/exchange/post [save_file: #{file_path}]")
 
     file_path
 
