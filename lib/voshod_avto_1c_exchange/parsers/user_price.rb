@@ -13,14 +13,6 @@ module VoshodAvtoExchange
         'ЦеноваяГруппа'         => 2
       }.freeze
 
-      D_ERROR = %Q(Дубль правил цен.
-        Пользователь:   %{id}
-        Вид правила:    %{rule_type}
-        Ид правила:     %{rule_id}
-        Ид типа цены:   %{price_id}
-        Процент cкидки: %{persent_discount}
-      ).freeze
-
       S_ERROR = %Q(Ошибка сохранения правил цен в базе.
         %{msg}
       ).freeze
@@ -95,17 +87,6 @@ module VoshodAvtoExchange
             price_type:     (RULE_TYPES[rule[:rule_type]] || 0),
             price_rule_id:  rule[:rule_id] || ""
           )
-
-          # Если запись не новая, значит дубль
-          log(D_ERROR % {
-
-            id:               @user_params[:user_id],
-            rule_type:        rule[:rule_type],
-            rule_id:          rule[:rule_id],
-            price_id:         rule[:price_id],
-            persent_discount: rule[:persent_discount]
-
-          }) unless pr.new_record?
 
           pr.price_id   = rule[:price_id]
           pr.value      = rule[:persent_discount] || 0
