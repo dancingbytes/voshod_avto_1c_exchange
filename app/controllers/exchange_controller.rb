@@ -157,7 +157,7 @@ class ExchangeController < ::ApplicationController
     )
 
     ::File.open(file_path, 'wb') do |f|
-      f.write (params[:data] || request.raw_post).read
+      f.write read_file
     end
 
     # Создаем задачу по обработке файла
@@ -192,5 +192,15 @@ class ExchangeController < ::ApplicationController
     @answer || { text: 'failure\nОбработка параметров не задана' }
 
   end # answer
+
+  def read_file
+
+    if !params[:data].nil?
+      ::Base64.decode64(params[:data].read)
+    else
+      request.raw_post.read
+    end
+
+  end # read_file
 
 end # ExchangeController
