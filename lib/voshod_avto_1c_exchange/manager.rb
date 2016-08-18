@@ -29,10 +29,16 @@ module VoshodAvtoExchange
 
       # Распаковываем zip архив, если такой имеется.
       # Подготавливаем список файлов к обработке
+
+      log(" --> [ФАЙЛ] #{file_path}")
+      log(" --> [ТИП] #{is_zip?(file_path) ? 'ZIP' : ' XML'}")
+
       files = if is_zip?(file_path)
+        log(" --> [РАСПАКОВКА] ДА")
         init_clb.call("Распаковка: #{::File.basename(file_path)}")
         extract_zip_file(file_path)
       else
+        log(" --> [РАСПАКОВКА] НЕТ")
         [file_path]
       end
 
@@ -76,12 +82,12 @@ module VoshodAvtoExchange
 
       return 0 unless File.exists?(file_name)
 
-      start = ::Time.now.to_i
-
-      log(STAT_INFO_S % {
-        file: file_name,
-        time: ::Time.now
-      })
+#      start = ::Time.now.to_i
+#
+#      log(STAT_INFO_S % {
+#        file: file_name,
+#        time: ::Time.now
+#      })
 
       lines = ::VoshodAvtoExchange::Parser.parse(file_name,
         clb:    clb,
@@ -89,10 +95,10 @@ module VoshodAvtoExchange
         tlines: total_lines
       )
 
-      log(STAT_INFO_E % {
-        file: file_name,
-        time: ::VoshodAvtoExchange::Util::humanize_time(::Time.now.to_i - start)
-      })
+#      log(STAT_INFO_E % {
+#        file: file_name,
+#        time: ::VoshodAvtoExchange::Util::humanize_time(::Time.now.to_i - start)
+#      })
 
       ::FileUtils.rm_rf(file_name)
 
@@ -165,7 +171,8 @@ module VoshodAvtoExchange
       begin
         ::Zip::File.open(file_name) { |zip_file| }
         true
-      rescue
+      rescue => ex
+        log(" --> [is_zip?] #{ex.inspect}")
         false
       end
 
