@@ -157,7 +157,7 @@ class ExchangeController < ::ApplicationController
     )
 
     ::File.open(file_path, 'wb') do |f|
-      f.write(params[:data] || request.raw_post)
+      f.write (params[:data] || request.raw_post).read
     end
 
     # Создаем задачу по обработке файла
