@@ -4,16 +4,6 @@ module VoshodAvtoExchange
 
     extend self
 
-    STAT_INFO_S = %Q(
-      [Обработка файла]: %{file}
-      [Время старта]:    %{time}
-    ).freeze
-
-    STAT_INFO_E = %Q(
-      [Завершена обработка файла]: %{file}
-      [Затрачено времени]:         %{time}
-    ).freeze
-
     def run(
       file_path:,
       init_clb:       nil,
@@ -29,21 +19,10 @@ module VoshodAvtoExchange
 
       # Распаковываем zip архив, если такой имеется.
       # Подготавливаем список файлов к обработке
-
-      log(" --> [ФАЙЛ] #{file_path}")
-      log(" --> [ТИП] #{is_zip?(file_path) ? 'ZIP' : ' XML'}")
-
-      ::FileUtils.cp(
-        file_path,
-        '/home/webmaster/tmp'
-      )
-
       files = if is_zip?(file_path)
-        log(" --> [РАСПАКОВКА] ДА")
         init_clb.call("Распаковка: #{::File.basename(file_path)}")
         extract_zip_file(file_path)
       else
-        log(" --> [РАСПАКОВКА] НЕТ")
         [file_path]
       end
 
@@ -87,23 +66,11 @@ module VoshodAvtoExchange
 
       return 0 unless File.exists?(file_name)
 
-#      start = ::Time.now.to_i
-#
-#      log(STAT_INFO_S % {
-#        file: file_name,
-#        time: ::Time.now
-#      })
-
       lines = ::VoshodAvtoExchange::Parser.parse(file_name,
         clb:    clb,
         cstart: line,
         tlines: total_lines
       )
-
-#      log(STAT_INFO_E % {
-#        file: file_name,
-#        time: ::VoshodAvtoExchange::Util::humanize_time(::Time.now.to_i - start)
-#      })
 
       ::FileUtils.rm_rf(file_name)
 
@@ -164,7 +131,7 @@ module VoshodAvtoExchange
         ::FileUtils.rm_rf(file_name)
 
       rescue => e
-        log(e.backtrace.join("\n"))
+        log("[extract_zip_file] #{e.backtrace.join('\n')}")
       end
 
       files
@@ -176,8 +143,7 @@ module VoshodAvtoExchange
       begin
         ::Zip::File.open(file_name) { |zip_file| }
         true
-      rescue => ex
-        log(" --> [is_zip?] #{ex.inspect}")
+      rescue
         false
       end
 
