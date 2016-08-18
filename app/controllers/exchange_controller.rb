@@ -156,12 +156,8 @@ class ExchangeController < ::ApplicationController
       "#{operation_id}-#{params[:filename]}" || "#{operation_id}-#{::Time.now.to_f}.xml"
     )
 
-    puts "--- > params"
-    puts params.inspect
-    puts " --- "
-
     ::File.open(file_path, 'wb') do |f|
-      f.write ::Base64.decode64(request.raw_post)
+      f.write(params[:data] || request.raw_post)
     end
 
     # Создаем задачу по обработке файла
