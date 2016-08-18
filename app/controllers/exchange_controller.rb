@@ -195,7 +195,7 @@ class ExchangeController < ::ApplicationController
 
   def read_file
 
-    if !params[:data].nil?
+    unless params[:data].nil?
       ::Base64.decode64(params[:data].read)
     else
       request.raw_post.read
