@@ -156,6 +156,13 @@ class ExchangeController < ::ApplicationController
       "#{operation_id}-#{params[:filename]}" || "#{operation_id}-#{::Time.now.to_f}.xml"
     )
 
+    puts " ---> raw_post"
+    puts request.raw_post
+    puts " --- "
+    puts " ---> ::Base64.decode64"
+    puts ::Base64.decode64(request.raw_post)
+    puts " --- "
+
     ::File.open(file_path, 'wb') do |f|
       f.write ::Base64.decode64(request.raw_post)
     end
