@@ -2,6 +2,7 @@ require 'logger'
 require 'fileutils'
 require 'nokogiri'
 require 'zip'
+require 'base64'
 
 module VoshodAvtoExchange
 

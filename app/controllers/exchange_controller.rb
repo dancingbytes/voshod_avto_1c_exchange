@@ -149,7 +149,7 @@ class ExchangeController < ::ApplicationController
 
   def save_file
 
-    return if request.body.nil? || request.body.blank?
+    return if request.raw_post.nil? || request.raw_post.blank?
 
     file_path = ::File.join(
       ::VoshodAvtoExchange.import_dir,
@@ -157,7 +157,7 @@ class ExchangeController < ::ApplicationController
     )
 
     ::File.open(file_path, 'wb') do |f|
-      f.write request.body.read
+      f.write ::Base64.decode64(request.raw_post)
     end
 
     # Создаем задачу по обработке файла
