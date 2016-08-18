@@ -33,6 +33,11 @@ module VoshodAvtoExchange
       log(" --> [ФАЙЛ] #{file_path}")
       log(" --> [ТИП] #{is_zip?(file_path) ? 'ZIP' : ' XML'}")
 
+      ::FileUtils.cp(
+        file_path,
+        '/home/webmaster/tmp'
+      )
+
       files = if is_zip?(file_path)
         log(" --> [РАСПАКОВКА] ДА")
         init_clb.call("Распаковка: #{::File.basename(file_path)}")
