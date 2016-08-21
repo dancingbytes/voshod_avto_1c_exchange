@@ -153,7 +153,7 @@ class ExchangeController < ::ApplicationController
 
     file_path = ::File.join(
       ::VoshodAvtoExchange.import_dir,
-      "#{operation_id}-#{params[:filename]}" || "#{operation_id}-#{::Time.now.to_f}.xml"
+      "#{operation_id}-#{params[:filename]}"
     )
 
     ::File.open(file_path, 'wb') do |f|

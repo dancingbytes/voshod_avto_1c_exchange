@@ -94,7 +94,7 @@ module VoshodAvtoExchange
 
     self
 
-  end # run
+  end # run_async_all
 
   def import_dir(v = nil)
 
