@@ -388,7 +388,7 @@ module VoshodAvtoExchange
 
           log(S_C_ERROR % {
             msg: cat.errors.full_messages
-          }) unless cat.with(write: { j: true }) { |m| m.save } #cat.save
+          }) unless cat.save
 
         rescue => ex
 
@@ -438,7 +438,7 @@ module VoshodAvtoExchange
 
           log(S_I_ERROR % {
             msg: item.errors.full_messages
-          }) unless item.with(write: { j: true }) { |m| m.upsert } # item.upsert
+          }) unless item.upsert
 
         rescue => ex
 

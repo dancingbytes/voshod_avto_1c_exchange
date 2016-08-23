@@ -97,7 +97,7 @@ module VoshodAvtoExchange
 
             log(S_ERROR % {
               msg: pr.errors.full_messages
-            }) unless pr.with(write: { j: true }) { |m| m.save } # pr.save
+            }) unless pr.save
 
           rescue => ex
 

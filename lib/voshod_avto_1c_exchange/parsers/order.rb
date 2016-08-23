@@ -155,7 +155,7 @@ module VoshodAvtoExchange
 
         log(S_ERROR % {
           msg: ci.errors.full_messages
-        }) unless ci.save
+        }) unless ci.upsert
 
         # Помечаем заказ обоаботанным
         order.set(operation_state: 2) if order.operation_state < 2
