@@ -203,7 +203,7 @@ module VoshodAvtoExchange
 
           log(S_I_ERROR % {
             msg: item.errors.full_messages
-          }) unless item.upsert
+          }) unless item.with(write: { j: true }) { |m| m.upsert } # item.upsert
 
         rescue => ex
 

@@ -87,7 +87,8 @@ module VoshodAvtoExchange
         begin
 
           usr.operation_state = 2
-          usr.save(validate: false)
+          usr.with(write: { j: true }) { |m| m.save(validate: false) }
+          # usr.save(validate: false)
 
           # Отправляем результат проверки регистрации
           if usr.approved?
