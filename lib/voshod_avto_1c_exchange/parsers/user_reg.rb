@@ -21,6 +21,7 @@ module VoshodAvtoExchange
 
       ACCEPTED = 'Утвержден'.freeze
       REJECTED = 'Отклонен'.freeze
+      IDLE     = 'Отложен'.freeze
 
       def start_element(name, attrs = [])
 
@@ -82,18 +83,27 @@ module VoshodAvtoExchange
           # Одобрили регистрацию
           when ACCEPTED then
 
-            usr.approve_state = 1
-            usr.inn           = params[:inn] unless params[:inn].nil?
+            usr.approve_state   = 1
+            usr.operation_state = 2
+            usr.inn             = params[:inn] unless params[:inn].nil?
 
           # Отклонили в регистрации
           when REJECTED then
 
-            usr.approve_state = 2
+            usr.approve_state   = 2
+            usr.operation_state = 2
+
+          # Регистрация отложена
+          when IDLE then
+
+            usr.approve_state   = 0
+            usr.operation_state = 0
 
           # Если статус не понятен -- тоже отклоняем.
           else
 
-            usr.approve_state = 2
+            usr.approve_state   = 2
+            usr.operation_state = 2
 
             log(N_ERROR % {
               msg: "Значение параметра [state: #{params[:state]}] неизвестно",
@@ -104,7 +114,6 @@ module VoshodAvtoExchange
 
         begin
 
-          usr.operation_state = 2
           usr.save(validate: false)
 
           # Отправляем результат проверки регистрации
