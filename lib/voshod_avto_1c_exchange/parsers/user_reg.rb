@@ -14,6 +14,11 @@ module VoshodAvtoExchange
         %{msg}
       ).freeze
 
+      N_ERROR = %Q(Ошибка разбора параметров.
+        ИД клиента: %{usr}
+        %{msg}
+      ).freeze
+
       ACCEPTED = 'Утвержден'.freeze
       REJECTED = 'Отклонен'.freeze
 
@@ -71,18 +76,31 @@ module VoshodAvtoExchange
           log(F_ERROR % { pr: params.inspect }) and return
         end
 
-        # Одобрили регистрацию
-        if params[:state] == ACCEPTED
+        # Разбор параметров регистарции
+        case params[:state]
 
-          usr.approve_state = 1
-          usr.inn           = params[:inn] unless params[:inn].nil?
+          # Одобрили регистрацию
+          when ACCEPTED then
 
-        # Отклонили в регистрации
-        elsif params[:state] == REJECTED
+            usr.approve_state = 1
+            usr.inn           = params[:inn] unless params[:inn].nil?
 
-          usr.approve_state = 2
+          # Отклонили в регистрации
+          when REJECTED then
 
-        end
+            usr.approve_state = 2
+
+          # Если статус не понятен -- тоже отклоняем.
+          else
+
+            usr.approve_state = 2
+
+            log(N_ERROR % {
+              msg: "Значение параметра [#{state}: #{params[:state]}] неизвестно",
+              usr: usr.id.to_s
+            })
+
+        end # case
 
         begin
 
