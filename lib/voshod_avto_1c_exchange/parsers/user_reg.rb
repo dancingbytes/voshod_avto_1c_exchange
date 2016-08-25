@@ -96,7 +96,7 @@ module VoshodAvtoExchange
             usr.approve_state = 2
 
             log(N_ERROR % {
-              msg: "Значение параметра [#{state}: #{params[:state]}] неизвестно",
+              msg: "Значение параметра [state: #{params[:state]}] неизвестно",
               usr: usr.id.to_s
             })
 
