@@ -23,6 +23,6 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'nokogiri', '~> 1.6'
   spec.add_dependency 'rubyzip',  '~> 1.1'
-  spec.add_dependency 'sidekiq',  '~> 4.1'
+  spec.add_dependency 'sidekiq',  '>= 4.1'
 
 end
