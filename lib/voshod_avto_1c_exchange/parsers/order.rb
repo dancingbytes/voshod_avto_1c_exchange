@@ -132,8 +132,8 @@ module VoshodAvtoExchange
           p_item_id:  @item_params[:p_item_id]
         })
 
-        ci.user_id      ||= order.user_id
-        ci.p_id         ||= order.p_id
+        ci.user_id        = order.user_id
+        ci.p_id           = order.p_id
 
         ci.state_name     = @item_params[:state_name]
 
@@ -155,7 +155,7 @@ module VoshodAvtoExchange
 
         log(S_ERROR % {
           msg: ci.errors.full_messages
-        }) unless ci.upsert
+        }) unless ci.save
 
         # Помечаем заказ обоаботанным
         order.set(operation_state: 2) if order.operation_state < 2
