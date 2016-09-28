@@ -24,15 +24,15 @@ module VoshodAvtoExchange
           str << ::VoshodAvtoExchange::Template::USER % {
 
             kid:            user.id.to_s,
-            inn:            user.inn,
+            inn:            xml_escape(user.inn),
             date:           date,
             time:           time,
-            company:        user.company,
-            first_name:     user.first_name,
-            last_name:      user.last_name,
-            email:          user.login,
-            phone:          user.phone,
-            contact_person: user.contact_person
+            company:        xml_escape(user.company),
+            first_name:     xml_escape(user.first_name),
+            last_name:      xml_escape(user.last_name),
+            email:          xml_escape(user.login),
+            phone:          xml_escape(user.phone),
+            contact_person: xml_escape(user.contact_person)
 
           }
 
@@ -60,6 +60,12 @@ module VoshodAvtoExchange
         res.modified_count > 0
 
       end # verify
+
+      private
+
+      def xml_escape(str)
+        ::VoshodAvtoExchange::Unil.xml_escape(str)
+      end # xml_escape
 
     end # User
 

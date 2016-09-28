@@ -22,7 +22,7 @@ module VoshodAvtoExchange
 
               item_id:          cart_item.p_item_id.to_s,
               item_mog:         cart_item.oem_num,
-              item_name:        cart_item.name,
+              item_name:        xml_escape(cart_item.name),
               item_contry_code: "643",
               item_contry_name: "РОССИЯ",
               item_gtd:         "",
@@ -58,8 +58,8 @@ module VoshodAvtoExchange
             time:             order.created_at.strftime('%H:%M:%S'),
             price:            order.amount,
             uid:              order.user_id.to_s,
-            company:          order.user.try(:company),
-            full_company:     order.user.try(:full_company),
+            company:          xml_escape( order.user.try(:company) ),
+            full_company:     xml_escape( order.user.try(:full_company) ),
 
             items:            items,
 
@@ -69,9 +69,9 @@ module VoshodAvtoExchange
             detete_1c:        false,
             hold_on_1c:       false,
 
-            comment:          order.comment,
-            delivery_address: delivery_address,
-            delivery_type:    delivery_type
+            comment:          xml_escape(order.comment),
+            delivery_address: xml_escape(delivery_address),
+            delivery_type:    xml_escape(delivery_type)
 
           }
 
@@ -99,6 +99,12 @@ module VoshodAvtoExchange
         res.modified_count > 0
 
       end # verify
+
+      private
+
+      def xml_escape(str)
+        ::VoshodAvtoExchange::Unil.xml_escape(str)
+      end # xml_escape
 
     end # Order
 

@@ -55,6 +55,18 @@ module VoshodAvtoExchange
 
     end # clean_whitespaces
 
+    def xml_escape(str)
+
+      str = str.to_s
+      str.gsub!(/&/, "&amp;")
+      str.gsub!(/'/, "&apos;")
+      str.gsub!(/"/, "&quot;")
+      str.gsub!(/>/, "&gt;")
+      str.gsub!(/</, "&lt;")
+      str
+
+    end # xml_escape
+
   end # Util
 
 end # VoshodAvtoExchange
