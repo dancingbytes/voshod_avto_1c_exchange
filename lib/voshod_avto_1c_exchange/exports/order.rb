@@ -103,7 +103,7 @@ module VoshodAvtoExchange
       private
 
       def xml_escape(str)
-        ::VoshodAvtoExchange::Unil.xml_escape(str)
+        ::VoshodAvtoExchange::Util.xml_escape(str)
       end # xml_escape
 
     end # Order
