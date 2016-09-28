@@ -42,12 +42,12 @@ module VoshodAvtoExchange
           order.set({ operation_id: operation_id })
 
           # Формируем даныне по доставке
-          delivery_address = "",
-          delivery_type    = "Самовывоз"
+          d_address = "",
+          d_type    = "Самовывоз"
 
           if order.delivery_type == 1
-            delivery_address = order.delivery_address
-            delivery_type    = "Доставка"
+            d_address = order.delivery_address
+            d_type    = "Доставка"
           end
 
           # Формируем заказ
@@ -70,8 +70,8 @@ module VoshodAvtoExchange
             hold_on_1c:       false,
 
             comment:          xml_escape(order.comment),
-            delivery_address: xml_escape(delivery_address),
-            delivery_type:    xml_escape(delivery_type)
+            delivery_address: xml_escape(d_address),
+            delivery_type:    xml_escape(d_type)
 
           }
 
