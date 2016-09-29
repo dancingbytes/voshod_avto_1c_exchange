@@ -11,6 +11,7 @@ class PriceGenerateWorker
 
     ensure
       ::SidekiqQuery.close(self.jid)
+      ::GC.start
 
   end # perform
 

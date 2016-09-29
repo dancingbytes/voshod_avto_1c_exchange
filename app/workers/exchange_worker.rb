@@ -31,6 +31,7 @@ class ExchangeWorker
 
     ensure
       ::SidekiqQuery.close(self.jid)
+      ::GC.start
 
   end # perform
 
