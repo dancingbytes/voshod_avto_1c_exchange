@@ -529,16 +529,6 @@ module VoshodAvtoExchange
 
           })
 
-          # Генерация прайс-листа
-          ::SidekiqQuery.create({
-
-            jid:  ::PriceGenerateWorker.perform_async,
-            tag:  ::VoshodAvtoExchange::TAG,
-            name: "Генерация прайса",
-            key:  1
-
-          })
-
         else
 
           ::Item.
