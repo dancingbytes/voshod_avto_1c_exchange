@@ -55,7 +55,7 @@ module VoshodAvtoExchange
 
       # Содержимое тега
       def tag_value
-        @str
+        ::VoshodAvtoExchange::Util.xml_unescape(@str)
       end # tag_value
 
       alias :value :tag_value

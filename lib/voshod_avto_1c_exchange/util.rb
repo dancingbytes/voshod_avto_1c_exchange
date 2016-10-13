@@ -57,12 +57,24 @@ module VoshodAvtoExchange
 
     def xml_escape(str)
 
-      str = str.to_s
+      str = str.to_s.dup
       str.gsub!(/&/, "&amp;")
       str.gsub!(/'/, "&apos;")
       str.gsub!(/"/, "&quot;")
       str.gsub!(/>/, "&gt;")
       str.gsub!(/</, "&lt;")
+      str
+
+    end # xml_escape
+
+    def xml_unescape(str)
+
+      str = str.to_s.dup
+      str.gsub!("&amp;", '&')
+      str.gsub!("&apos;", "'")
+      str.gsub!("&quot;", '"')
+      str.gsub!("&gt;", '>')
+      str.gsub!("&lt;", '<')
       str
 
     end # xml_escape

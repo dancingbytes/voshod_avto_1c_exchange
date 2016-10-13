@@ -5,6 +5,7 @@ require 'voshod_avto_1c_exchange/parsers/user_price'
 require 'voshod_avto_1c_exchange/parsers/order'
 require 'voshod_avto_1c_exchange/parsers/chel_import'
 require 'voshod_avto_1c_exchange/parsers/chel_offers'
+require 'voshod_avto_1c_exchange/parsers/chel_cross'
 
 #
 # Фабрика по выбору парсера обработки данных
@@ -98,6 +99,10 @@ module VoshodAvtoExchange
 
           # 1c (offers)
           when 'ПакетПредложений'.freeze    then init_1c8_offers(::Hash[attrs])
+
+          # Кроссы из 1С Восход-авто
+          when 'Кросы'.freeze then
+            @parser = ::VoshodAvtoExchange::Parsers::ChelCross.new
 
         end # case
 
