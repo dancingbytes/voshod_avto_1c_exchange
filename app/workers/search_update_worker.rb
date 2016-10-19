@@ -6,6 +6,9 @@ class SearchUpdateWorker
 
   def perform
 
+    # Удаляем все из поискового индекса
+    ::Item.clear_all_from_sphinx
+
     # Обновляем поисковый индекс
     ::Item.insert_sphinx_by_page
 
