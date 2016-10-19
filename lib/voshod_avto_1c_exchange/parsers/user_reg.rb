@@ -104,14 +104,19 @@ module VoshodAvtoExchange
 
           usr.save(validate: false)
 
-          # Отправляем результат проверки регистрации
-          if usr.approved?
-            # Если пользователю подтверждена регистрация
-            usr.send_approve_request
-          elsif usr.rejected?
-            # Если отказали
-            usr.send_reject_request
-          end
+          # Если были изменения в статусе -- производим уведомленияи нужные действия
+          if usr.approve_state_changed? || usr.operation_state_changed?
+
+            # Отправляем результат проверки регистрации
+            if usr.approved?
+              # Если пользователю подтверждена регистрация
+              usr.send_approve_request
+            elsif usr.rejected?
+              # Если отказали
+              usr.send_reject_request
+            end
+
+          end # if
 
         rescue => ex
 
