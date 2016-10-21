@@ -434,18 +434,9 @@ module VoshodAvtoExchange
 
         item.search_tags  = @item[:search_tags]
 
-        begin
-
-          log(S_I_ERROR % {
-            msg: item.errors.full_messages
-          }) unless item.upsert
-
-        rescue => ex
-
-          log(S_I_ERROR % {
-            msg: [ex.message].push(ex.backtrace).join("\n")
-          })
-
+        if item.changed?
+          item.save rescue nil
+          item.insert_sphinx
         end
 
       end # save_item

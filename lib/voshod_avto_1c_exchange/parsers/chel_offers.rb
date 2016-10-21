@@ -199,18 +199,15 @@ module VoshodAvtoExchange
         item.meta_prices  = @item[:meta_prices]
         item.count        = @item[:count].try(:to_i) || 0
 
-        begin
+        count_changed     = item.count_changed?
 
-          log(S_I_ERROR % {
-            msg: item.errors.full_messages
-          }) unless item.upsert
+        if item.changed?
+          item.save rescue nil
+        end
 
-        rescue => ex
-
-          log(S_I_ERROR % {
-            msg: [ex.message].push(ex.backtrace).join("\n")
-          })
-
+        if count_changed
+          item.update_cross_avaliable
+          item.insert_sphinx
         end
 
       end # save_item
