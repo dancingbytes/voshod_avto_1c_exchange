@@ -197,13 +197,11 @@ module VoshodAvtoExchange
         item.updated_at   = ::Time.now
         item.prices       = @item[:prices]
         item.meta_prices  = @item[:meta_prices]
-        item.count        = @item[:count].try(:to_i) || 0
+        item.count        = @item[:count] #.try(:to_i) || 0
 
         count_changed     = item.count_changed?
 
-        if item.changed?
-          item.save rescue nil
-        end
+        item.save # rescue nil
 
         if count_changed
           item.update_cross_avaliable
