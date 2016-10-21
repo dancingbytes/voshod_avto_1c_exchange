@@ -484,11 +484,15 @@ module VoshodAvtoExchange
       #
       def start_work_with_items
 
-        # При полной обработке данных, помечаем все товары как "сырые",
-        # что бы в дальнейшем понять какие товары нужно удалит из каталога
-        ::Item.
-          by_provider(@provider_id).
-          update_all({ raw: true })
+        if @full_update
+
+          # При полной обработке данных, помечаем все товары как "сырые",
+          # что бы в дальнейшем понять какие товары нужно удалит из каталога
+          ::Item.
+            by_provider(@provider_id).
+            update_all({ raw: true })
+
+        end # if
 
       end # start_work_with_items
 
@@ -519,12 +523,6 @@ module VoshodAvtoExchange
             key:  0
 
           })
-
-        else
-
-          ::Item.
-            by_provider(@provider_id).
-            update_all({ raw: false })
 
         end # if
 
