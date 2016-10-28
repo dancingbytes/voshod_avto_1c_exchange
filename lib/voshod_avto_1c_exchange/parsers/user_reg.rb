@@ -102,10 +102,12 @@ module VoshodAvtoExchange
 
         begin
 
+          has_changes = usr.approve_state_changed? || usr.operation_state_changed? || false
+
           usr.save(validate: false)
 
           # Если были изменения в статусе -- производим уведомленияи нужные действия
-          if usr.approve_state_changed? || usr.operation_state_changed?
+          if has_changes
 
             # Отправляем результат проверки регистрации
             if usr.approved?
