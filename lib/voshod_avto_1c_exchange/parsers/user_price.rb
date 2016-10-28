@@ -77,12 +77,12 @@ module VoshodAvtoExchange
       def stop_user
 
         # Удаляем все правила пользователя
-        ::Price.for_user(@user_params[:user_id]).delete_all
+        ::Price.for_user(@user_params[:user_id]).delete
 
         # Создаем правила заново
         @user_params[:rules].each do |rule|
 
-          pr = ::Price.find_or_initialize_by(
+          pr = ::Price.new(
             user_id:        @user_params[:user_id],
             price_type:     (RULE_TYPES[rule[:rule_type]] || 0),
             price_rule_id:  rule[:rule_id] || ""
@@ -93,19 +93,7 @@ module VoshodAvtoExchange
           pr.nom_name   = rule[:rule_good_name]
           pr.price_name = rule[:price_type_name]
 
-          begin
-
-            log(S_ERROR % {
-              msg: pr.errors.full_messages
-            }) unless pr.save
-
-          rescue => ex
-
-            log(S_ERROR % {
-              msg: [ex.message].push(ex.backtrace).join("\n")
-            })
-
-          end
+          pr.upsert rescue nil
 
         end # each
 
