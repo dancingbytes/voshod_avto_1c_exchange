@@ -42,12 +42,12 @@ module VoshodAvtoExchange
           order.set({ operation_id: operation_id })
 
           # Формируем даныне по доставке
-          d_address = "",
-          d_type    = "Самовывоз"
-
           if order.delivery_type == 1
             d_address = order.delivery_address
             d_type    = "Доставка"
+          else
+            d_address = ""
+            d_type    = "Самовывоз"
           end
 
           # Формируем заказ
