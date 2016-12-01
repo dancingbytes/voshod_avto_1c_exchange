@@ -20,8 +20,21 @@ module VoshodAvtoExchange
 
             cistr << ::VoshodAvtoExchange::Template::ORDER_ITEM % {
 
-              item_id:          cart_item.p_item_id.to_s,
-              item_mog:         cart_item.oem_num,
+              # ИД товара в 1С Восход-авто
+              item_id:          cart_item.va_item_id,
+
+#              # Код внешнего поставщика
+#              p_code:           xml_escape(cart_item.p_code),
+
+#              # Бренд детали
+#              t.string      :oem_brand
+
+#              # Номер детали
+#              oem_num:          xml_escape(cart_item.oem_num),
+
+              # Артикул товара в 1С Восход-авто
+              item_mog:         xml_escape(cart_item.mog),
+
               item_name:        xml_escape(cart_item.name),
               item_contry_code: "643",
               item_contry_name: "РОССИЯ",
@@ -39,7 +52,7 @@ module VoshodAvtoExchange
           next if items.blank?
 
           # Выставляем индектификатор операции
-          order.set({ operation_id: operation_id })
+          order.update_columns(operation_id: operation_id)
 
           # Формируем даныне по доставке
           if order.delivery_type == 1
@@ -53,11 +66,11 @@ module VoshodAvtoExchange
           # Формируем заказ
           str << ::VoshodAvtoExchange::Template::ORDER % {
 
-            kid:              order.id.to_s,
+            kid:              order.uid,
             date:             order.created_at.strftime('%Y-%m-%d'),
             time:             order.created_at.strftime('%H:%M:%S'),
             price:            order.amount,
-            uid:              order.user_id.to_s,
+            uid:              order.user_uid,
             company:          xml_escape( order.user.try(:company) ),
             full_company:     xml_escape( order.user.try(:full_company) ),
 

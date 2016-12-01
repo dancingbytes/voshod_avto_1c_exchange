@@ -18,12 +18,12 @@ module VoshodAvtoExchange
         ::User.where(operation_state: 0).each { |user|
 
           # Выставляем индектификатор операции
-          user.set({ operation_id: operation_id })
+          user.update_columns(operation_id: operation_id)
 
           # Формируем карточку пользователя
           str << ::VoshodAvtoExchange::Template::USER % {
 
-            kid:            user.id.to_s,
+            kid:            user.uid,
             inn:            xml_escape(user.inn),
             date:           date,
             time:           time,

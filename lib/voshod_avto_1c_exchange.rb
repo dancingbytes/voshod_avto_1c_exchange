@@ -33,7 +33,8 @@ module VoshodAvtoExchange
         key: key || 0,
         tag: ::VoshodAvtoExchange::TAG
       }).
-      first
+      limit(1).
+      to_a[0]
 
     {
 
