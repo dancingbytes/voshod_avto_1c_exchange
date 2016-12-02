@@ -76,24 +76,34 @@ module VoshodAvtoExchange
 
       def stop_user
 
+        # Ищем пользователя
+        user = User.where(uid: @user_params[:user_id]).limit(1).to_a[0]
+
+        unless user
+
+          log(S_ERROR % {
+            msg: "Пользователь #{@user_params[:user_id]} не найден"
+          }) and return
+
+        end
+
         # Удаляем все правила пользователя
-        ::Price.for_user(@user_params[:user_id]).delete
+        ::Price.for_user(user.id).delete
 
         # Создаем правила заново
         @user_params[:rules].each do |rule|
 
-          pr = ::Price.new(
-            user_id:        @user_params[:user_id],
-            price_type:     (RULE_TYPES[rule[:rule_type]] || 0),
-            price_rule_id:  rule[:rule_id] || ""
+          ::Price.insert_or_update(
+
+            user_id:          user.id,
+            price_type:       RULE_TYPES[rule[:rule_type]] || 0,
+            price_rule_id:    rule[:rule_id]  || '',
+            price_id:         rule[:price_id] || '',
+            value:            rule[:persent_discount].try(:to_f) || 0,
+            nom_name:         rule[:rule_good_name]   || '',
+            price_name:       rule[:price_type_name]  || ''
+
           )
-
-          pr.price_id   = rule[:price_id]
-          pr.value      = rule[:persent_discount] || 0
-          pr.nom_name   = rule[:rule_good_name]
-          pr.price_name = rule[:price_type_name]
-
-          pr.upsert rescue nil
 
         end # each
 

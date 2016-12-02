@@ -113,7 +113,7 @@ module VoshodAvtoExchange
 
       def save_item
 
-        order = ::Order.where(id: @order_params[:order_id]).first
+        order = ::Order.where(uid: @order_params[:order_id]).first
 
         unless order
 
@@ -128,22 +128,24 @@ module VoshodAvtoExchange
         end
 
         ci = ::CartItem.find_or_initialize_by({
-          order_id:   @order_params[:order_id],
-          p_item_id:  @item_params[:p_item_id]
+          order_id:     order.id,
+          va_item_id:   @item_params[:p_item_id]
         })
 
         ci.user_id        = order.user_id
-        ci.p_id           = order.p_id
+        ci.p_code         = 'VNY6'
 
         ci.state_name     = @item_params[:state_name]
 
         ci.mog            = @item_params[:mog]
         ci.name           = @item_params[:name]
         ci.unit           = @item_params[:unit]
-        ci.in_pack        = @item_params[:in_pack]
-        ci.contry_code    = @item_params[:contry_code]
-        ci.contry_name    = @item_params[:contry_name]
-        ci.gtd            = @item_params[:gtd]
+
+#        ci.p_id           = order.p_id
+#        ci.in_pack        = @item_params[:in_pack]
+#        ci.contry_code    = @item_params[:contry_code]
+#        ci.contry_name    = @item_params[:contry_name]
+#        ci.gtd            = @item_params[:gtd]
 
         ci.raw_price      = true
         ci.price          = @item_params[:price]
@@ -158,10 +160,10 @@ module VoshodAvtoExchange
         }) unless ci.save
 
         # Помечаем заказ обоаботанным
-        order.set(operation_state: 2) if order.operation_state < 2
+        order.update_columns(operation_state: 2) if order.operation_state < 2
 
         # Обновляем итоговую сумму заказа
-        order.set(amount: order.basket_total_price)
+        order.update_columns(amount: order.basket_total_price)
 
       end # save_item
 
