@@ -117,13 +117,34 @@ module VoshodAvtoExchange
           va_item_id:   @item_params[:va_item_id]
         })
 
-        ci.user_id          = order.user_id
-        ci.p_code           = ::VoshodAvtoExchange::P_CODE
-
         ci.state_name       = @item_params[:state_name]
 
-        ci.mog              = @item_params[:mog]
-        ci.name             = @item_params[:name]
+        #
+        # TODO:
+        # Основная проблема возникнет при обработке товаров внещних поставщиков
+        #
+        if ci.new_record?
+
+          ci.user_id  = order.user_id
+          ci.p_code   = ::VoshodAvtoExchange::P_CODE
+          ci.mog      = @item_params[:mog]
+          ci.name     = @item_params[:name]
+
+          item = ::Item.where(
+            p_code:      ::VoshodAvtoExchange::P_CODE,
+            va_item_id:  @item_params[:va_item_id]
+          ).limit(1).to_a[0]
+
+          if item
+
+            ci.oem_num    = item.oem_num
+            ci.oem_brand  = item.oem_brand
+
+          end # if
+
+        end # if
+
+
 
         ci.raw_price        = true
         ci.price            = @item_params[:price].try(:to_f) || 0
