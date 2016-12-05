@@ -142,7 +142,7 @@ module VoshodAvtoExchange
         order.update_columns({
           operation_state:  2,
           amount:           order.basket_total_price
-        )
+        })
 
       end # save_item
 
