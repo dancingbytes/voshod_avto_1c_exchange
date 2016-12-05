@@ -151,7 +151,7 @@ module VoshodAvtoExchange
         ci.total_price      = @item_params[:total_price].try(:to_f) || 0
         ci.count            = @item_params[:count].try(:to_i) || 0
 
-        ci.delivery_address = @item_params[:delivery_address]
+        ci.delivery_address = @item_params[:delivery_address] ||
         ci.delivery_at      = @item_params[:delivery_at].try(:to_time)
 
         log(S_ERROR % {
