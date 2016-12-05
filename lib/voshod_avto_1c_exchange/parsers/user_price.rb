@@ -96,12 +96,12 @@ module VoshodAvtoExchange
           ::Price.insert_or_update(
 
             user_id:          user.id,
-            price_type:       RULE_TYPES[rule[:rule_type]] || 0,
-            price_rule_id:    rule[:rule_id]  || '',
-            price_id:         rule[:price_id] || '',
-            value:            rule[:persent_discount].try(:to_f) || 0,
-            nom_name:         rule[:rule_good_name]   || '',
-            price_name:       rule[:price_type_name]  || ''
+            price_type:       RULE_TYPES[rule[:rule_type]],
+            price_rule_id:    rule[:rule_id],
+            price_id:         rule[:price_id],
+            value:            rule[:persent_discount],
+            nom_name:         rule[:rule_good_name],
+            price_name:       rule[:price_type_name]
 
           )
 
