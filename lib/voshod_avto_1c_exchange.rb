@@ -8,7 +8,8 @@ module VoshodAvtoExchange
 
   extend self
 
-  TAG = '1С_EXCHANGE'.freeze
+  TAG     = 'ОБМЕН_1С'.freeze
+  P_CODE  = 'VNY6'.freeze
 
   def login(v = nil)
 

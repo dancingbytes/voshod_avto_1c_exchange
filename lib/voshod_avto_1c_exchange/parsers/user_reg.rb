@@ -70,11 +70,13 @@ module VoshodAvtoExchange
           log(P_ERROR % { tag: tag_debug }) and return
         end
 
-        usr = ::User.where(id: params[:id]).first
+        usr = ::User.where(uid: params[:id]).limit(1).to_a[0]
 
         unless usr
           log(F_ERROR % { pr: params.inspect }) and return
         end
+
+        usr.first_name, usr.last_name, usr.patronomic = params[:name].split(/\s/)
 
         # Разбор параметров регистарции
         case params[:state]
@@ -84,7 +86,7 @@ module VoshodAvtoExchange
 
             usr.approve_state   = 1
             usr.operation_state = 2
-            usr.inn             = params[:inn] unless params[:inn].nil?
+            usr.inn             = params[:inn] unless params[:inn].blank?
 
           # Отклонили в регистрации
           when REJECTED then

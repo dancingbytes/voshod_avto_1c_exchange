@@ -16,14 +16,14 @@ module VoshodAvtoExchange
       ).freeze
 
       def initialize(
-        provider_id:  nil,
-        doc_info:     {}
+        p_code:,
+        doc_info:   {}
       )
 
         super
 
-        @provider_id = provider_id
-        @doc_info    = doc_info
+        @p_code     = p_code
+        @doc_info   = doc_info
         start_catalogs
 
       end # new
@@ -205,8 +205,7 @@ module VoshodAvtoExchange
 
         @start_catalog_group = true
         @catalog = {
-          p_parent_id:  @catalog_parents[@catalog_level-1],
-          p_id:         @provider_id
+          p_parent_id:  @catalog_parents[@catalog_level-1]
         }
 
       end # start_catalog_group
@@ -283,7 +282,7 @@ module VoshodAvtoExchange
 
         @start_item = true
         @item       = {
-          p_id:         @provider_id,
+          p_code:       @p_code,
           params:       {},
           characters:   {}
         }
@@ -368,27 +367,24 @@ module VoshodAvtoExchange
         return if @catalog.nil? || @catalog.empty?
 
         cat = ::Catalog.find_or_initialize_by(
-
-          p_id:         @catalog[:p_id],
-          p_catalog_id: @catalog[:id]
-
+          va_catalog_id: @catalog[:id]
         )
 
-        # Сохраняем инднтификатор текущего каталога
-        @catalogs_meta[@catalog[:id]] = cat.id.to_s
-
         # Выбираем идентификатор родительского каталога
-        cat.parent_id   = @catalogs_meta[@catalog[:p_parent_id]]
+        cat.parent_id   = @catalogs_meta[@catalog[:va_parent_id]]
 
         cat.raw         = false
-        cat.p_parent_id = @catalog[:p_parent_id]
         cat.name        = @catalog[:name]
+        cat.va_parent_id = @catalog[:va_parent_id]
 
         begin
 
           log(S_C_ERROR % {
             msg: cat.errors.full_messages
           }) unless cat.save
+
+          # Сохраняем инднтификатор текущего каталога
+          @catalogs_meta[@catalog[:id]] = cat.id
 
         rescue => ex
 
@@ -407,36 +403,53 @@ module VoshodAvtoExchange
 
         item = ::Item.find_or_initialize_by(
 
-          p_id:       @item[:p_id],
-          p_item_id:  @item[:id]
+          p_code:      @item[:p_code],
+          va_item_id:  @item[:id]
 
         )
 
-        item.raw          = false
-        item.updated_at   = ::Time.now.utc
-        item.p_catalog_id = @item[:p_catalog_id]
-        item.nom_group    = @item[:nom_group]
-        item.price_group  = @item[:price_group]
-        item.mog          = @item[:mog]
-        item.name         = @item[:name]
+        item.raw            = false
+        item.updated_at     = ::Time.now.utc
 
-        item.oem_num      = @item[:oem_num]
-        item.oem_brand    = @item[:oem_brand]
+        item.p_rate         = 5
+        item.p_delivery     = 0
+        item.p_markup       = 0
 
-        item.unit         = @item[:unit]
-        item.unit_code    = @item[:unit_code]
-        item.gtd          = @item[:gtd]
-        item.barcode      = @item[:barcode]
-        item.contry_code  = @item[:contry_code]
-        item.contry_name  = @item[:contry_name]
-        item.weight       = @item[:params]["Вес"].try(:to_f)
-        item.department   = @item[:department]
+        item.va_catalog_id  = @item[:va_catalog_id]
+        item.va_nom_group   = @item[:va_nom_group]
+        item.va_price_group = @item[:va_price_group]
 
-        item.search_tags  = @item[:search_tags]
+        item.mog            = (@item[:mog].try(:clean_whitespaces) || "")[0..99]
+        item.name           = (@item[:name].try(:clean_whitespaces) || "")[0..250]
 
-        if item.changed?
-          item.save rescue nil
+        item.oem_num_original   = (@item[:oem_num].try(:clean_whitespaces) || "")[0..99]
+        item.oem_brand_original = (@item[:oem_brand].try(:clean_whitespaces) || "")[0..99]
+
+        item.oem_num        = ::Cross.clean(@item[:oem_num])[0..99]
+        item.oem_brand      = ::Vendor.clean(@item[:oem_brand])[0..99]
+
+        item.unit           = @item[:unit]
+        item.unit_code      = @item[:unit_code]
+
+        item.department     = (@item[:department].try(:clean_whitespaces) || "")[0..99]
+        item.search_tags    = @item[:search_tags].try(:clean_whitespaces)
+
+        return unless item.changed?
+
+        begin
+
+          log(S_I_ERROR % {
+            msg: item.errors.full_messages
+          }) unless item.save
+
           item.insert_sphinx
+
+        rescue => ex
+
+          log(S_I_ERROR % {
+            msg: [ex.message].push(ex.backtrace).join("\n")
+          })
+
         end
 
       end # save_item
@@ -449,7 +462,6 @@ module VoshodAvtoExchange
         # При полной обработке данных, помечаем все каталоги как "сырые",
         # что бы в дальнейшем понять какие каталоги нужно удалит из каталога
         ::Catalog.
-          by_provider(@provider_id).
           update_all({ raw: true })
 
       end # start_work_with_catalogs
@@ -463,7 +475,6 @@ module VoshodAvtoExchange
         if @full_update
 
           ::Catalog.
-            by_provider(@provider_id).
             raw.
             destroy_all
 
@@ -472,7 +483,6 @@ module VoshodAvtoExchange
         else
 
           ::Catalog.
-            by_provider(@provider_id).
             update_all({ raw: false })
 
         end # if
@@ -489,7 +499,7 @@ module VoshodAvtoExchange
           # При полной обработке данных, помечаем все товары как "сырые",
           # что бы в дальнейшем понять какие товары нужно удалит из каталога
           ::Item.
-            by_provider(@provider_id).
+            filter_by_p_code(@provider_id).
             update_all({ raw: true })
 
         end # if
@@ -503,15 +513,9 @@ module VoshodAvtoExchange
 
         if @full_update
 
-          # Удалем все товары у которых не указан каталог
-          ::Item.
-            by_provider(@provider_id).
-            where({ p_catalog_id: nil }).
-            destroy_all
-
           # Удаляем все товары, которые не были обработаны
           ::Item.
-            by_provider(@provider_id).
+            filter_by_p_code(@provider_id).
             raw.
             destroy_all
 

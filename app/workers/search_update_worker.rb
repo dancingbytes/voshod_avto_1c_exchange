@@ -9,6 +9,8 @@ class SearchUpdateWorker
     # Удаляем все из поискового индекса
     ::Item.clear_all_from_sphinx
 
+    sleep 5
+
     # Обновляем поисковый индекс
     ::Item.insert_sphinx_by_page
 

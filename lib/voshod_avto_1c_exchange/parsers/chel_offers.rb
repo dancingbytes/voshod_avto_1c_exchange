@@ -12,15 +12,15 @@ module VoshodAvtoExchange
       ).freeze
 
       def initialize(
-        provider_id:  nil,
+        p_code:       nil,
         i_attrs:      {},
         doc_info:     {}
       )
 
         super
 
-        @provider_id = provider_id
-        @doc_info    = doc_info
+        @p_code     = p_code
+        @doc_info   = doc_info
         start_all
 
       end # new
@@ -120,7 +120,7 @@ module VoshodAvtoExchange
 
         @start_item = true
         @item       = {
-          p_id:         @provider_id,
+          p_code:       @p_code,
           prices:       {},
           meta_prices:  {}
         }
@@ -189,23 +189,34 @@ module VoshodAvtoExchange
 
         item = ::Item.find_or_initialize_by(
 
-          p_id:       @item[:p_id],
-          p_item_id:  @item[:id]
+          p_code:       @item[:p_code],
+          va_item_id:   @item[:id]
 
         )
 
-        item.updated_at   = ::Time.now
-        item.prices       = @item[:prices]
-        item.meta_prices  = @item[:meta_prices]
+        item.updated_at   = ::Time.now.utc
+        item.prices       = @item[:prices] || {}
+        item.meta_prices  = @item[:meta_prices] || {}
         item.count        = @item[:count].try(:to_i) || 0
 
-        count_changed     = item.count_changed?
+        item.default_price = (@item[:prices] || {}).values.min || 0
 
-        item.save rescue nil
+        return unless item.changed?
 
-        if count_changed
-          item.update_cross_avaliable
+        begin
+
+          log(S_I_ERROR % {
+            msg: item.errors.full_messages
+          }) unless item.save
+
           item.insert_sphinx
+
+        rescue => ex
+
+          log(S_I_ERROR % {
+            msg: [ex.message].push(ex.backtrace).join("\n")
+          })
+
         end
 
       end # save_item

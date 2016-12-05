@@ -88,7 +88,7 @@ module VoshodAvtoExchange
         end
 
         # Удаляем все правила пользователя
-        ::Price.for_user(user.id).delete
+        ::Price.for_user(user.id).delete_all
 
         # Создаем правила заново
         @user_params[:rules].each do |rule|

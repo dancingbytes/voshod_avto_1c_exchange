@@ -40,7 +40,7 @@ module VoshodAvtoExchange
 
           when "Ид".freeze            then
             parse_order_params(:order_id)
-            parse_item_params(:p_item_id)
+            parse_item_params(:va_item_id)
 
           when "Артикул".freeze       then
             parse_item_params(:mog)
@@ -57,9 +57,6 @@ module VoshodAvtoExchange
           when "Сумма".freeze         then
             parse_item_params(:total_price)
 
-          when "Единица".freeze       then
-            parse_item_params(:unit)
-
           when "Статус".freeze        then
             parse_item_params(:state_name)
 
@@ -68,18 +65,6 @@ module VoshodAvtoExchange
 
           when "ДатаДоставки".freeze  then
             parse_item_params(:delivery_at)
-
-          when "Коэффициент".freeze   then
-            parse_item_params(:in_pack)
-
-          when "КодСтранаПроисхождения".freeze    then
-            parse_item_params(:contry_code)
-
-          when "СтранаПроисхождения".freeze       then
-            parse_item_params(:contry_name)
-
-          when "НомерГТД".freeze      then
-            parse_item_params(:gtd)
 
         end # case
 
@@ -129,28 +114,21 @@ module VoshodAvtoExchange
 
         ci = ::CartItem.find_or_initialize_by({
           order_id:     order.id,
-          va_item_id:   @item_params[:p_item_id]
+          va_item_id:   @item_params[:va_item_id]
         })
 
-        ci.user_id        = order.user_id
-        ci.p_code         = 'VNY6'
+        ci.user_id          = order.user_id
+        ci.p_code           = ::VoshodAvtoExchange::P_CODE
 
-        ci.state_name     = @item_params[:state_name]
+        ci.state_name       = @item_params[:state_name]
 
-        ci.mog            = @item_params[:mog]
-        ci.name           = @item_params[:name]
-        ci.unit           = @item_params[:unit]
+        ci.mog              = @item_params[:mog]
+        ci.name             = @item_params[:name]
 
-#        ci.p_id           = order.p_id
-#        ci.in_pack        = @item_params[:in_pack]
-#        ci.contry_code    = @item_params[:contry_code]
-#        ci.contry_name    = @item_params[:contry_name]
-#        ci.gtd            = @item_params[:gtd]
-
-        ci.raw_price      = true
-        ci.price          = @item_params[:price]
-        ci.total_price    = @item_params[:total_price]
-        ci.count          = @item_params[:count]
+        ci.raw_price        = true
+        ci.price            = @item_params[:price].try(:to_f) || 0
+        ci.total_price      = @item_params[:total_price].try(:to_f) || 0
+        ci.count            = @item_params[:count].try(:to_i) || 0
 
         ci.delivery_address = @item_params[:delivery_address]
         ci.delivery_at      = @item_params[:delivery_at].try(:to_time)
@@ -159,11 +137,12 @@ module VoshodAvtoExchange
           msg: ci.errors.full_messages
         }) unless ci.save
 
-        # Помечаем заказ обоаботанным
-        order.update_columns(operation_state: 2) if order.operation_state < 2
-
-        # Обновляем итоговую сумму заказа
-        order.update_columns(amount: order.basket_total_price)
+        # Помечаем заказ обоаботанным и
+        # обновляем итоговую сумму заказа
+        order.update_columns({
+          operation_state:  2,
+          amount:           order.basket_total_price
+        )
 
       end # save_item
 
