@@ -10,7 +10,7 @@ module VoshodAvtoExchange
       P_ERROR = %Q(Ошибка парсинга.\n%{tag}).freeze
       F_ERROR = %Q(Клиент не найден.\n%{pr}).freeze
 
-      S_ERROR = %Q(Ошибка сохранения правил цен в базе.
+      S_ERROR = %Q(Ошибка сохранения данных о клиенте в базе.
         %{msg}
       ).freeze
 
@@ -76,7 +76,10 @@ module VoshodAvtoExchange
           log(F_ERROR % { pr: params.inspect }) and return
         end
 
-        usr.first_name, usr.last_name, usr.patronomic = params[:name].split(/\s/)
+        names = params[:name].split(/\s/)
+        usr.first_name  = names[0] || ''
+        usr.last_name   = names[1] || ''
+        usr.patronomic  = names[2] || ''
 
         # Разбор параметров регистарции
         case params[:state]
