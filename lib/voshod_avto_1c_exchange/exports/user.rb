@@ -57,7 +57,7 @@ module VoshodAvtoExchange
           operation_state: 1
         })
 
-        res.modified_count > 0
+        true
 
       end # verify
 
