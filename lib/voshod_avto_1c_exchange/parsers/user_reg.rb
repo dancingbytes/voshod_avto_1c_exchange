@@ -76,11 +76,6 @@ module VoshodAvtoExchange
           log(F_ERROR % { pr: params.inspect }) and return
         end
 
-        names = params[:name].split(/\s/)
-        usr.first_name  = names[0] || ''
-        usr.last_name   = names[1] || ''
-        usr.patronomic  = names[2] || ''
-
         # Разбор параметров регистарции
         case params[:state]
 
