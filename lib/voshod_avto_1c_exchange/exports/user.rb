@@ -50,14 +50,12 @@ module VoshodAvtoExchange
       # Закрываем экспорт
       def verify(operation_id = 0)
 
-        res = ::User.where({
+        ::User.where({
           operation_state: 0,
           operation_id:    operation_id
         }).update_all({
           operation_state: 1
         })
-
-        true
 
       end # verify
 
