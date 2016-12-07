@@ -45,6 +45,18 @@ module VoshodAvtoExchange
           when "Артикул".freeze       then
             parse_item_params(:mog)
 
+          when "АртикулПроизводителя".freeze  then
+            parse_item_params(:oem_num)
+
+          when "Производитель".freeze  then
+            parse_item_params(:oem_brand)
+
+          when "КодПоставщика".freeze  then
+            parse_item_params(:p_code)
+
+          when "ЦенаЗакупа".freeze then
+            parse_item_params(:purchase_price)
+
           when "Наименование".freeze  then
             parse_item_params(:name)
 
@@ -113,43 +125,34 @@ module VoshodAvtoExchange
         end
 
         ci = ::CartItem.find_or_initialize_by({
+
+          user_id:      order.user_id,
           order_id:     order.id,
-          va_item_id:   @item_params[:va_item_id]
+
+          mog:          @item_params[:mog],
+          p_code:       @item_params[:p_code],
+          oem_num:      @item_params[:oem_num],
+          oem_brand:    @item_params[:oem_brand]
+
         })
 
-        ci.state_name       = @item_params[:state_name]
-
-        #
-        # TODO:
-        # Основная проблема возникнет при обработке товаров внещних поставщиков
-        #
         if ci.new_record?
 
-          ci.user_id  = order.user_id
-          ci.p_code   = ::VoshodAvtoExchange::P_CODE
-          ci.mog      = @item_params[:mog]
-          ci.name     = @item_params[:name]
-
-          item = ::Item.where(
-            p_code:      ::VoshodAvtoExchange::P_CODE,
-            va_item_id:  @item_params[:va_item_id]
-          ).limit(1).to_a[0]
-
-          if item
-
-            ci.oem_num    = item.oem_num
-            ci.oem_brand  = item.oem_brand
-
-          end # if
+          ci.name       = @item_params[:name] || ''
+          ci.va_item_id = @item_params[:va_item_id] || ''
 
         end # if
 
-
+        ci.state_name       = @item_params[:state_name] || ''
 
         ci.raw_price        = true
         ci.price            = @item_params[:price].try(:to_f) || 0
         ci.total_price      = @item_params[:total_price].try(:to_f) || 0
         ci.count            = @item_params[:count].try(:to_i) || 0
+
+        # Цена закупа у внешнего поставщика. Пока не будем обновлять эти данные
+        # при обмене с 1С
+        # ci.purchase_price   = @item_params[:purchase_price].try(:to_f) || 0
 
         ci.delivery_address = @item_params[:delivery_address] ||
         ci.delivery_at      = @item_params[:delivery_at].try(:to_time)

@@ -21,19 +21,22 @@ module VoshodAvtoExchange
             cistr << ::VoshodAvtoExchange::Template::ORDER_ITEM % {
 
               # ИД товара в 1С Восход-авто
-              item_id:          cart_item.va_item_id,
+              item_id:          xml_escape(cart_item.va_item_id),
 
-#              # Код внешнего поставщика
-#              p_code:           xml_escape(cart_item.p_code),
+              # Код внешнего поставщика
+              p_code:           xml_escape(cart_item.p_code),
 
-#              # Бренд детали
-#              t.string      :oem_brand
+              # Бренд детали (Производитель)
+              oem_brand:        xml_escape(cart_item.oem_brand),
 
-#              # Номер детали
-#              oem_num:          xml_escape(cart_item.oem_num),
+              # Номер детали (Артикул производителя)
+              oem_num:          xml_escape(cart_item.oem_num),
 
               # Артикул товара в 1С Восход-авто
               item_mog:         xml_escape(cart_item.mog),
+
+              # Цена закупа (у внешнего поставщика)
+              purchase_price:   cart_item.purchase_price || 0,
 
               item_name:        xml_escape(cart_item.name),
               item_contry_code: "643",
