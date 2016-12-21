@@ -206,7 +206,7 @@ module VoshodAvtoExchange
         item.meta_prices  = @item[:meta_prices] || {}
         item.count        = @item[:count].try(:to_i) || 0
 
-        item.default_price = (@item[:prices] || {}).values.min || 0
+        item.purchase_price = (@item[:prices] || {}).values.min || 0
 
         return unless item.changed?
 

@@ -7,12 +7,12 @@ class SearchUpdateWorker
   def perform
 
     # Удаляем все из поискового индекса
-    ::Item.clear_all_from_sphinx
+    ::Item.clear_sphinx
 
-    sleep 5
+    sleep 3
 
     # Обновляем поисковый индекс
-    ::Item.insert_sphinx_by_page
+    ::Item.insert_sphinx
 
     ensure
       ::SidekiqQuery.close(self.jid)
