@@ -425,19 +425,19 @@ module VoshodAvtoExchange
         item.va_nom_group   = @item[:va_nom_group]    || ''
         item.va_price_group = @item[:va_price_group]  || ''
 
-        item.mog            = (@item[:mog].try(:clean_whitespaces) || "")[0..99]
-        item.name           = (@item[:name].try(:clean_whitespaces) || "")[0..250]
+        item.mog            = (@item[:mog].try(:clean_whitespaces) || '')[0..99]
+        item.name           = (@item[:name].try(:clean_whitespaces) || '')[0..250]
 
-        item.oem_num_original   = (@item[:oem_num].try(:clean_whitespaces) || "")[0..99]
-        item.oem_brand_original = (@item[:oem_brand].try(:clean_whitespaces) || "")[0..99]
+        item.oem_num_original   = (@item[:oem_num].try(:clean_whitespaces) || '')[0..99]
+        item.oem_brand_original = (@item[:oem_brand].try(:clean_whitespaces) || '')[0..99]
 
         item.oem_num        = ::Cross.clean(@item[:oem_num])[0..99]
         item.oem_brand      = ::Vendor.clean(@item[:oem_brand])[0..99]
 
-        item.unit_code      = @item[:unit_code]
+        item.unit_code      = @item[:unit_code] || 0
 
-        item.department     = (@item[:department].try(:clean_whitespaces) || "")[0..99]
-        item.search_tags    = @item[:search_tags].try(:clean_whitespaces)
+        item.department     = (@item[:department].try(:clean_whitespaces) || '')[0..99]
+        item.search_tags    = @item[:search_tags].try(:clean_whitespaces) || ''
 
         return unless item.changed?
 
