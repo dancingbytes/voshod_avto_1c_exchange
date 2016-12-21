@@ -67,6 +67,9 @@ module VoshodAvtoExchange
           when 'Количество'.freeze then
             parse_item(:count)
 
+          when "КратностьОтгрузки".freeze then
+            parse_item(:shipment)
+
           when 'Наименование'.freeze then
             parse_price(:name)
 
@@ -193,6 +196,10 @@ module VoshodAvtoExchange
           va_item_id:   @item[:id]
 
         )
+
+        unless @item[:shipment].blank?
+          item.shipment     = @item[:shipment].try(:to_i) || 1
+        end
 
         item.updated_at   = ::Time.now.utc
         item.prices       = @item[:prices] || {}

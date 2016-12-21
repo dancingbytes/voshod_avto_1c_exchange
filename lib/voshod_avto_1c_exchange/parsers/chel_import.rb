@@ -130,6 +130,9 @@ module VoshodAvtoExchange
           when "СтранаПроисхождения".freeze then
             parse_item(:contry_name) if item_only?
 
+          when "КратностьОтгрузки".freeze then
+            parse_item(:shipment) if item_only?
+
           when "Производитель".freeze then
             parse_item(:oem_brand) if item_only?
 
@@ -414,6 +417,10 @@ module VoshodAvtoExchange
         item.p_rate         = 5
         item.p_delivery     = 0
         item.p_markup       = 0
+
+        unless @item[:shipment].blank?
+          item.shipment       = @item[:shipment].try(:to_i) || 1
+        end
 
         item.va_catalog_id  = @item[:va_catalog_id]
         item.va_nom_group   = @item[:va_nom_group]
