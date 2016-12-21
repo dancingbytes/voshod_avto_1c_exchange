@@ -378,7 +378,7 @@ module VoshodAvtoExchange
 
         cat.raw           = false
         cat.name          = @catalog[:name] || ''
-        cat.va_parent_id  = @catalog[:va_parent_id] || ||
+        cat.va_parent_id  = @catalog[:va_parent_id] || ''
 
         begin
 
