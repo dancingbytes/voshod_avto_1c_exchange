@@ -374,11 +374,11 @@ module VoshodAvtoExchange
         )
 
         # Выбираем идентификатор родительского каталога
-        cat.parent_id   = @catalogs_meta[@catalog[:va_parent_id]]
+        cat.parent_id     = @catalogs_meta[@catalog[:va_parent_id]]
 
-        cat.raw         = false
-        cat.name        = @catalog[:name]
-        cat.va_parent_id = @catalog[:va_parent_id]
+        cat.raw           = false
+        cat.name          = @catalog[:name] || ''
+        cat.va_parent_id  = @catalog[:va_parent_id] || ||
 
         begin
 
@@ -407,7 +407,7 @@ module VoshodAvtoExchange
         item = ::Item.find_or_initialize_by(
 
           p_code:      @item[:p_code],
-          va_item_id:  @item[:id]
+          va_item_id:  @item[:id] || ''
 
         )
 
@@ -416,15 +416,14 @@ module VoshodAvtoExchange
 
         item.p_rate         = 5
         item.p_delivery     = 0
-        item.p_markup       = 0
 
         unless @item[:shipment].blank?
           item.shipment       = @item[:shipment].try(:to_i) || 1
         end
 
-        item.va_catalog_id  = @item[:va_catalog_id]
-        item.va_nom_group   = @item[:va_nom_group]
-        item.va_price_group = @item[:va_price_group]
+        item.va_catalog_id  = @item[:va_catalog_id]   || ''
+        item.va_nom_group   = @item[:va_nom_group]    || ''
+        item.va_price_group = @item[:va_price_group]  || ''
 
         item.mog            = (@item[:mog].try(:clean_whitespaces) || "")[0..99]
         item.name           = (@item[:name].try(:clean_whitespaces) || "")[0..250]

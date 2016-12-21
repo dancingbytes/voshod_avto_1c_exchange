@@ -193,7 +193,7 @@ module VoshodAvtoExchange
         item = ::Item.find_or_initialize_by(
 
           p_code:       @item[:p_code],
-          va_item_id:   @item[:id]
+          va_item_id:   @item[:id] || ''
 
         )
 
