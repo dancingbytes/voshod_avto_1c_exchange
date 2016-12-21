@@ -504,7 +504,7 @@ module VoshodAvtoExchange
           # При полной обработке данных, помечаем все товары как "сырые",
           # что бы в дальнейшем понять какие товары нужно удалит из каталога
           ::Item.
-            filter_by_p_code(@provider_id).
+            where(p_code: @p_code).
             update_all({ raw: true })
 
         end # if
@@ -520,7 +520,7 @@ module VoshodAvtoExchange
 
           # Удаляем все товары, которые не были обработаны
           ::Item.
-            filter_by_p_code(@provider_id).
+            where(p_code: @p_code).
             raw.
             destroy_all
 
