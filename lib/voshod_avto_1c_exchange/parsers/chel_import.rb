@@ -434,7 +434,6 @@ module VoshodAvtoExchange
         item.oem_num        = ::Cross.clean(@item[:oem_num])[0..99]
         item.oem_brand      = ::Vendor.clean(@item[:oem_brand])[0..99]
 
-        item.unit           = @item[:unit]
         item.unit_code      = @item[:unit_code]
 
         item.department     = (@item[:department].try(:clean_whitespaces) || "")[0..99]
