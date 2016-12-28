@@ -69,7 +69,12 @@ module VoshodAvtoExchange
       end # log
 
       def squish_str(str)
-        str.split.join(' ')
+
+        str.sub!(/\A\s+/, "")
+        str.sub!(/\s+\z/, "")
+        str.gsub!(/(\s){2,}/, '\\1')
+        str
+
       end # squish_str
 
     end # Base
