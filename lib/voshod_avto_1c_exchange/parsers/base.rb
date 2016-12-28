@@ -30,7 +30,7 @@ module VoshodAvtoExchange
       end # end_element
 
       def characters(str)
-        @str << squish_str(str) unless str.blank?
+        @str << str unless str.blank?
       end # characters
 
       def end_document
@@ -67,15 +67,6 @@ module VoshodAvtoExchange
       def log(msg)
         ::VoshodAvtoExchange.log(msg, self.class.name)
       end # log
-
-      def squish_str(str)
-
-        str.sub!(/\A\s+/, "")
-        str.sub!(/\s+\z/, "")
-        str.gsub!(/(\s){2,}/, '\\1')
-        str
-
-      end # squish_str
 
     end # Base
 
