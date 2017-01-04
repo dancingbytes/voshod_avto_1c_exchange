@@ -198,7 +198,7 @@ module VoshodAvtoExchange
         )
 
         unless @item[:shipment].blank?
-          item.shipment     = @item[:shipment].try(:to_i) || 1
+          item.shipment   = @item[:shipment].try(:to_i) || 1
         end
 
         item.updated_at   = ::Time.now.utc
@@ -208,15 +208,20 @@ module VoshodAvtoExchange
 
         item.purchase_price = (@item[:prices] || {}).values.min || 0
 
+        # Если нет изменений -- завершаем работу
         return unless item.changed?
 
         begin
 
-          log(S_I_ERROR % {
-            msg: item.errors.full_messages
-          }) unless item.save
+          if item.save
+            item.insert_sphinx
+          else
 
-          item.insert_sphinx
+            log(S_I_ERROR % {
+              msg: item.errors.full_messages
+            })
+
+          end
 
         rescue => ex
 

@@ -80,7 +80,7 @@ module VoshodAvtoExchange
 
             # Товары
             parse_item(:id)           if item_only?
-            parse_item(:p_catalog_id) if item_catalog?
+            parse_item(:catalog_id)   if item_catalog?
             parse_item_character(:key)
 
           when "Наименование".freeze    then
@@ -374,20 +374,26 @@ module VoshodAvtoExchange
         )
 
         # Выбираем идентификатор родительского каталога
-        cat.parent_id     = @catalogs_meta[@catalog[:va_parent_id]]
+        cat.parent_id     = @catalogs_meta[@catalog[:p_parent_id]]
 
         cat.raw           = false
         cat.name          = @catalog[:name] || ''
-        cat.va_parent_id  = @catalog[:va_parent_id] || ''
+        cat.va_parent_id  = @catalog[:p_parent_id] || ''
 
         begin
 
-          log(S_C_ERROR % {
-            msg: cat.errors.full_messages
-          }) unless cat.save
+          if cat.save
 
-          # Сохраняем инднтификатор текущего каталога
-          @catalogs_meta[@catalog[:id]] = cat.id
+            # Сохраняем инднтификатор текущего каталога
+            @catalogs_meta[@catalog[:id]] = cat.id
+
+          else
+
+            log(S_C_ERROR % {
+              msg: cat.errors.full_messages
+            })
+
+          end
 
         rescue => ex
 
@@ -396,7 +402,6 @@ module VoshodAvtoExchange
           })
 
         end
-
 
       end # save_catalog
 
@@ -418,12 +423,12 @@ module VoshodAvtoExchange
         item.p_delivery     = 0
 
         unless @item[:shipment].blank?
-          item.shipment       = @item[:shipment].try(:to_i) || 1
+          item.shipment     = @item[:shipment].try(:to_i) || 1
         end
 
-        item.va_catalog_id  = @item[:va_catalog_id]   || ''
-        item.va_nom_group   = @item[:va_nom_group]    || ''
-        item.va_price_group = @item[:va_price_group]  || ''
+        item.va_catalog_id  = @item[:catalog_id]   || ''
+        item.va_nom_group   = @item[:nom_group]    || ''
+        item.va_price_group = @item[:price_group]  || ''
 
         item.mog            = (@item[:mog].try(:clean_whitespaces) || '')[0..99]
         item.name           = (@item[:name].try(:clean_whitespaces) || '')[0..250]
@@ -439,15 +444,20 @@ module VoshodAvtoExchange
         item.department     = (@item[:department].try(:clean_whitespaces) || '')[0..99]
         item.search_tags    = @item[:search_tags].try(:clean_whitespaces) || ''
 
+        # Если нет изменений -- завершаем работу
         return unless item.changed?
 
         begin
 
-          log(S_I_ERROR % {
-            msg: item.errors.full_messages
-          }) unless item.save
+          if item.save
+            item.insert_sphinx
+          else
 
-          item.insert_sphinx
+            log(S_I_ERROR % {
+              msg: item.errors.full_messages
+            })
+
+          end
 
         rescue => ex
 
@@ -481,7 +491,10 @@ module VoshodAvtoExchange
 
           ::Catalog.
             raw.
-            destroy_all
+            delete_all
+
+          ::Catalog.
+            update_all({ lft: nil, rgt: nil })
 
           ::Catalog.rebuild!
 
@@ -522,7 +535,7 @@ module VoshodAvtoExchange
           ::Item.
             where(p_code: @p_code).
             raw.
-            destroy_all
+            delete_all
 
           ::SidekiqQuery.create({
 
