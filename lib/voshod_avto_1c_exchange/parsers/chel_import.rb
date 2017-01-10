@@ -411,8 +411,10 @@ module VoshodAvtoExchange
 
         item = ::Item.find_or_initialize_by(
 
-          p_code:      @item[:p_code],
-          va_item_id:  @item[:id] || ''
+          p_code:       @item[:p_code],
+          oem_num:      ::Cross.clean(@item[:oem_num])[0..99],
+          oem_brand:    ::Vendor.get_name(@item[:oem_brand])[0..99],
+          mog:          (@item[:mog].try(:clean_whitespaces) || '')[0..99]
 
         )
 
@@ -427,17 +429,14 @@ module VoshodAvtoExchange
         end
 
         item.va_catalog_id  = @item[:catalog_id]   || ''
+        item.va_item_id     = @item[:id] || ''
         item.va_nom_group   = @item[:nom_group]    || ''
         item.va_price_group = @item[:price_group]  || ''
 
-        item.mog            = (@item[:mog].try(:clean_whitespaces) || '')[0..99]
         item.name           = (@item[:name].try(:clean_whitespaces) || '')[0..250]
 
         item.oem_num_original   = (@item[:oem_num].try(:clean_whitespaces) || '')[0..99]
         item.oem_brand_original = (@item[:oem_brand].try(:clean_whitespaces) || '')[0..99]
-
-        item.oem_num        = ::Cross.clean(@item[:oem_num])[0..99]
-        item.oem_brand      = ::Vendor.clean(@item[:oem_brand])[0..99]
 
         item.unit_code      = @item[:unit_code] || 0
 

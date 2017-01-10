@@ -64,6 +64,15 @@ module VoshodAvtoExchange
             parse_price(:id)
             parse_item(:id)
 
+          when 'АртикулПроизводителя'.freeze then
+            parse_item(:oem_num)
+
+          when 'Артикул'.freeze then
+            parse_item(:mog)
+
+          when "Производитель".freeze then
+            parse_item(:oem_brand)
+
           when 'Количество'.freeze then
             parse_item(:count)
 
@@ -193,7 +202,9 @@ module VoshodAvtoExchange
         item = ::Item.find_or_initialize_by(
 
           p_code:       @item[:p_code],
-          va_item_id:   @item[:id] || ''
+          oem_num:      ::Cross.clean(@item[:oem_num])[0..99],
+          oem_brand:    ::Vendor.get_name(@item[:oem_brand])[0..99],
+          mog:          (@item[:mog].try(:clean_whitespaces) || '')[0..99]
 
         )
 
@@ -201,6 +212,7 @@ module VoshodAvtoExchange
           item.shipment   = @item[:shipment].try(:to_i) || 1
         end
 
+        item.va_item_id   = @item[:id] || ''
         item.updated_at   = ::Time.now.utc
         item.prices       = @item[:prices] || {}
         item.meta_prices  = @item[:meta_prices] || {}
