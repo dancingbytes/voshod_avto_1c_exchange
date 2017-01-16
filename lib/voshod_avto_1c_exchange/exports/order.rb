@@ -27,10 +27,10 @@ module VoshodAvtoExchange
               p_code:           xml_escape(cart_item.p_code),
 
               # Бренд детали (Производитель)
-              oem_brand:        xml_escape(cart_item.oem_brand),
+              oem_brand:        xml_escape(cart_item.oem_brand_original),
 
               # Номер детали (Артикул производителя)
-              oem_num:          xml_escape(cart_item.oem_num),
+              oem_num:          xml_escape(cart_item.oem_num_original),
 
               # Артикул товара в 1С Восход-авто
               item_mog:         xml_escape(cart_item.mog),

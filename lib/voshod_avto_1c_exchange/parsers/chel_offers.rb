@@ -202,9 +202,11 @@ module VoshodAvtoExchange
         item = ::Item.find_or_initialize_by(
 
           p_code:       @item[:p_code],
+          mog:          (@item[:mog].try(:clean_whitespaces) || '')[0..99],
+
+          # Приводим номер производителя и его название к нужному виду
           oem_num:      ::Cross.clean(@item[:oem_num])[0..99],
-          oem_brand:    ::Vendor.get_name(@item[:oem_brand])[0..99],
-          mog:          (@item[:mog].try(:clean_whitespaces) || '')[0..99]
+          oem_brand:    ::VendorAlias.get_name(@item[:oem_brand])[0..99]
 
         )
 

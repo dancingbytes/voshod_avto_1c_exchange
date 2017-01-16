@@ -131,8 +131,10 @@ module VoshodAvtoExchange
 
           mog:          @item_params[:mog],
           p_code:       @item_params[:p_code],
-          oem_num:      @item_params[:oem_num],
-          oem_brand:    @item_params[:oem_brand]
+
+          # Приводим номер производителя и его название к нужному виду
+          oem_num:      ::Cross.clean( (@item_params[:oem_num].try(:clean_whitespaces) || '')[0..99] ),
+          oem_brand:    ::VendorAlias.get_name( (@item_params[:oem_brand].try(:clean_whitespaces) || '')[0..99] )
 
         })
 
@@ -149,6 +151,9 @@ module VoshodAvtoExchange
         ci.price            = @item_params[:price].try(:to_f) || 0
         ci.total_price      = @item_params[:total_price].try(:to_f) || 0
         ci.count            = @item_params[:count].try(:to_i) || 0
+
+        ci.oem_num_original   = (@item_params[:oem_num].try(:clean_whitespaces) || '')[0..99]
+        ci.oem_brand_original = (@item_params[:oem_brand].try(:clean_whitespaces) || '')[0..99]
 
         # Цена закупа у внешнего поставщика. Пока не будем обновлять эти данные
         # при обмене с 1С
