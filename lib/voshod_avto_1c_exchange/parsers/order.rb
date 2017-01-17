@@ -163,7 +163,7 @@ module VoshodAvtoExchange
         ci.delivery_at      = @item_params[:delivery_at].try(:to_time)
 
         log(S_ERROR % {
-          msg: ci.errors.full_messages
+          msg: "#{ci.errors.full_messages}\n#{ci.inspect}"
         }) unless ci.save
 
         # Помечаем заказ обоаботанным и
