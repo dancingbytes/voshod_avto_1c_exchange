@@ -195,10 +195,12 @@ class ExchangeController < ::ApplicationController
 
   def read_file
 
-    unless params[:data].nil?
-      ::Base64.decode64(params[:data])
+    return request.raw_post if params[:data].nil?
+
+    if params[:data].is_a?(::ActionDispatch::Http::UploadedFile)
+      ::Base64.decode64(params[:data].read)
     else
-      request.raw_post
+      ::Base64.decode64(params[:data])
     end
 
   end # read_file
