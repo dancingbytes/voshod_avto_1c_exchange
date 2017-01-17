@@ -161,7 +161,7 @@ module VoshodAvtoExchange
         # при обмене с 1С
         # ci.purchase_price   = @item_params[:purchase_price].try(:to_f) || 0
 
-        ci.delivery_address = @item_params[:delivery_address] ||
+        ci.delivery_address = @item_params[:delivery_address] || ''
         ci.delivery_at      = @item_params[:delivery_at].try(:to_time)
 
         log(S_ERROR % {
