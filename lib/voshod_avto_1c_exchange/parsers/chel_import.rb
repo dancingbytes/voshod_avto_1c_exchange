@@ -536,16 +536,10 @@ module VoshodAvtoExchange
           ::Item.
             where(p_code: @p_code).
             raw.
-            delete_all
-
-          ::SidekiqQuery.create({
-
-            jid:  ::SearchUpdateWorker.perform_async,
-            tag:  ::VoshodAvtoExchange::TAG,
-            name: "Обновление поискового индекса",
-            key:  0
-
-          })
+            each do |item|
+              item.remove_from_sphinx
+              item.delete
+            end
 
         end # if
 
