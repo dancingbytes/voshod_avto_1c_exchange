@@ -130,7 +130,9 @@ module VoshodAvtoExchange
           order_id:     order.id,
 
           mog:          @item_params[:mog],
-          p_code:       @item_params[:p_code],
+
+          # Если код поставщика пуст -- используем код по-умочланию
+          p_code:       @item_params[:p_code].blank? ? 'VNY6' : @item_params[:p_code],
 
           # Приводим номер производителя и его название к нужному виду
           oem_num:      ::Cross.clean( (@item_params[:oem_num].try(:clean_whitespaces) || '')[0..99] ),
