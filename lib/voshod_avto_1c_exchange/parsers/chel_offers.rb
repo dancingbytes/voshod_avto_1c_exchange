@@ -220,7 +220,11 @@ module VoshodAvtoExchange
         item.meta_prices  = @item[:meta_prices] || {}
         item.count        = @item[:count].try(:to_i) || 0
 
-        item.purchase_price = (@item[:prices] || {}).values.min || 0
+        if item.count > 0
+          item.purchase_price = (@item[:prices] || {}).values.min || 0
+        else
+          item.purchase_price = 0
+        end
 
         # Если нет изменений -- завершаем работу
         return unless item.changed?
