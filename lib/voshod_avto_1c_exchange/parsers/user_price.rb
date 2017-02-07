@@ -10,7 +10,8 @@ module VoshodAvtoExchange
       RULE_TYPES = {
         'Общее'                 => 0,
         'НоменклатурнаяГруппа'  => 1,
-        'ЦеноваяГруппа'         => 2
+        'ЦеноваяГруппа'         => 2,
+        'Номенклатура'          => 3
       }.freeze
 
       S_ERROR = %Q(Ошибка сохранения правил цен в базе.
@@ -47,6 +48,9 @@ module VoshodAvtoExchange
 
           when "ПроцентСкидкиНаценки".freeze then
             parse_persent_discount
+
+          when "Цена".freeze                 then
+            parse_fix_price
 
           when "Ид".freeze                   then
             parse_user_params(:user_id)
@@ -100,6 +104,7 @@ module VoshodAvtoExchange
             price_rule_id:    rule[:rule_id],
             price_id:         rule[:price_id],
             value:            rule[:persent_discount],
+            fix_value:        rule[:fix_price] || 0,
             nom_name:         rule[:rule_good_name],
             price_name:       rule[:price_type_name]
 
@@ -126,6 +131,10 @@ module VoshodAvtoExchange
       def parse_persent_discount
         @rule_params[:persent_discount] = tag_value if rule?
       end # parse_persent_discount
+
+      def parse_fix_price
+        @rule_params[:fix_price] = tag_value if rule?
+      end # parse_fix_price
 
       def parse_type_price
         @rule_params[:price_id]   = tag_value if rule? && type_price?

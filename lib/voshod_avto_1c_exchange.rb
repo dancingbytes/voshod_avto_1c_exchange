@@ -80,7 +80,7 @@ module VoshodAvtoExchange
 
     # Сортируем по дате последнего доступа по-возрастанию
     files.sort { |a, b|
-      ::File.new(a).mtime <=> ::File.new(b).atime
+      ::File.new(a).atime <=> ::File.new(b).atime
     }.each do |file_path|
 
       ::SidekiqQuery.create({
