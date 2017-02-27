@@ -220,6 +220,9 @@ module VoshodAvtoExchange
         item.meta_prices  = @item[:meta_prices] || {}
         item.count        = @item[:count].try(:to_i) || 0
 
+        # Если товара нет в наличии то, ставим ему максимальный срок доставки
+        item.p_delivery   = item.count > 0 ? 0 : 999
+
         if item.count > 0
           item.purchase_price = (@item[:prices] || {}).values.min || 0
         else

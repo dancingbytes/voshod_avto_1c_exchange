@@ -424,7 +424,9 @@ module VoshodAvtoExchange
         item.updated_at     = ::Time.now.utc
 
         item.p_rate         = 5
-        item.p_delivery     = 0
+
+        # Если товара нет в наличии то, ставим ему максимальный срок доставки
+        item.p_delivery     = item.count > 0 ? 0 : 999
 
         unless @item[:shipment].blank?
           item.shipment     = @item[:shipment].try(:to_i) || 1
