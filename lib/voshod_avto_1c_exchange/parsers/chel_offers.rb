@@ -171,9 +171,8 @@ module VoshodAvtoExchange
 
         return if @item_price.nil? || @item_price.empty?
 
-        @item[:prices][@item_price[:id]]      = @item_price[:value].try(:to_f)
+        @item[:prices][@item_price[:id]]      = @item_price[:value].try(:to_f) || 0
         @item[:meta_prices][@item_price[:id]] = @types_of_prices[@item_price[:id]] || 'Неизвестно'
-
 
       end # stop_item_price
 
@@ -222,12 +221,6 @@ module VoshodAvtoExchange
 
         # Если товара нет в наличии то, ставим ему максимальный срок доставки
         item.p_delivery   = item.count > 0 ? 0 : 999
-
-        if item.count > 0
-          item.purchase_price = (@item[:prices] || {}).values.min || 0
-        else
-          item.purchase_price = 0
-        end
 
         # Если нет изменений -- завершаем работу
         return unless item.changed?
