@@ -111,8 +111,12 @@ module VoshodAvtoExchange
 
             # Отправляем результат проверки регистрации
             if usr.approved?
+
               # Если пользователю подтверждена регистрация
-              usr.send_approve_request
+              # и он не частное лицо (в этом случае повторное
+              # подтверждение регистрации не требуется)
+              usr.send_approve_request unless usr.retail?
+
             elsif usr.rejected?
               # Если отказали
               usr.send_reject_request

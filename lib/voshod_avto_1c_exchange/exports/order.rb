@@ -77,6 +77,8 @@ module VoshodAvtoExchange
             company:          xml_escape( order.user.try(:company) ),
             full_company:     xml_escape( order.user.try(:full_company) ),
 
+            user_type:        ::VoshodAvtoExchange::USER_TYPE[order.user.try(:user_type)] || 'Неизвестно',
+
             items:            items,
 
             payment_date:     date,

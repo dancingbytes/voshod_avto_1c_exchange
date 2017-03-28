@@ -6,14 +6,6 @@ module VoshodAvtoExchange
 
       extend self
 
-      USER_TYPE = {
-        0   =>  'ИП',
-        1   =>  'ООО',
-        2   =>  'ОАО',
-        3   =>  'ЗАО',
-        4   =>  'ЧастноеЛицо'
-      }.freeze
-
       def list(operation_id = 0, doc: true)
 
         str         = ""
@@ -33,7 +25,7 @@ module VoshodAvtoExchange
 
             kid:            user.uid,
             inn:            xml_escape(user.inn),
-            user_type:      USER_TYPE[user.user_type] || 'Неизвестно',
+            user_type:      ::VoshodAvtoExchange::USER_TYPE[user.user_type] || 'Неизвестно',
             date:           date,
             time:           time,
             company:        xml_escape(user.company),

@@ -11,6 +11,14 @@ module VoshodAvtoExchange
   TAG     = 'ОБМЕН_1С'.freeze
   P_CODE  = 'VNY6'.freeze
 
+  USER_TYPE = {
+    0   =>  'ИП',
+    1   =>  'ООО',
+    2   =>  'ОАО',
+    3   =>  'ЗАО',
+    4   =>  'ЧастноеЛицо'
+  }.freeze
+
   def login(v = nil)
 
     @login = v unless v.blank?
