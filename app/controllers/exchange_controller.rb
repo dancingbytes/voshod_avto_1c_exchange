@@ -18,24 +18,24 @@ class ExchangeController < ::ApplicationController
 
     case mode
 
-      when 'checkauth'
+      when 'checkauth'  then
         answer(text: "success\nexchange_1c\n#{session_id}")
 
-      when 'init'
+      when 'init'       then
         answer(text: "zip=yes\nfile_limit=0")
 
-      when 'success'
+      when 'success'    then
 
         case type
 
           # GET /exchange?type=catalog&mode=success
-          when 'catalog'
+          when 'catalog'  then
             answer(text: "failure\nType `#{type}` is not implement")
 
           # GET /exchange?type=sale&mode=success
           # Пользователи
           # Заказы
-          when 'sale'
+          when 'sale'     then
 
             ::VoshodAvtoExchange::Exports.users_and_orders_verify(operation_id)
             answer(text: "success")
@@ -45,19 +45,35 @@ class ExchangeController < ::ApplicationController
 
         end # case
 
-      when 'query'
+      when 'query' then
 
         case type
 
           # GET /exchange?type=catalog&mode=query
-          when 'catalog'
+          when 'catalog' then
             answer(text: "failure\nType `#{type}` is not implement")
 
           # GET /exchange?type=sale&mode=query
           # Пользователи
           # Заказы
-          when 'sale'
+          when 'sale' then
             answer(xml: ::VoshodAvtoExchange::Exports.users_and_orders(operation_id))
+
+          # GET /exchange?type=users_list&mode=query&id=123
+          # Спсисок пользователей по заданному списку id
+          when 'users_list'    then
+
+            answer(xml: ::VoshodAvtoExchange::Exports::User.list(0,
+              users_list: User.where(id: String(params[:id]).split(','))
+            ))
+
+          # GET /exchange?type=orders_list&mode=query&id=123
+          # Спсисок заказов по заданному списку id
+          when 'orders_list'   then
+
+            answer(xml: ::VoshodAvtoExchange::Exports::Order.list(0,
+              orders_list: Order.where(id: String(params[:id]).split(','))
+            ))
 
           else
             answer(text: "failure\nType `#{type}` is not found")
@@ -65,7 +81,7 @@ class ExchangeController < ::ApplicationController
         end # case
 
       # Узнаем, пришел ли файл выгрузки
-      when 'import'
+      when 'import' then
 
         if ::VoshodAvtoExchange.exist_job?(key: operation_id)
           answer(text: "success")
@@ -93,13 +109,13 @@ class ExchangeController < ::ApplicationController
 
     case mode
 
-      when 'checkauth'
+      when 'checkauth'  then
         answer(text: "success\nexchange_1c\n#{session_id}")
 
-      when 'init'
+      when 'init'       then
         answer(text: "zip=no\nfile_limit=0")
 
-      when 'success'
+      when 'success'    then
         answer(text: "success")
 
       when 'file'
@@ -107,14 +123,14 @@ class ExchangeController < ::ApplicationController
         case type
 
           # POST /exchange?type=catalog&mode=file&filename=sdsd.xml
-          when 'catalog'
+          when 'catalog'  then
 
             # Получение файла из 1С
             res = !save_file.nil?
             answer(text: res ? "success" : "failure\nFile is not found")
 
           # POST /exchange?type=sale&mode=file&filename=sdsd.xml
-          when 'sale'
+          when 'sale'     then
 
             # Получение файла из 1С
             res = !save_file.nil?
