@@ -56,7 +56,7 @@ module VoshodAvtoExchange
           next if items.blank?
 
           # Выставляем индектификатор операции
-          order.update_columns(operation_id: operation_id) if operation_id.blank?
+          order.update_columns(operation_id: operation_id) unless operation_id.blank?
 
           # Формируем даныне по доставке
           if order.delivery_type == 1
