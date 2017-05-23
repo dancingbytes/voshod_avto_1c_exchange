@@ -6,7 +6,7 @@ module VoshodAvtoExchange
 
       extend self
 
-      def list(operation_id = 0, doc: true, users_list: nil)
+      def list(operation_id: nil, doc: true, users_list: nil)
 
         str           = ""
         first_name    = ""
@@ -19,7 +19,7 @@ module VoshodAvtoExchange
         users_list.each { |user|
 
           # Выставляем индектификатор операции
-          user.update_columns(operation_id: operation_id) if operation_id > 0
+          user.update_columns(operation_id: operation_id) if operation_id.blank?
 
           # Формируем карточку пользователя
           str << ::VoshodAvtoExchange::Template::USER % {

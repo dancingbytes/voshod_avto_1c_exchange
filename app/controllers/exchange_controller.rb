@@ -63,7 +63,7 @@ class ExchangeController < ::ApplicationController
           # Спсисок пользователей по заданному списку id
           when 'users_list'    then
 
-            answer(xml: ::VoshodAvtoExchange::Exports::User.list(0,
+            answer(xml: ::VoshodAvtoExchange::Exports::User.list(
               users_list: User.where(id: String(params[:id]).split(','))
             ))
 
@@ -71,7 +71,7 @@ class ExchangeController < ::ApplicationController
           # Спсисок заказов по заданному списку id
           when 'orders_list'   then
 
-            answer(xml: ::VoshodAvtoExchange::Exports::Order.list(0,
+            answer(xml: ::VoshodAvtoExchange::Exports::Order.list(
               orders_list: Order.where(id: String(params[:id]).split(','))
             ))
 
