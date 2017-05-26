@@ -203,9 +203,9 @@ class ExchangeController < ::ApplicationController
 
   def answer(text: nil, xml: nil)
 
-    @answer = { text: text } if text
-    @answer = { xml:  xml, encoding: 'utf-8' } if xml
-    @answer || { text: 'failure\nОбработка параметров не задана' }
+    @answer = { plain: text } if text
+    @answer = { xml: xml, encoding: 'utf-8' } if xml
+    @answer || { plain: 'failure\nОбработка параметров не задана' }
 
   end # answer
 
