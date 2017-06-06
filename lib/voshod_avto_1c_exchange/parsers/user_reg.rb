@@ -70,7 +70,7 @@ module VoshodAvtoExchange
           log(P_ERROR % { tag: tag_debug }) and return
         end
 
-        usr = ::User.where(uid: params[:id]).limit(1).to_a[0]
+        usr = ::User.where(uid: params[:id]).take
 
         unless usr
           log(F_ERROR % { pr: params.inspect }) and return
