@@ -227,9 +227,7 @@ module VoshodAvtoExchange
 
         begin
 
-          if item.save
-            item.insert_sphinx
-          else
+          unless item.save
 
             log(S_I_ERROR % {
               msg: item.errors.full_messages

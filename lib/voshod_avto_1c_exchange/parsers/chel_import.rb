@@ -452,9 +452,7 @@ module VoshodAvtoExchange
 
         begin
 
-          if item.save
-            item.insert_sphinx
-          else
+          unless item.save
 
             log(S_I_ERROR % {
               msg: item.errors.full_messages
@@ -538,10 +536,7 @@ module VoshodAvtoExchange
           ::Item.
             where(p_code: @p_code).
             raw.
-            each do |item|
-              item.remove_from_sphinx
-              item.delete
-            end
+            delete_all
 
         end # if
 
