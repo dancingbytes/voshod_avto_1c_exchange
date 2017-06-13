@@ -198,34 +198,34 @@ module VoshodAvtoExchange
 
         return if @item.nil? || @item.empty?
 
-        item = ::Item.find_or_initialize_by(
-
-          p_code:       @item[:p_code],
-          mog:          (@item[:mog].try(:clean_whitespaces) || '')[0..99],
-
-          # Приводим номер производителя и его название к нужному виду
-          oem_num:      ::Cross.clean(@item[:oem_num])[0..99],
-          oem_brand:    ::VendorAlias.get_name(@item[:oem_brand])[0..99]
-
-        )
-
-        unless @item[:shipment].blank?
-          item.shipment   = @item[:shipment].try(:to_i) || 1
-        end
-
-        item.va_item_id   = @item[:id] || ''
-        item.updated_at   = ::Time.now.utc
-        item.prices       = @item[:prices] || {}
-        item.meta_prices  = @item[:meta_prices] || {}
-        item.count        = @item[:count].try(:to_i) || 0
-
-        # Если товара нет в наличии то, ставим ему максимальный срок доставки
-        item.p_delivery   = item.count > 0 ? 0 : 999
-
-        # Если нет изменений -- завершаем работу
-        return unless item.changed?
-
         begin
+
+          item = ::Item.find_or_initialize_by(
+
+            p_code:       @item[:p_code],
+            mog:          (@item[:mog].try(:clean_whitespaces) || '')[0..99],
+
+            # Приводим номер производителя и его название к нужному виду
+            oem_num:      ::Cross.clean(@item[:oem_num])[0..99],
+            oem_brand:    ::VendorAlias.get_name(@item[:oem_brand])[0..99]
+
+          )
+
+          unless @item[:shipment].blank?
+            item.shipment   = @item[:shipment].try(:to_i) || 1
+          end
+
+          item.va_item_id   = @item[:id] || ''
+          item.updated_at   = ::Time.now.utc
+          item.prices       = @item[:prices] || {}
+          item.meta_prices  = @item[:meta_prices] || {}
+          item.count        = @item[:count].try(:to_i) || 0
+
+          # Если товара нет в наличии то, ставим ему максимальный срок доставки
+          item.p_delivery   = item.count > 0 ? 0 : 999
+
+          # Если нет изменений -- завершаем работу
+          return unless item.changed?
 
           unless item.save
 
@@ -235,6 +235,8 @@ module VoshodAvtoExchange
 
           end
 
+        rescue ::ActiveRecord::RecordNotUnique
+          retry
         rescue => ex
 
           log(S_I_ERROR % {
