@@ -45,7 +45,7 @@ module VoshodAvtoExchange
           when "Наименование".freeze         then parse_params(:name)
           when "Статус".freeze               then parse_params(:state)
           when "Инн".freeze                  then parse_params(:inn)
-          when "ЕстьЗаказы".freeze           then parse_params(:constraint)
+          when "ЕстьЗаказы".freeze           then parse_params(:orders_exists)
 
         end # case
 
@@ -102,7 +102,7 @@ module VoshodAvtoExchange
         end # case
 
         # Убираем/выставляем ограничения если...
-        usr.constraint = params[:constraint].to_s.downcase.eql?('true')
+        usr.constraint = !params[:orders_exists].to_s.downcase.eql?('true')
 
         begin
 
