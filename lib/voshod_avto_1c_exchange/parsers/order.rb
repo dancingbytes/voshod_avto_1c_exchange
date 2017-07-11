@@ -124,49 +124,60 @@ module VoshodAvtoExchange
           log(P_ERROR % { tag: tag_debug }) and return
         end
 
-        ci = ::CartItem.find_or_initialize_by({
+        begin
 
-          user_id:      order.user_id,
-          order_id:     order.id,
+          ci = ::CartItem.find_or_initialize_by({
 
-          mog:          @item_params[:mog],
+            user_id:      order.user_id,
+            order_id:     order.id,
 
-          # Если код поставщика пуст -- используем код по-умочланию
-          p_code:       @item_params[:p_code].blank? ? 'VNY6' : @item_params[:p_code],
+            mog:          @item_params[:mog],
 
-          # Приводим номер производителя и его название к нужному виду
-          oem_num:      ::Cross.clean( (@item_params[:oem_num].try(:clean_whitespaces) || '')[0..99] ),
-          oem_brand:    ::VendorAlias.get_name( (@item_params[:oem_brand].try(:clean_whitespaces) || '')[0..99] )
+            # Если код поставщика пуст -- используем код по-умочланию
+            p_code:       @item_params[:p_code].blank? ? 'VNY6' : @item_params[:p_code],
 
-        })
+            # Приводим номер производителя и его название к нужному виду
+            oem_num:      ::Cross.clean( (@item_params[:oem_num].try(:clean_whitespaces) || '')[0..99] ),
+            oem_brand:    ::VendorAlias.get_name( (@item_params[:oem_brand].try(:clean_whitespaces) || '')[0..99] )
 
-        if ci.new_record?
+          })
 
-          ci.name       = @item_params[:name] || ''
-          ci.va_item_id = @item_params[:va_item_id] || ''
+          if ci.new_record?
 
-        end # if
+            ci.name       = @item_params[:name] || ''
+            ci.va_item_id = @item_params[:va_item_id] || ''
 
-        ci.state_name       = @item_params[:state_name] || ''
+          end # if
 
-        ci.raw_price        = true
-        ci.price            = @item_params[:price].try(:to_f) || 0
-        ci.total_price      = @item_params[:total_price].try(:to_f) || 0
-        ci.count            = @item_params[:count].try(:to_i) || 0
+          ci.state_name       = @item_params[:state_name] || ''
 
-        ci.oem_num_original   = (@item_params[:oem_num].try(:clean_whitespaces) || '')[0..99]
-        ci.oem_brand_original = (@item_params[:oem_brand].try(:clean_whitespaces) || '')[0..99]
+          ci.price            = @item_params[:price].try(:to_f) || 0
+          ci.total_price      = @item_params[:total_price].try(:to_f) || 0
+          ci.count            = @item_params[:count].try(:to_i) || 0
 
-        # Цена закупа у внешнего поставщика. Пока не будем обновлять эти данные
-        # при обмене с 1С
-        # ci.purchase_price   = @item_params[:purchase_price].try(:to_f) || 0
+          ci.oem_num_original   = (@item_params[:oem_num].try(:clean_whitespaces) || '')[0..99]
+          ci.oem_brand_original = (@item_params[:oem_brand].try(:clean_whitespaces) || '')[0..99]
 
-        ci.delivery_address = @item_params[:delivery_address] || ''
-        ci.delivery_at      = @item_params[:delivery_at].try(:to_time)
+          # Цена закупа у внешнего поставщика. Пока не будем обновлять эти данные
+          # при обмене с 1С
+          # ci.purchase_price   = @item_params[:purchase_price].try(:to_f) || 0
 
-        log(S_ERROR % {
-          msg: "#{ci.errors.full_messages}\n#{ci.inspect}"
-        }) unless ci.save
+          ci.delivery_address = @item_params[:delivery_address] || ''
+          ci.delivery_at      = @item_params[:delivery_at].try(:to_time)
+
+          log(S_ERROR % {
+            msg: "#{ci.errors.full_messages}\n#{ci.inspect}"
+          }) unless ci.save
+
+        rescue ::ActiveRecord::RecordNotUnique
+          retry
+        rescue => ex
+
+          log(S_ERROR % {
+            msg: [ex.message].push(ex.backtrace).join("\n")
+          })
+
+        end
 
         # Помечаем заказ обоаботанным и
         # обновляем итоговую сумму заказа
