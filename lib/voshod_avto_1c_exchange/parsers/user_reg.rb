@@ -45,6 +45,7 @@ module VoshodAvtoExchange
           when "Наименование".freeze         then parse_params(:name)
           when "Статус".freeze               then parse_params(:state)
           when "Инн".freeze                  then parse_params(:inn)
+          when "ЕстьЗаказы".freeze           then parse_params(:orders_exists)
 
         end # case
 
@@ -70,7 +71,7 @@ module VoshodAvtoExchange
           log(P_ERROR % { tag: tag_debug }) and return
         end
 
-        usr = ::User.where(uid: params[:id]).limit(1).to_a[0]
+        usr = ::User.where(uid: params[:id]).take
 
         unless usr
           log(F_ERROR % { pr: params.inspect }) and return
@@ -99,6 +100,9 @@ module VoshodAvtoExchange
             usr.operation_state = 0
 
         end # case
+
+        # Убираем/выставляем ограничения если...
+        usr.constraint = !params[:orders_exists].to_s.downcase.eql?('true')
 
         begin
 

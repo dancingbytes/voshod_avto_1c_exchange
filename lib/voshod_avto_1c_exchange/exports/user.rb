@@ -6,19 +6,20 @@ module VoshodAvtoExchange
 
       extend self
 
-      def list(operation_id = 0, doc: true)
+      def list(operation_id: nil, doc: true, users_list: nil)
 
-        str         = ""
-        first_name  = ""
-        last_name   = ""
-        date        = Time.now.strftime('%Y-%m-%d')
-        time        = Time.now.strftime('%H:%M:%S')
+        str           = ""
+        first_name    = ""
+        last_name     = ""
+        date          = Time.now.strftime('%Y-%m-%d')
+        time          = Time.now.strftime('%H:%M:%S')
+        users_list  ||= ::User.where(operation_state: 0)
 
         # Выбраем всех пользователей на обработку
-        ::User.where(operation_state: 0).each { |user|
+        users_list.each { |user|
 
           # Выставляем индектификатор операции
-          user.update_columns(operation_id: operation_id)
+          user.update_columns(operation_id: operation_id) unless operation_id.blank?
 
           # Формируем карточку пользователя
           str << ::VoshodAvtoExchange::Template::USER % {

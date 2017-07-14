@@ -6,14 +6,15 @@ module VoshodAvtoExchange
 
       extend self
 
-      def list(operation_id = 0, doc: true)
+      def list(operation_id: nil, doc: true, orders_list: nil)
 
-        str   = ""
-        date  = Time.now.strftime('%Y-%m-%d')
-        time  = Time.now.strftime('%H:%M:%S')
+        str           = ""
+        date          = Time.now.strftime('%Y-%m-%d')
+        time          = Time.now.strftime('%H:%M:%S')
+        orders_list ||= ::Order.where(operation_state: 0)
 
         # Выбраем все заказы на обработку
-        ::Order.where(operation_state: 0).each { |order|
+        orders_list.each { |order|
 
           # Выбираем все товары из заказа
           items = order.cart_items.inject("") { |cistr, cart_item|
@@ -55,7 +56,7 @@ module VoshodAvtoExchange
           next if items.blank?
 
           # Выставляем индектификатор операции
-          order.update_columns(operation_id: operation_id)
+          order.update_columns(operation_id: operation_id) unless operation_id.blank?
 
           # Формируем даныне по доставке
           if order.delivery_type == 1

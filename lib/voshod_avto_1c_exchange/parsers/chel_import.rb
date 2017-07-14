@@ -369,18 +369,18 @@ module VoshodAvtoExchange
 
         return if @catalog.nil? || @catalog.empty?
 
-        cat = ::Catalog.find_or_initialize_by(
-          va_catalog_id: @catalog[:id]
-        )
-
-        # Выбираем идентификатор родительского каталога
-        cat.parent_id     = @catalogs_meta[@catalog[:p_parent_id]]
-
-        cat.raw           = false
-        cat.name          = @catalog[:name] || ''
-        cat.va_parent_id  = @catalog[:p_parent_id] || ''
-
         begin
+
+          cat = ::Catalog.find_or_initialize_by(
+            va_catalog_id: @catalog[:id]
+          )
+
+          # Выбираем идентификатор родительского каталога
+          cat.parent_id     = @catalogs_meta[@catalog[:p_parent_id]]
+
+          cat.raw           = false
+          cat.name          = @catalog[:name] || ''
+          cat.va_parent_id  = @catalog[:p_parent_id] || ''
 
           if cat.save
 
@@ -395,6 +395,8 @@ module VoshodAvtoExchange
 
           end
 
+        rescue ::ActiveRecord::RecordNotUnique
+          retry
         rescue => ex
 
           log(S_C_ERROR % {
@@ -409,52 +411,50 @@ module VoshodAvtoExchange
 
         return if @item.nil? || @item.empty?
 
-        item = ::Item.find_or_initialize_by(
-
-          p_code:       @item[:p_code],
-          mog:          (@item[:mog].try(:clean_whitespaces) || '')[0..99],
-
-          # Приводим номер производителя и его название к нужному виду
-          oem_num:      ::Cross.clean( (@item[:oem_num].try(:clean_whitespaces) || '')[0..99] ),
-          oem_brand:    ::VendorAlias.get_name( (@item[:oem_brand].try(:clean_whitespaces) || '')[0..99] )
-
-        )
-
-        item.raw            = false
-        item.updated_at     = ::Time.now.utc
-
-        item.p_rate         = 5
-
-        # Если товара нет в наличии то, ставим ему максимальный срок доставки
-        item.p_delivery     = item.count > 0 ? 0 : 999
-
-        unless @item[:shipment].blank?
-          item.shipment     = @item[:shipment].try(:to_i) || 1
-        end
-
-        item.va_catalog_id  = @item[:catalog_id]   || ''
-        item.va_item_id     = @item[:id] || ''
-        item.va_nom_group   = @item[:nom_group]    || ''
-        item.va_price_group = @item[:price_group]  || ''
-
-        item.name           = (@item[:name].try(:clean_whitespaces) || '')[0..250]
-
-        item.oem_num_original   = (@item[:oem_num].try(:clean_whitespaces) || '')[0..99]
-        item.oem_brand_original = (@item[:oem_brand].try(:clean_whitespaces) || '')[0..99]
-
-        item.unit_code      = @item[:unit_code] || 0
-
-        item.department     = (@item[:department].try(:clean_whitespaces) || '')[0..99]
-        item.search_tags    = @item[:search_tags].try(:clean_whitespaces) || ''
-
-        # Если нет изменений -- завершаем работу
-        return unless item.changed?
-
         begin
 
-          if item.save
-            item.insert_sphinx
-          else
+          item = ::Item.find_or_initialize_by(
+
+            p_code:       @item[:p_code],
+            mog:          (@item[:mog].try(:clean_whitespaces) || '')[0..99],
+
+            # Приводим номер производителя и его название к нужному виду
+            oem_num:      ::Cross.clean(@item[:oem_num])[0..99],
+            oem_brand:    ::VendorAlias.get_name(@item[:oem_brand])[0..99]
+
+          )
+
+          item.raw            = false
+          item.updated_at     = ::Time.now.utc
+
+          item.p_rate         = 5
+
+          # Если товара нет в наличии то, ставим ему максимальный срок доставки
+          item.p_delivery     = item.count > 0 ? 0 : 999
+
+          unless @item[:shipment].blank?
+            item.shipment     = @item[:shipment].try(:to_i) || 1
+          end
+
+          item.va_catalog_id  = @item[:catalog_id]   || ''
+          item.va_item_id     = @item[:id] || ''
+          item.va_nom_group   = @item[:nom_group]    || ''
+          item.va_price_group = @item[:price_group]  || ''
+
+          item.name           = (@item[:name].try(:clean_whitespaces) || '')[0..250]
+
+          item.oem_num_original   = (@item[:oem_num].try(:clean_whitespaces) || '')[0..99]
+          item.oem_brand_original = (@item[:oem_brand].try(:clean_whitespaces) || '')[0..99]
+
+          item.unit_code      = @item[:unit_code] || 0
+
+          item.department     = (@item[:department].try(:clean_whitespaces) || '')[0..99]
+          item.search_tags    = @item[:search_tags].try(:clean_whitespaces) || ''
+
+          # Если нет изменений -- завершаем работу
+          return unless item.changed?
+
+          unless item.save
 
             log(S_I_ERROR % {
               msg: item.errors.full_messages
@@ -462,6 +462,8 @@ module VoshodAvtoExchange
 
           end
 
+        rescue ::ActiveRecord::RecordNotUnique
+          retry
         rescue => ex
 
           log(S_I_ERROR % {
@@ -538,10 +540,7 @@ module VoshodAvtoExchange
           ::Item.
             where(p_code: @p_code).
             raw.
-            each do |item|
-              item.remove_from_sphinx
-              item.delete
-            end
+            delete_all
 
         end # if
 

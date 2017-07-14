@@ -15,10 +15,10 @@ module VoshodAvtoExchange
       str     = ""
 
       # Выбираем все заказы
-      str     << ::VoshodAvtoExchange::Exports::Order.list(operation_id, doc: false)
+      str     << ::VoshodAvtoExchange::Exports::Order.list(operation_id: operation_id, doc: false)
 
       # Выбираем всех пользователей на регистрацию
-      str     << ::VoshodAvtoExchange::Exports::User.list(operation_id, doc: false)
+      str     << ::VoshodAvtoExchange::Exports::User.list(operation_id: operation_id, doc: false)
 
       ::VoshodAvtoExchange::Template::XML_BASE % {
         date: date,
