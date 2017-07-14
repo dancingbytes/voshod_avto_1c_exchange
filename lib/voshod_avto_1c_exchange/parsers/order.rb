@@ -129,7 +129,7 @@ module VoshodAvtoExchange
           user_id:      order.user_id,
           order_id:     order.id,
 
-          mog:          @item_params[:mog],
+          mog:          @item_params[:mog] || '',
 
           # Если код поставщика пуст -- используем код по-умочланию
           p_code:       @item_params[:p_code].blank? ? 'VNY6' : @item_params[:p_code],
@@ -147,12 +147,12 @@ module VoshodAvtoExchange
 
         end # if
 
-        ci.state_name       = @item_params[:state_name] || ''
+        ci.state_name         = @item_params[:state_name] || ''
 
-        ci.raw_price        = true
-        ci.price            = @item_params[:price].try(:to_f) || 0
-        ci.total_price      = @item_params[:total_price].try(:to_f) || 0
-        ci.count            = @item_params[:count].try(:to_i) || 0
+        ci.raw_price          = true
+        ci.price              = @item_params[:price].try(:to_f) || 0
+        ci.total_price        = @item_params[:total_price].try(:to_f) || 0
+        ci.count              = @item_params[:count].try(:to_i) || 0
 
         ci.oem_num_original   = (@item_params[:oem_num].try(:clean_whitespaces) || '')[0..99]
         ci.oem_brand_original = (@item_params[:oem_brand].try(:clean_whitespaces) || '')[0..99]
