@@ -120,6 +120,17 @@ module VoshodAvtoExchange
 
         end
 
+        # --------------------------------------------------------
+        log(%{
+          Заказ: %{order_id}
+          Параметры товара:
+          %{data}
+        } % {
+          order_id: @order_params[:order_id],
+          data:     item_params
+        })
+        # --------------------------------------------------------
+
         if @item_params.empty?
           log(P_ERROR % { tag: tag_debug }) and return
         end
