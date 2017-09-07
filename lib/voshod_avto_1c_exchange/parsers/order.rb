@@ -124,6 +124,9 @@ module VoshodAvtoExchange
           log(P_ERROR % { tag: tag_debug }) and return
         end
 
+        # Список изменений товара
+        changes_list = []
+
         begin
 
           ci = ::CartItem.find_or_initialize_by({
@@ -142,13 +145,6 @@ module VoshodAvtoExchange
 
           })
 
-          if ci.new_record?
-
-            ci.name       = @item_params[:name] || ''
-            ci.va_item_id = @item_params[:va_item_id] || ''
-
-          end # if
-
           ci.state_name       = @item_params[:state_name] || ''
 
           ci.price            = @item_params[:price].try(:to_f) || 0
@@ -165,9 +161,40 @@ module VoshodAvtoExchange
           ci.delivery_address = @item_params[:delivery_address] || ''
           ci.delivery_at      = @item_params[:delivery_at].try(:to_time)
 
-          log(S_ERROR % {
-            msg: "#{ci.errors.full_messages}\n#{ci.inspect}"
-          }) unless ci.save
+          if ci.new_record?
+
+            ci.name       = @item_params[:name] || ''
+            ci.va_item_id = @item_params[:va_item_id] || ''
+
+            changes_list  << 'Добавлен новый товар'
+
+          else
+
+            changes_list.concat(
+              ::CartItemHistory.changes_for(ci.changes)
+            )
+
+          end # if
+
+          if ci.save
+
+            changes_list.each { |msg|
+
+              ::CartItemHistory.add(
+                cart_item_id:   ci.id,
+                user_name:      'Менеджер',
+                msg:            msg
+              )
+
+            }
+
+          else
+
+            log(S_ERROR % {
+              msg: "#{ci.errors.full_messages}\n#{ci.inspect}"
+            })
+
+          end
 
         rescue ::ActiveRecord::RecordNotUnique
           retry
