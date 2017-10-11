@@ -178,6 +178,13 @@ module VoshodAvtoExchange
 
           if ci.save
 
+            # Костыль
+            ci.update_columns({
+              price:          @item_params[:price].try(:to_f) || 0,
+              purchase_price: @item_params[:purchase_price].try(:to_f) || 0,
+              total_price:    @item_params[:total_price].try(:to_f) || 0
+            })
+
             changes_list.each { |msg|
 
               ::CartItemHistory.add(
