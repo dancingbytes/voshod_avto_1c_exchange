@@ -207,7 +207,9 @@ module VoshodAvtoExchange
 
             # Приводим номер производителя и его название к нужному виду
             oem_num:      ::Cross.clean(@item[:oem_num])[0..99],
-            oem_brand:    (@item[:oem_brand].try(:clean_whitespaces) || '')[0..99]
+            oem_brand:    ::VendorAlias.clean(
+              (@item[:oem_brand].try(:clean_whitespaces) || '')[0..99]
+            )
 
           )
 

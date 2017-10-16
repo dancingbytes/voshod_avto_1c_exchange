@@ -420,7 +420,9 @@ module VoshodAvtoExchange
 
             # Приводим номер производителя и его название к нужному виду
             oem_num:      ::Cross.clean(@item[:oem_num])[0..99],
-            oem_brand:    (@item[:oem_brand].try(:clean_whitespaces) || '')[0..99]
+            oem_brand:    ::VendorAlias.clean(
+              (@item[:oem_brand].try(:clean_whitespaces) || '')[0..99]
+            )
 
           )
 
@@ -449,7 +451,7 @@ module VoshodAvtoExchange
           item.unit_code      = @item[:unit_code] || 0
 
           item.department     = (@item[:department].try(:clean_whitespaces) || '')[0..99]
-          item.search_tags    = @item[:search_tags].try(:clean_whitespaces) || ''
+          item.search_tags    = (@item[:search_tags].try(:clean_whitespaces) || '')
 
           # Если нет изменений -- завершаем работу
           return unless item.changed?
