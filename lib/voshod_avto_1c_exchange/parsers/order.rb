@@ -129,21 +129,21 @@ module VoshodAvtoExchange
 
         begin
 
-          ci = ::CartItem.find_or_initialize_by({
+          ci = find_item_by(order, @item_params)
 
-            user_id:      order.user_id,
-            order_id:     order.id,
+          ci.mog              = @item_params[:mog].to_s
 
-            mog:          @item_params[:mog] || '',
+          # Если код поставщика пуст -- используем код по-умочланию
+          ci.p_code           = @item_params[:p_code].blank? ? 'VNY6' : @item_params[:p_code]
 
-            # Если код поставщика пуст -- используем код по-умочланию
-            p_code:       @item_params[:p_code].blank? ? 'VNY6' : @item_params[:p_code],
+          # Приводим номер производителя и его название к нужному виду
+          ci.oem_num          =      ::Cross.clean(
+            (@item_params[:oem_num].try(:clean_whitespaces) || '')[0..99]
+          )
 
-            # Приводим номер производителя и его название к нужному виду
-            oem_num:      ::Cross.clean( (@item_params[:oem_num].try(:clean_whitespaces) || '')[0..99] ),
-            oem_brand:    (@item_params[:oem_brand].try(:clean_whitespaces) || '')[0..99]
-
-          })
+          ci.oem_brand        =    ::VendorAlias.clean(
+            (@item_params[:oem_brand].try(:clean_whitespaces) || '')[0..99]
+          )
 
           ci.state_name       = @item_params[:state_name] || ''
 
@@ -221,6 +221,43 @@ module VoshodAvtoExchange
         })
 
       end # save_item
+
+      def find_item_by(order, params)
+
+        va_item_id = params[:va_item_id].to_s
+
+        ci = ::CartItem.where({
+
+          user_id:      order.user_id,
+          order_id:     order.id,
+          va_item_id:   va_item_id
+
+        }) if va_item_id.present?
+
+        return ci if ci
+
+        ::CartItem.find_or_initialize_by({
+
+          user_id:      order.user_id,
+          order_id:     order.id,
+
+          mog:          params[:mog].to_s,
+
+          # Если код поставщика пуст -- используем код по-умочланию
+          p_code:       params[:p_code].blank? ? 'VNY6' : params[:p_code],
+
+          # Приводим номер производителя и его название к нужному виду
+          oem_num:      ::Cross.clean(
+            (params[:oem_num].try(:clean_whitespaces) || '')[0..99]
+          ),
+
+          oem_brand:    ::VendorAlias.clean(
+            (params[:oem_brand].try(:clean_whitespaces) || '')[0..99]
+          )
+
+        })
+
+      end # find_item_by
 
     end # Order < Base
 
