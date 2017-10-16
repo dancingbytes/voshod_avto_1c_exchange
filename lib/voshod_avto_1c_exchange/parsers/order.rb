@@ -232,7 +232,7 @@ module VoshodAvtoExchange
           order_id:     order.id,
           va_item_id:   va_item_id
 
-        }) if va_item_id.present?
+        }).take if va_item_id.present?
 
         return ci if ci
 
