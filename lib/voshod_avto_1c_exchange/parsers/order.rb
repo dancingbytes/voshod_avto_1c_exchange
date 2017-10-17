@@ -163,8 +163,8 @@ module VoshodAvtoExchange
 
           if ci.new_record?
 
-            ci.name       = @item_params[:name] || ''
-            ci.va_item_id = @item_params[:va_item_id] || ''
+            ci.name       = @item_params[:name].to_s
+            ci.va_item_id = @item_params[:va_item_id].to_s
 
             changes_list  << 'Добавлен новый товар'
 
@@ -176,7 +176,7 @@ module VoshodAvtoExchange
 
           end # if
 
-          if ci.save
+          if ci.save!(validate: false)
 
             # Костыль
             ci.update_columns({
@@ -194,12 +194,6 @@ module VoshodAvtoExchange
               )
 
             }
-
-          else
-
-            log(S_ERROR % {
-              msg: "#{ci.errors.full_messages}\n#{ci.inspect}"
-            })
 
           end
 
