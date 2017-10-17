@@ -176,26 +176,30 @@ module VoshodAvtoExchange
 
           end # if
 
-          if ci.save!(validate: false)
+          ::CartItem.transaction(requires_new: true) do
 
-            # Костыль
-            ci.update_columns({
-              price:          @item_params[:price].try(:to_f) || 0,
-              purchase_price: @item_params[:purchase_price].try(:to_f) || 0,
-              total_price:    @item_params[:total_price].try(:to_f) || 0
-            })
+            if ci.save(validate: false)
 
-            changes_list.each { |msg|
+              # Костыль
+              ci.update_columns({
+                price:          @item_params[:price].try(:to_f) || 0,
+                purchase_price: @item_params[:purchase_price].try(:to_f) || 0,
+                total_price:    @item_params[:total_price].try(:to_f) || 0
+              })
 
-              ::CartItemHistory.add(
-                cart_item_id:   ci.id,
-                user_name:      'Менеджер',
-                msg:            msg
-              )
+              changes_list.each { |msg|
 
-            }
+                ::CartItemHistory.add(
+                  cart_item_id:   ci.id,
+                  user_name:      'Менеджер',
+                  msg:            msg
+                )
 
-          end
+              }
+
+            end
+
+          end # transaction
 
         rescue ::ActiveRecord::RecordNotUnique
           retry
