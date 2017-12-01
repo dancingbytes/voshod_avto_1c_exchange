@@ -5,6 +5,10 @@ class ExchangeWorker
 
   sidekiq_options queue: :default, retry: false, backtrace: false
 
+  def expiration
+    @expiration ||= 60 * 60 * 24 * 1 # 1 day
+  end
+
   def perform(file_path)
 
     ::VoshodAvtoExchange::Manager.run(
