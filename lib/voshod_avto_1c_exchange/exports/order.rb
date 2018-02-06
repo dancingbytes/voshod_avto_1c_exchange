@@ -13,6 +13,9 @@ module VoshodAvtoExchange
         time          = Time.now.strftime('%H:%M:%S')
         orders_list ||= ::Order.where(operation_state: 0)
 
+        # Исключаем заказы тестового пользователя
+        orders_list = orders_list.where.not(user_id: 3115)
+
         # Выбраем все заказы на обработку
         orders_list.each { |order|
 
