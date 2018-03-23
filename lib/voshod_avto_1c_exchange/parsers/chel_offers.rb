@@ -114,7 +114,7 @@ module VoshodAvtoExchange
       def stop_parse_storehouse
 
         unless @parse_storehouse_hash.empty?
-          @item.storehouses[@parse_storehouse_hash[:city]] = @parse_storehouse_hash[:count].try(:to_i) || 0
+          @item[:storehouses][@parse_storehouse_hash[:city]] = @parse_storehouse_hash[:count].try(:to_i) || 0
         end
 
         @parse_storehouse       = false
@@ -262,7 +262,7 @@ module VoshodAvtoExchange
           item.prices       = @item[:prices]            || {}
           item.meta_prices  = @item[:meta_prices]       || {}
           item.count        = @item[:count].try(:to_i)  || 0
-          item.storehouses  = @item.storehouses         || {}
+          item.storehouses  = @item[:storehouses]       || {}
 
           # Если товара нет в наличии то, ставим ему максимальный срок доставки
           item.p_delivery   = item.count > 0 ? 0 : 999
