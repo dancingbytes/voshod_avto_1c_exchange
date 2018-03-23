@@ -40,6 +40,9 @@ module VoshodAvtoExchange
           when 'Цена'.freeze then
             start_item_price
 
+          when 'КоличествоРегион'.freeze then
+            start_parse_storehouse
+
         end # case
 
       end # start_element
@@ -75,6 +78,7 @@ module VoshodAvtoExchange
 
           when 'Количество'.freeze then
             parse_item(:count)
+            parse_item_storehouse(:count)
 
           when "КратностьОтгрузки".freeze then
             parse_item(:shipment)
@@ -88,11 +92,46 @@ module VoshodAvtoExchange
           when 'ЦенаЗаЕдиницу'.freeze then
             parse_item_price(:value)
 
+          when 'КоличествоРегион'.freeze then
+            stop_parse_storehouse
+
+          when 'Регион'.freeze then
+            parse_item_storehouse(:city)
+
         end # case
 
       end # end_element
 
       private
+
+      def start_parse_storehouse
+
+        @parse_storehouse       = true
+        @parse_storehouse_hash  = {}
+
+      end
+
+      def stop_parse_storehouse
+
+        unless @parse_storehouse_hash.empty?
+          @item.storehouses[@parse_storehouse_hash[:city]] = @parse_storehouse_hash[:count].try(:to_i) || 0
+        end
+
+        @parse_storehouse       = false
+        @parse_storehouse_hash  = {}
+
+      end
+
+      def for_storehouse?
+        @parse_storehouse == true
+      end
+
+      def parse_item_storehouse(key)
+
+        @parse_storehouse_hash ||= {}
+        @parse_storehouse_hash[key] = tag_value if for_storehouse?
+
+      end
 
       #
       # Обработка цен товаров
@@ -134,7 +173,8 @@ module VoshodAvtoExchange
         @item       = {
           p_code:       @p_code,
           prices:       {},
-          meta_prices:  {}
+          meta_prices:  {},
+          storehouses:  {}
         }
 
       end # start_item
@@ -217,11 +257,12 @@ module VoshodAvtoExchange
             item.shipment   = @item[:shipment].try(:to_i) || 1
           end
 
-          item.va_item_id   = @item[:id] || ''
           item.updated_at   = ::Time.now.utc
-          item.prices       = @item[:prices] || {}
-          item.meta_prices  = @item[:meta_prices] || {}
-          item.count        = @item[:count].try(:to_i) || 0
+          item.va_item_id   = @item[:id]                || ''
+          item.prices       = @item[:prices]            || {}
+          item.meta_prices  = @item[:meta_prices]       || {}
+          item.count        = @item[:count].try(:to_i)  || 0
+          item.storehouses  = @item.storehouses         || {}
 
           # Если товара нет в наличии то, ставим ему максимальный срок доставки
           item.p_delivery   = item.count > 0 ? 0 : 999
