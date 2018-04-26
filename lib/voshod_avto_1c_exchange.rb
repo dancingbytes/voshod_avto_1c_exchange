@@ -8,7 +8,7 @@ module VoshodAvtoExchange
 
   extend self
 
-  TAG     = 'ОБМЕН_1С'.freeze
+  TAG     = 'VoshodAvtoExchange'.freeze
   P_CODE  = 'VNY6'.freeze
 
   USER_TYPE = {
@@ -35,50 +35,17 @@ module VoshodAvtoExchange
 
   alias :pass :password
 
-  def status(key: nil)
-
-    sq = ::SidekiqQuery.
-      where({
-        key: key || 0,
-        tag: ::VoshodAvtoExchange::TAG
-      }).
-      take
-
-    {
-
-      message:    sq.try(:message)    || '',
-      progress:   sq.try(:progress)   || 0,
-      completed:  sq.try(:completed?) || false,
-      status:     sq.try(:status)     || 'undefined'
-
-    }.to_json
-
-  end # status
-
   def run_async(file_path, key: nil)
 
-    ::SidekiqQuery.create({
-
-      jid:  ::ExchangeWorker.perform_async(file_path),
-      tag:  ::VoshodAvtoExchange::TAG,
-      name: "Выгрузка данных из 1С",
-      key:  key || 0
-
-    })
+    jid = ::ExchangeWorker.perform_async(file_path)
+    register_worker(key || 0, jid)
 
     self
 
   end # run_async
 
   def exist_job?(key: nil)
-
-    ::SidekiqQuery.where({
-
-      tag:  ::VoshodAvtoExchange::TAG,
-      key:  key
-
-    }).exists?
-
+    ::Sidekiq.redis {|c| c.exists("#{::VoshodAvtoExchange::TAG}-#{key || 0}") }
   end # exist_job?
 
   def run_async_all(key: nil)
@@ -90,14 +57,8 @@ module VoshodAvtoExchange
       ::File.new(a).atime <=> ::File.new(b).atime
     }.each do |file_path|
 
-      ::SidekiqQuery.create({
-
-        jid:  ::ExchangeWorker.perform_async(file_path),
-        tag:  ::VoshodAvtoExchange::TAG,
-        name: "Выгрузка данных из 1С",
-        key:  key || 0
-
-      })
+      jid = ::ExchangeWorker.perform_async(file_path)
+      register_worker(key || 0, jid)
 
     end # each
 
@@ -144,6 +105,13 @@ module VoshodAvtoExchange
   end # close_logger
 
   private
+
+  def register_worker(key, jid)
+
+    ::Sidekiq.redis { |c| c.setex("#{::VoshodAvtoExchange::TAG}-#{key || 0}", 60*20, jid) }
+    self
+
+  end
 
   def create_logger
 
