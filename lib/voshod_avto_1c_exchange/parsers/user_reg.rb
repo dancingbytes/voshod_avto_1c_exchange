@@ -46,6 +46,7 @@ module VoshodAvtoExchange
           when "Статус".freeze               then parse_params(:state)
           when "Инн".freeze                  then parse_params(:inn)
           when "ЕстьЗаказы".freeze           then parse_params(:orders_exists)
+          when "Комментарий".freeze          then parse_params(:comment)
 
         end # case
 
@@ -123,7 +124,7 @@ module VoshodAvtoExchange
 
             elsif usr.rejected?
               # Если отказали
-              usr.send_reject_request
+              usr.send_reject_request(comment: params[:comment].try(:clean_whitespaces))
             end
 
           end # if
