@@ -41,11 +41,6 @@ class ExchangeController < ::ApplicationController
             answer(text: "success")
 
           else
-
-            puts "[GET] /exchange [Type 1]"
-            puts params.inspect
-            puts
-
             answer(text: "failure\nType `#{type}` is not found")
 
         end # case
@@ -81,11 +76,6 @@ class ExchangeController < ::ApplicationController
             ))
 
           else
-
-            puts "[GET] /exchange [Type 2]"
-            puts params.inspect
-            puts
-
             answer(text: "failure\nType `#{type}` is not found")
 
         end # case
@@ -101,10 +91,6 @@ class ExchangeController < ::ApplicationController
 
       # На все остальное отвечаем ошибкой
       else
-
-        puts "[GET] /exchange [Mode]"
-        puts params.inspect
-        puts
         answer(text: "failure\nMode `#{mode}` is not found")
 
     end # case
@@ -151,20 +137,12 @@ class ExchangeController < ::ApplicationController
             answer(text: res ? "success" : "failure\nFile is not found")
 
           else
-
-            puts "[POST] /exchange [Type]"
-            puts params.inspect
-            puts
             answer(text: "failure\nType `#{type}` is not found")
 
         end # case
 
       # На все остальное отвечаем ошибкой
       else
-
-        puts "[POST] /exchange [Mode]"
-        puts params.inspect
-        puts
         answer(text: "failure\nMode `#{mode}` is not found")
 
     end # case
