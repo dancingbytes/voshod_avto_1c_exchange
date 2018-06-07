@@ -11,10 +11,6 @@ class ExchangeController < ::ApplicationController
   # GET /exchange
   def get
 
-    puts "[GET] /exchange [params]"
-    puts params.inspect
-    puts
-
     ::Rails.logger.tagged("[GET] /exchange [params]") {
       ::Rails.logger.info(" --> session_id: #{session_id}, operation_id: #{operation_id}")
       ::Rails.logger.info(params.inspect)
@@ -45,6 +41,11 @@ class ExchangeController < ::ApplicationController
             answer(text: "success")
 
           else
+
+            puts "[GET] /exchange [Type 1]"
+            puts params.inspect
+            puts
+
             answer(text: "failure\nType `#{type}` is not found")
 
         end # case
@@ -81,10 +82,10 @@ class ExchangeController < ::ApplicationController
 
           else
 
-            ::Rails.logger.tagged("[GET] /exchange [params]") {
-              ::Rails.logger.error(" --> session_id: #{session_id}, operation_id: #{operation_id}")
-              ::Rails.logger.error(params.inspect)
-            }
+            puts "[GET] /exchange [Type 2]"
+            puts params.inspect
+            puts
+
             answer(text: "failure\nType `#{type}` is not found")
 
         end # case
@@ -101,10 +102,9 @@ class ExchangeController < ::ApplicationController
       # На все остальное отвечаем ошибкой
       else
 
-        ::Rails.logger.tagged("[GET] /exchange [params]") {
-          ::Rails.logger.error(" --> session_id: #{session_id}, operation_id: #{operation_id}")
-          ::Rails.logger.error(params.inspect)
-        }
+        puts "[GET] /exchange [Mode]"
+        puts params.inspect
+        puts
         answer(text: "failure\nMode `#{mode}` is not found")
 
     end # case
@@ -115,10 +115,6 @@ class ExchangeController < ::ApplicationController
 
   # POST /exchange
   def post
-
-    puts "[POST] /exchange [params]"
-    puts params.inspect
-    puts
 
     ::Rails.logger.tagged("[POST] /exchange [params]") {
       ::Rails.logger.info("session_id: #{session_id}, operation_id: #{operation_id}")
@@ -156,10 +152,9 @@ class ExchangeController < ::ApplicationController
 
           else
 
-            ::Rails.logger.tagged("[POST] /exchange [params]") {
-              ::Rails.logger.error(" --> session_id: #{session_id}, operation_id: #{operation_id}")
-              ::Rails.logger.error(params.inspect)
-            }
+            puts "[POST] /exchange [Type]"
+            puts params.inspect
+            puts
             answer(text: "failure\nType `#{type}` is not found")
 
         end # case
@@ -167,10 +162,9 @@ class ExchangeController < ::ApplicationController
       # На все остальное отвечаем ошибкой
       else
 
-        ::Rails.logger.tagged("[POST] /exchange [params]") {
-          ::Rails.logger.error(" --> session_id: #{session_id}, operation_id: #{operation_id}")
-          ::Rails.logger.error(params.inspect)
-        }
+        puts "[POST] /exchange [Mode]"
+        puts params.inspect
+        puts
         answer(text: "failure\nMode `#{mode}` is not found")
 
     end # case
