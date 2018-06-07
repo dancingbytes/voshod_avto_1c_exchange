@@ -76,6 +76,11 @@ class ExchangeController < ::ApplicationController
             ))
 
           else
+
+            ::Rails.logger.tagged("[GET] /exchange [params]") {
+              ::Rails.logger.error(" --> session_id: #{session_id}, operation_id: #{operation_id}")
+              ::Rails.logger.error(params.inspect)
+            }
             answer(text: "failure\nType `#{type}` is not found")
 
         end # case
@@ -91,6 +96,11 @@ class ExchangeController < ::ApplicationController
 
       # На все остальное отвечаем ошибкой
       else
+
+        ::Rails.logger.tagged("[GET] /exchange [params]") {
+          ::Rails.logger.error(" --> session_id: #{session_id}, operation_id: #{operation_id}")
+          ::Rails.logger.error(params.inspect)
+        }
         answer(text: "failure\nMode `#{mode}` is not found")
 
     end # case
@@ -137,12 +147,22 @@ class ExchangeController < ::ApplicationController
             answer(text: res ? "success" : "failure\nFile is not found")
 
           else
+
+            ::Rails.logger.tagged("[POST] /exchange [params]") {
+              ::Rails.logger.error(" --> session_id: #{session_id}, operation_id: #{operation_id}")
+              ::Rails.logger.error(params.inspect)
+            }
             answer(text: "failure\nType `#{type}` is not found")
 
         end # case
 
       # На все остальное отвечаем ошибкой
       else
+
+        ::Rails.logger.tagged("[POST] /exchange [params]") {
+          ::Rails.logger.error(" --> session_id: #{session_id}, operation_id: #{operation_id}")
+          ::Rails.logger.error(params.inspect)
+        }
         answer(text: "failure\nMode `#{mode}` is not found")
 
     end # case
