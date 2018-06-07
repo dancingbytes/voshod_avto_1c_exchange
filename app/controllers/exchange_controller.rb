@@ -11,6 +11,10 @@ class ExchangeController < ::ApplicationController
   # GET /exchange
   def get
 
+    puts "[GET] /exchange [params]"
+    puts params.inspect
+    puts
+
     ::Rails.logger.tagged("[GET] /exchange [params]") {
       ::Rails.logger.info(" --> session_id: #{session_id}, operation_id: #{operation_id}")
       ::Rails.logger.info(params.inspect)
@@ -111,6 +115,10 @@ class ExchangeController < ::ApplicationController
 
   # POST /exchange
   def post
+
+    puts "[POST] /exchange [params]"
+    puts params.inspect
+    puts
 
     ::Rails.logger.tagged("[POST] /exchange [params]") {
       ::Rails.logger.info("session_id: #{session_id}, operation_id: #{operation_id}")
