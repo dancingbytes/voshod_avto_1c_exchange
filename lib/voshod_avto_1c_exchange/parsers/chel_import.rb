@@ -57,7 +57,8 @@ module VoshodAvtoExchange
           oem_brand_original,
           unit_code,
           department,
-          search_tags
+          search_tags,
+          fts
         ) VALUES (
           %{p_code},
           %{mog},
@@ -77,7 +78,13 @@ module VoshodAvtoExchange
           %{oem_brand_original},
           %{unit_code},
           %{department},
-          %{search_tags}
+          %{search_tags},
+          setweight(
+            coalesce( to_tsvector('ru', %{mog}),''),'A') || ' ' ||
+            setweight( coalesce( to_tsvector('ru', %{name}),''),'B') || ' ' ||
+            setweight( coalesce( to_tsvector('ru', %{search_tags}),''),'B') || ' ' ||
+            setweight( coalesce( to_tsvector('ru', %{oem_brand_original}),''),'A'
+          )
         ) ON CONFLICT (p_code, mog, oem_num, oem_brand) DO UPDATE SET raw = %{raw},
           shipment = %{shipment},
           updated_at = %{updated_at},
@@ -92,7 +99,13 @@ module VoshodAvtoExchange
           oem_brand_original = %{oem_brand_original},
           unit_code = %{unit_code},
           department = %{department},
-          search_tags = %{search_tags}
+          search_tags = %{search_tags},
+          fts = setweight(
+            coalesce( to_tsvector('ru', %{mog}),''),'A') || ' ' ||
+            setweight( coalesce( to_tsvector('ru', %{name}),''),'B') || ' ' ||
+            setweight( coalesce( to_tsvector('ru', %{search_tags}),''),'B') || ' ' ||
+            setweight( coalesce( to_tsvector('ru', %{oem_brand_original}),''),'A'
+          )
       }.freeze
 
       S_C_ERROR = %Q(Ошибка сохранения каталога в базу.

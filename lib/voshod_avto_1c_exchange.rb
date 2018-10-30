@@ -37,15 +37,24 @@ module VoshodAvtoExchange
 
   def run_async(file_path, key: nil)
 
-    jid = ::ExchangeWorker.perform_async(file_path)
-    register_worker(key || 0, jid)
+    ::SidekiqManager.create(
+      tag: ::VoshodAvtoExchange::TAG,
+      key: key || 0
+    ) do
+      ::ExchangeWorker.perform_async(file_path)
+    end
 
     self
 
   end # run_async
 
   def exist_job?(key: nil)
-    ::Sidekiq.redis {|c| c.exists("#{::VoshodAvtoExchange::TAG}-#{key || 0}") }
+
+    ::SidekiqManager.exist?(
+      tag: ::VoshodAvtoExchange::TAG,
+      key: key || 0
+    )
+
   end # exist_job?
 
   def run_async_all(key: nil)
@@ -56,11 +65,8 @@ module VoshodAvtoExchange
     files.sort { |a, b|
       ::File.new(a).atime <=> ::File.new(b).atime
     }.each do |file_path|
-
-      jid = ::ExchangeWorker.perform_async(file_path)
-      register_worker(key || 0, jid)
-
-    end # each
+      ::ExchangeWorker.perform_async(file_path)
+    end
 
     self
 
@@ -105,13 +111,6 @@ module VoshodAvtoExchange
   end # close_logger
 
   private
-
-  def register_worker(key, jid)
-
-    ::Sidekiq.redis { |c| c.setex("#{::VoshodAvtoExchange::TAG}-#{key || 0}", 60*20, jid) }
-    self
-
-  end
 
   def create_logger
 
