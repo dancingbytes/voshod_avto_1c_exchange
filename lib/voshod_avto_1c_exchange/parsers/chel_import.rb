@@ -7,6 +7,94 @@ module VoshodAvtoExchange
 
     class ChelImport < Base
 
+      ITEMS_SET_RAW_ALL           = %{UPDATE items SET raw = 't' WHERE p_code = '%{p_code}'}.freeze
+      ITEMS_DELETE_RAW_ALL        = %{DELETE FROM items WHERE raw = 't' AND p_code = '%{p_code}'}.freeze
+      CATALOGS_SET_RAW_FALSE_ALL  = %{UPDATE catalogs SET raw = 'f'}.freeze
+      CATALOGS_RESET_TREE         = %{UPDATE catalogs SET lft = null, rgt = null}.freeze
+      CATALOGS_DELETE_RAW_ALL     = %{DELETE FROM catalogs WHERE raw = 't'}.freeze
+      CATALOGS_SET_RAW_ALL        = %{UPDATE catalogs SET raw = 't'}.freeze
+
+      CATALOG_INSERT_OR_UPDATE    = %{
+        INSERT INTO catalogs (
+          raw,
+          url,
+          parent_id,
+          va_parent_id,
+          va_catalog_id,
+          name
+        ) VALUES (
+          %{raw},
+          %{url},
+          %{parent_id},
+          %{va_parent_id},
+          %{va_catalog_id},
+          %{name}
+        ) ON CONFLICT (va_catalog_id) DO UPDATE SET raw = %{raw},
+          url = %{url},
+          parent_id = %{parent_id},
+          va_parent_id = %{va_parent_id},
+          name = %{name}
+        RETURNING id
+      }.freeze
+
+      ITEM_INSERT_OR_UPDATE = %{
+        INSERT INTO items (
+          p_code,
+          mog,
+          oem_num,
+          oem_brand,
+          shipment,
+          raw,
+          updated_at,
+          p_rate,
+          p_delivery,
+          va_catalog_id,
+          va_item_id,
+          va_nom_group,
+          va_price_group,
+          name,
+          oem_num_original,
+          oem_brand_original,
+          unit_code,
+          department,
+          search_tags
+        ) VALUES (
+          %{p_code},
+          %{mog},
+          %{oem_num},
+          %{oem_brand},
+          %{shipment},
+          %{raw},
+          %{updated_at},
+          %{p_rate},
+          %{p_delivery},
+          %{va_catalog_id},
+          %{va_item_id},
+          %{va_nom_group},
+          %{va_price_group},
+          %{name},
+          %{oem_num_original},
+          %{oem_brand_original},
+          %{unit_code},
+          %{department},
+          %{search_tags}
+        ) ON CONFLICT (p_code, mog, oem_num, oem_brand) DO UPDATE SET raw = %{raw},
+          shipment = %{shipment},
+          updated_at = %{updated_at},
+          p_rate = %{p_rate},
+          p_delivery = %{p_delivery},
+          va_catalog_id = %{va_catalog_id},
+          va_item_id = %{va_item_id},
+          va_nom_group = %{va_nom_group},
+          va_price_group = %{va_price_group},
+          name = %{name},
+          oem_num_original = %{oem_num_original},
+          oem_brand_original = %{oem_brand_original},
+          unit_code = %{unit_code},
+          department = %{department},
+          search_tags = %{search_tags}
+      }.freeze
+
       S_C_ERROR = %Q(Ошибка сохранения каталога в базу.
         %{msg}
       ).freeze
@@ -371,32 +459,38 @@ module VoshodAvtoExchange
 
         begin
 
-          cat = ::Catalog.find_or_initialize_by(
-            va_catalog_id: @catalog[:id]
-          )
+          str_sql = (CATALOG_INSERT_OR_UPDATE % {
 
-          # Выбираем идентификатор родительского каталога
-          cat.parent_id     = @catalogs_meta[@catalog[:p_parent_id]]
+            # Ссылка на каталог
+            url:            quote("1-#{@catalog[:id]}"),
 
-          cat.raw           = false
-          cat.name          = @catalog[:name] || ''
-          cat.va_parent_id  = @catalog[:p_parent_id] || ''
+            # ID каталога в 1С
+            va_catalog_id:  quote(@catalog[:id]),
 
-          if cat.save
+            # Выбираем идентификатор родительского каталога
+            parent_id:      quote(@catalogs_meta[@catalog[:p_parent_id]]),
 
-            # Сохраняем инднтификатор текущего каталога
-            @catalogs_meta[@catalog[:id]] = cat.id
+            # Данные обработаны
+            raw:            quote('f'),
 
+            # Название
+            name:           quote(@catalog[:name].to_s.clean_whitespaces[0..250]),
+
+            # ID родительского каталога в 1С
+            va_parent_id:   quote(@catalog[:p_parent_id].to_s)
+
+          })
+
+          req_id = sql(str_sql).first['id']
+
+          if req_id.nil?
+            # Если пусто -- пишем ошибку в лог
+            log(S_C_ERROR % { msg: str_sql })
           else
-
-            log(S_C_ERROR % {
-              msg: cat.errors.full_messages
-            })
-
+            # Иначе, сохраняем ID текущего каталога
+            @catalogs_meta[@catalog[:id]] = req_id
           end
 
-        rescue ::ActiveRecord::RecordNotUnique
-          retry
         rescue => ex
 
           log(S_C_ERROR % {
@@ -413,59 +507,36 @@ module VoshodAvtoExchange
 
         begin
 
-          item = ::Item.find_or_initialize_by(
+          sql(ITEM_INSERT_OR_UPDATE % {
 
-            p_code:       @item[:p_code],
-            mog:          (@item[:mog].try(:clean_whitespaces) || '')[0..99],
+            p_code:             quote(@item[:p_code]),
+            mog:                quote(@item[:mog].to_s.clean_whitespaces[0..99]),
+            oem_num:            quote(
+              ::Cross.clean(@item[:oem_num])[0..99]
+            ),
+            oem_brand:          quote(
+              ::VendorAlias.clean(
+                @item[:oem_brand].to_s.clean_whitespaces[0..99]
+              )
+            ),
+            raw:                quote('f'),
+            updated_at:         quote(::Time.now.utc),
+            p_rate:             5,
+            p_delivery:         0,
+            shipment:           @item[:shipment].try(:to_i) || 1,
+            va_catalog_id:      quote(@item[:catalog_id].to_s),
+            va_item_id:         quote(@item[:id].to_s),
+            va_nom_group:       quote(@item[:nom_group].to_s),
+            va_price_group:     quote(@item[:price_group].to_s),
+            name:               quote(@item[:name].to_s.clean_whitespaces[0..250]),
+            oem_num_original:   quote(@item[:oem_num].to_s.clean_whitespaces[0..99]),
+            oem_brand_original: quote(@item[:oem_brand].to_s.clean_whitespaces[0..99]),
+            unit_code:          @item[:unit_code].to_i,
+            department:         quote(@item[:department].to_s.clean_whitespaces[0..99]),
+            search_tags:        quote(@item[:search_tags].to_s.clean_whitespaces)
 
-            # Приводим номер производителя и его название к нужному виду
-            oem_num:      ::Cross.clean(@item[:oem_num])[0..99],
-            oem_brand:    ::VendorAlias.clean(
-              (@item[:oem_brand].try(:clean_whitespaces) || '')[0..99]
-            )
+          })
 
-          )
-
-          item.raw            = false
-          item.updated_at     = ::Time.now.utc
-
-          item.p_rate         = 5
-
-          # Если товара нет в наличии то, ставим ему максимальный срок доставки
-          item.p_delivery     = item.count > 0 ? 0 : 999
-
-          unless @item[:shipment].blank?
-            item.shipment     = @item[:shipment].try(:to_i) || 1
-          end
-
-          item.va_catalog_id  = @item[:catalog_id]   || ''
-          item.va_item_id     = @item[:id] || ''
-          item.va_nom_group   = @item[:nom_group]    || ''
-          item.va_price_group = @item[:price_group]  || ''
-
-          item.name           = (@item[:name].try(:clean_whitespaces) || '')[0..250]
-
-          item.oem_num_original   = (@item[:oem_num].try(:clean_whitespaces) || '')[0..99]
-          item.oem_brand_original = (@item[:oem_brand].try(:clean_whitespaces) || '')[0..99]
-
-          item.unit_code      = @item[:unit_code] || 0
-
-          item.department     = (@item[:department].try(:clean_whitespaces) || '')[0..99]
-          item.search_tags    = (@item[:search_tags].try(:clean_whitespaces) || '')
-
-          # Если нет изменений -- завершаем работу
-          return unless item.changed?
-
-          unless item.save
-
-            log(S_I_ERROR % {
-              msg: item.errors.full_messages
-            })
-
-          end
-
-        rescue ::ActiveRecord::RecordNotUnique
-          retry
         rescue => ex
 
           log(S_I_ERROR % {
@@ -483,8 +554,7 @@ module VoshodAvtoExchange
 
         # При полной обработке данных, помечаем все каталоги как "сырые",
         # что бы в дальнейшем понять какие каталоги нужно удалит из каталога
-        ::Catalog.
-          update_all({ raw: true })
+        sql(CATALOGS_SET_RAW_ALL)
 
       end # start_work_with_catalogs
 
@@ -496,19 +566,14 @@ module VoshodAvtoExchange
         # Все "сырые" данные удаляем
         if @full_update
 
-          ::Catalog.
-            raw.
-            delete_all
-
-          ::Catalog.
-            update_all({ lft: nil, rgt: nil })
+          sql(CATALOGS_DELETE_RAW_ALL)
+          sql(CATALOGS_RESET_TREE)
 
           ::Catalog.rebuild!
 
         else
 
-          ::Catalog.
-            update_all({ raw: false })
+          sql(CATALOGS_SET_RAW_FALSE_ALL)
 
         end # if
 
@@ -523,9 +588,9 @@ module VoshodAvtoExchange
 
           # При полной обработке данных, помечаем все товары как "сырые",
           # что бы в дальнейшем понять какие товары нужно удалит из каталога
-          ::Item.
-            where(p_code: @p_code).
-            update_all({ raw: true })
+          sql(ITEMS_SET_RAW_ALL % {
+            p_code: @p_code
+          })
 
         end # if
 
@@ -539,14 +604,21 @@ module VoshodAvtoExchange
         if @full_update
 
           # Удаляем все товары, которые не были обработаны
-          ::Item.
-            where(p_code: @p_code).
-            raw.
-            delete_all
+          sql(ITEMS_DELETE_RAW_ALL % {
+            p_code: @p_code
+          })
 
         end # if
 
       end # stop_work_with_items
+
+      def sql(str)
+        ::ApplicationRecord.execute(str)
+      end
+
+      def quote(el)
+        ::ApplicationRecord.quote(el)
+      end
 
     end # ChelImport
 

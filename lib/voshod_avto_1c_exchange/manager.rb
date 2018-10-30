@@ -15,7 +15,7 @@ module VoshodAvtoExchange
       init_clb      = ->(msg) {}        unless init_clb.is_a?(::Proc)
       start_clb     = ->(total, msg) {} unless start_clb.is_a?(::Proc)
       process_clb   = ->(index, msg) {} unless process_clb.is_a?(::Proc)
-      completed_clb = ->(total) {}      unless completed_clb.is_a?(::Proc)
+      completed_clb = ->(total, msg) {} unless completed_clb.is_a?(::Proc)
 
       # Распаковываем zip архив, если такой имеется.
       # Подготавливаем список файлов к обработке

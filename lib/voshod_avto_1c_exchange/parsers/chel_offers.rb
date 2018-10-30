@@ -7,6 +7,43 @@ module VoshodAvtoExchange
 
     class ChelOffers < Base
 
+      ITEM_INSERT_OR_UPDATE = %{
+        INSERT INTO items (
+          p_code,
+          mog,
+          oem_num,
+          oem_brand,
+          shipment,
+          p_delivery,
+          updated_at,
+          va_item_id,
+          prices,
+          meta_prices,
+          count,
+          storehouses
+        ) VALUES (
+          %{p_code},
+          %{mog},
+          %{oem_num},
+          %{oem_brand},
+          %{shipment},
+          %{p_delivery},
+          %{updated_at},
+          %{va_item_id},
+          %{prices},
+          %{meta_prices},
+          %{count},
+          %{storehouses}
+        ) ON CONFLICT (p_code, mog, oem_num, oem_brand) DO UPDATE SET shipment = %{shipment},
+          p_delivery = %{p_delivery},
+          updated_at = %{updated_at},
+          va_item_id = %{va_item_id},
+          prices = %{prices},
+          meta_prices = %{meta_prices},
+          count = %{count},
+          storehouses = %{storehouses}
+      }.freeze
+
       S_I_ERROR = %Q(Ошибка сохранения товара в базу.
         %{msg}
       ).freeze
@@ -240,46 +277,30 @@ module VoshodAvtoExchange
 
         begin
 
-          item = ::Item.find_or_initialize_by(
+          sql(ITEM_INSERT_OR_UPDATE % {
 
-            p_code:       @item[:p_code],
-            mog:          (@item[:mog].try(:clean_whitespaces) || '')[0..99],
+            p_code:       quote(@item[:p_code]),
+            mog:          quote(@item[:mog].to_s.clean_whitespaces[0..99]),
+            oem_num:      quote(
+              ::Cross.clean(@item[:oem_num])[0..99]
+            ),
+            oem_brand:    quote(
+              ::VendorAlias.clean(
+                @item[:oem_brand].to_s.clean_whitespaces[0..99]
+              )
+            ),
 
-            # Приводим номер производителя и его название к нужному виду
-            oem_num:      ::Cross.clean(@item[:oem_num])[0..99],
-            oem_brand:    ::VendorAlias.clean(
-              (@item[:oem_brand].try(:clean_whitespaces) || '')[0..99]
-            )
+            shipment:     @item[:shipment].try(:to_i) || 1,
+            p_delivery:   0,
+            updated_at:   quote(::Time.now.utc),
+            va_item_id:   quote(@item[:id].to_s),
+            prices:       quote((@item[:prices] || {}).to_json),
+            meta_prices:  quote((@item[:meta_prices] || {}).to_json),
+            count:        @item[:count].try(:to_i),
+            storehouses:  quote((@item[:storehouses] || {}).to_json)
 
-          )
+          })
 
-          unless @item[:shipment].blank?
-            item.shipment   = @item[:shipment].try(:to_i) || 1
-          end
-
-          item.updated_at   = ::Time.now.utc
-          item.va_item_id   = @item[:id]                || ''
-          item.prices       = @item[:prices]            || {}
-          item.meta_prices  = @item[:meta_prices]       || {}
-          item.count        = @item[:count].try(:to_i)  || 0
-          item.storehouses  = @item[:storehouses]       || {}
-
-          # Если товара нет в наличии то, ставим ему максимальный срок доставки
-          item.p_delivery   = item.count > 0 ? 0 : 999
-
-          # Если нет изменений -- завершаем работу
-          return unless item.changed?
-
-          unless item.save
-
-            log(S_I_ERROR % {
-              msg: item.errors.full_messages
-            })
-
-          end
-
-        rescue ::ActiveRecord::RecordNotUnique
-          retry
         rescue => ex
 
           log(S_I_ERROR % {
@@ -289,6 +310,14 @@ module VoshodAvtoExchange
         end
 
       end # save_item
+
+      def sql(str)
+        ::ApplicationRecord.execute(str)
+      end
+
+      def quote(el)
+        ::ApplicationRecord.quote(el)
+      end
 
     end # ChelOffers
 
