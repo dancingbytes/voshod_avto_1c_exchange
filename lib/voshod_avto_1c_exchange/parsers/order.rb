@@ -110,7 +110,7 @@ module VoshodAvtoExchange
 
       def save_item
 
-        order = ::Order.where(uid: @order_params[:order_id]).first
+        order = ::Order.where(uid: @order_params[:order_id]).take
 
         unless order
 
@@ -126,6 +126,7 @@ module VoshodAvtoExchange
 
         # Список изменений товара
         changes_list = []
+        retry_tries  = 5
 
         begin
 
@@ -201,8 +202,15 @@ module VoshodAvtoExchange
 
           end # transaction
 
-        rescue ::ActiveRecord::RecordNotUnique
-          retry
+        rescue ::ActiveRecord::RecordNotUnique => ex
+
+          retry_tries = retry_tries - 1
+          retry if retry_tries > 0
+
+          log(S_ERROR % {
+            msg: [ex.message].push(ex.backtrace).join("\n")
+          })
+
         rescue => ex
 
           log(S_ERROR % {
