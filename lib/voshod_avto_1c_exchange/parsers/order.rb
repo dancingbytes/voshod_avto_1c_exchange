@@ -202,14 +202,12 @@ module VoshodAvtoExchange
 
           end # transaction
 
-        rescue ::ActiveRecord::RecordNotUnique => ex
+        rescue ::ActiveRecord::RecordNotUnique,
+               ::PG::UniqueViolation,
+               ::PG::TRDeadlockDetected
 
           retry_tries = retry_tries - 1
           retry if retry_tries > 0
-
-          log(S_ERROR % {
-            msg: [ex.message].push(ex.backtrace).join("\n")
-          })
 
         rescue => ex
 
