@@ -14,7 +14,7 @@ module VoshodAvtoExchange
         @tags   = {}
         @attrs  = {}
 
-      end # initialize
+      end
 
       def start_element(name, attrs = [])
 
@@ -23,50 +23,50 @@ module VoshodAvtoExchange
         @tags[@level] = name
         @attrs        = ::Hash[attrs]
 
-      end # start_element
+      end
 
       def end_element(name)
         @level -= 1
-      end # end_element
+      end
 
       def characters(str)
         @str << str unless str.blank?
-      end # characters
+      end
 
       def end_document
-      end # end_document
+      end
 
       private
 
       # Тег
       def tag(diff = 0)
         @tags[level + diff]
-      end # tag
+      end
 
       # Параметры тега
       def attrs
         @attrs || {}
-      end # attrs
+      end
 
       # Уровень вложенности
       def level
         @level || 0
-      end # level
+      end
 
       # Содержимое тега
       def tag_value
         ::VoshodAvtoExchange::Util.xml_unescape(@str)
-      end # tag_value
+      end
 
       alias :value :tag_value
 
       def tag_debug
         "<#{tag} #{attrs.inspect}>#{tag_value}</#{tag}>"
-      end # tag_debug
+      end
 
       def log(msg)
         ::VoshodAvtoExchange.log(msg, self.class.name)
-      end # log
+      end
 
     end # Base
 

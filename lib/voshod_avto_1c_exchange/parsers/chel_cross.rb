@@ -72,7 +72,7 @@ module VoshodAvtoExchange
 
         return if @cross.empty?
 
-        ::Cross.create_cross(
+        ::CrossModule.create_cross(
           oem_num:      @cross[:oem_num],
           oem_brand:    @cross[:oem_brand],
           repl_num:     @cross[:repl_num],

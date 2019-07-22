@@ -14,10 +14,12 @@ module VoshodAvtoExchange
         orders_list ||= ::Order.where(operation_state: 0)
 
         # Исключаем заказы тестового пользователя
-        orders_list = orders_list.where.not(user_id: 3115)
+        orders = OrderDecorator.decorate_collection(
+          orders_list.where.not(user_id: 3115)
+        )
 
         # Выбраем все заказы на обработку
-        orders_list.each { |order|
+        orders.each { |order|
 
           # Выбираем все товары из заказа
           items = order.cart_items.inject("") { |cistr, cart_item|
@@ -31,16 +33,16 @@ module VoshodAvtoExchange
               p_code:           xml_escape(cart_item.p_code),
 
               # Бренд детали (Производитель)
-              oem_brand:        xml_escape(cart_item.oem_brand_original),
+              oem_brand:        xml_escape(cart_item.oem_brand),
 
               # Номер детали (Артикул производителя)
-              oem_num:          xml_escape(cart_item.oem_num_original),
+              oem_num:          xml_escape(cart_item.oem_num),
 
               # Артикул товара в 1С Восход-авто
               item_mog:         xml_escape(cart_item.mog),
 
               # Цена закупа (у внешнего поставщика)
-              purchase_price:   cart_item.purchase_price || 0,
+              purchase_price:   0,
 
               item_name:        xml_escape(cart_item.name),
               item_contry_code: "643",
@@ -48,7 +50,7 @@ module VoshodAvtoExchange
               item_gtd:         "",
               item_price:       cart_item.price,
               item_count:       cart_item.count,
-              item_total:       cart_item.total_price
+              item_total:       (cart_item.price * cart_item.count).to_f2
 
             }
             cistr

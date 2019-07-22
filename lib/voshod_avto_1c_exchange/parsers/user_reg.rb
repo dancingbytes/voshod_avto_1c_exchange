@@ -64,7 +64,7 @@ module VoshodAvtoExchange
 
       def params
         @params || {}
-      end # params
+      end
 
       def save_data
 
@@ -72,7 +72,7 @@ module VoshodAvtoExchange
           log(P_ERROR % { tag: tag_debug }) and return
         end
 
-        usr = ::User.where(uid: params[:id]).take
+        usr = ::User.where(uid: params[:id]).take.try(:decorate)
 
         unless usr
           log(F_ERROR % { pr: params.inspect }) and return
@@ -86,7 +86,7 @@ module VoshodAvtoExchange
 
             usr.approve_state   = 1
             usr.operation_state = 2
-            usr.inn             = params[:inn] unless params[:inn].blank?
+            usr.inn             = params[:inn] if params[:inn].present?
 
           # Отклонили в регистрации
           when REJECTED then
@@ -111,20 +111,18 @@ module VoshodAvtoExchange
 
           usr.save(validate: false)
 
-          # Если были изменения в статусе -- производим уведомленияи нужные действия
+          # Если были изменения в статусе -- уведомляем
           if has_changes
 
             # Отправляем результат проверки регистрации
             if usr.approved?
 
               # Если пользователю подтверждена регистрация
-              # и он не частное лицо (в этом случае повторное
-              # подтверждение регистрации не требуется)
-              usr.send_approve_request unless usr.retail?
+              send_approve_request(usr)
 
             elsif usr.rejected?
               # Если отказали
-              usr.send_reject_request(comment: params[:comment].try(:clean_whitespaces))
+              send_reject_request(usr, params[:comment].try(:clean_whitespaces))
             end
 
           end # if
@@ -138,6 +136,31 @@ module VoshodAvtoExchange
         end
 
       end # save_data
+
+      def send_approve_request(user)
+
+        begin
+
+          user.set_password
+          user.save
+
+          ::UserMailer.approve_mail(user).deliver
+
+        rescue ::Exception => ex
+          ::Rails.logger.error(ex)
+        end
+
+      end
+
+      def send_reject_request(user, comment)
+
+        begin
+          ::UserMailer.reject_mail(user, comment).deliver
+        rescue ::Exception => ex
+          ::Rails.logger.error(ex)
+        end
+
+      end
 
     end # UserReg
 

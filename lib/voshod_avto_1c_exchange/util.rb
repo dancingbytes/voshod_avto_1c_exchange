@@ -11,11 +11,7 @@ module VoshodAvtoExchange
       uid = str.to_s.ljust(32, '0')
       "#{uid[0,8]}-#{uid[8,4]}-#{uid[12,4]}-#{uid[16,4]}-#{uid[20,12]}"
 
-    end # to_1c_id
-
-    def to_bson_id(str)
-      str.gsub(/-/, '')[0, 24]
-    end # to_bson_id
+    end
 
     def humanize_time(secs)
 

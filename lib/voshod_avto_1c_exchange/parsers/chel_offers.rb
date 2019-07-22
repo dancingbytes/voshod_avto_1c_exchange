@@ -281,14 +281,9 @@ module VoshodAvtoExchange
 
             p_code:       quote(@item[:p_code]),
             mog:          quote(@item[:mog].to_s.clean_whitespaces[0..99]),
-            oem_num:      quote(
-              ::Cross.clean(@item[:oem_num])[0..99]
-            ),
-            oem_brand:    quote(
-              ::VendorAlias.clean(
-                @item[:oem_brand].to_s.clean_whitespaces[0..99]
-              )
-            ),
+
+            oem_num:      quote(@item[:oem_num].to_s.clean_whitespaces[0..99]),
+            oem_brand:    quote(@item[:oem_brand].to_s.clean_whitespaces[0..99]),
 
             shipment:     @item[:shipment].try(:to_i) || 1,
             p_delivery:   0,

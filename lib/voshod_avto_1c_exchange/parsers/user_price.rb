@@ -14,6 +14,35 @@ module VoshodAvtoExchange
         'Номенклатура'          => 3
       }.freeze
 
+      INSERT_OR_UPDATE_SQL = %{
+        INSERT INTO prices (
+          user_id,
+          price_type,
+          price_rule_id,
+          price_id,
+          value,
+          fix_value,
+          nom_name,
+          price_name
+        )
+        VALUES (
+          %{user_id},
+          %{price_type},
+          %{price_rule_id},
+          %{price_id},
+          %{value},
+          %{fix_value},
+          %{nom_name},
+          %{price_name}
+        )
+        ON CONFLICT (user_id, price_type, price_rule_id) DO UPDATE SET
+          price_id   = %{price_id},
+          value      = %{value},
+          fix_value  = %{fix_value},
+          nom_name   = %{nom_name},
+          price_name = %{price_name};
+      }.freeze
+
       S_ERROR = %Q(Ошибка сохранения правил цен в базе.
         %{msg}
       ).freeze
@@ -92,12 +121,12 @@ module VoshodAvtoExchange
         end
 
         # Удаляем все правила пользователя
-        ::Price.for_user(user.id).delete_all
+        ::Price.where(user_id: user.id).delete_all
 
         # Создаем правила заново
         @user_params[:rules].each do |rule|
 
-          ::Price.insert_or_update(
+          insert_or_update(
 
             user_id:          user.id,
             price_type:       RULE_TYPES[rule[:rule_type]],
@@ -175,6 +204,41 @@ module VoshodAvtoExchange
       def rule?
         @start_rule == true
       end # rule?
+
+      def insert_or_update(
+        user_id:,
+        price_type:,
+        price_rule_id:,
+        price_id:,
+        value:        0,
+        fix_value:    0,
+        nom_name:     '',
+        price_name:   ''
+      )
+
+        sql(INSERT_OR_UPDATE_SQL % {
+
+          user_id:        user_id,
+          price_type:     price_type || 0,
+          price_rule_id:  quote(price_rule_id || ''),
+          price_id:       quote(price_id || ''),
+          value:          value.try(:to_f) || 0,
+          fix_value:      fix_value.try(:to_f) || 0,
+          nom_name:       quote(nom_name || ''),
+          price_name:     quote(price_name || '')
+
+        })
+        self
+
+      end
+
+      def sql(str)
+        ::ApplicationRecord.execute(str)
+      end
+
+      def quote(el)
+        ::ApplicationRecord.quote(el)
+      end
 
     end # UserPrice
 

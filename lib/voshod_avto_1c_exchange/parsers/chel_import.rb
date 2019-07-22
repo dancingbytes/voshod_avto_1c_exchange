@@ -53,8 +53,6 @@ module VoshodAvtoExchange
           va_nom_group,
           va_price_group,
           name,
-          oem_num_original,
-          oem_brand_original,
           unit_code,
           department,
           search_tags,
@@ -74,8 +72,6 @@ module VoshodAvtoExchange
           %{va_nom_group},
           %{va_price_group},
           %{name},
-          %{oem_num_original},
-          %{oem_brand_original},
           %{unit_code},
           %{department},
           %{search_tags},
@@ -95,8 +91,6 @@ module VoshodAvtoExchange
           va_nom_group = %{va_nom_group},
           va_price_group = %{va_price_group},
           name = %{name},
-          oem_num_original = %{oem_num_original},
-          oem_brand_original = %{oem_brand_original},
           unit_code = %{unit_code},
           department = %{department},
           search_tags = %{search_tags},
@@ -524,14 +518,10 @@ module VoshodAvtoExchange
 
             p_code:             quote(@item[:p_code]),
             mog:                quote(@item[:mog].to_s.clean_whitespaces[0..99]),
-            oem_num:            quote(
-              ::Cross.clean(@item[:oem_num])[0..99]
-            ),
-            oem_brand:          quote(
-              ::VendorAlias.clean(
-                @item[:oem_brand].to_s.clean_whitespaces[0..99]
-              )
-            ),
+
+            oem_num:            quote(@item[:oem_num].to_s.clean_whitespaces[0..99]),
+            oem_brand:          quote(@item[:oem_brand].to_s.clean_whitespaces[0..99]),
+
             raw:                quote('f'),
             updated_at:         quote(::Time.now.utc),
             p_rate:             5,
@@ -542,8 +532,6 @@ module VoshodAvtoExchange
             va_nom_group:       quote(@item[:nom_group].to_s),
             va_price_group:     quote(@item[:price_group].to_s),
             name:               quote(@item[:name].to_s.clean_whitespaces[0..250]),
-            oem_num_original:   quote(@item[:oem_num].to_s.clean_whitespaces[0..99]),
-            oem_brand_original: quote(@item[:oem_brand].to_s.clean_whitespaces[0..99]),
             unit_code:          @item[:unit_code].to_i,
             department:         quote(@item[:department].to_s.clean_whitespaces[0..99]),
             search_tags:        quote(@item[:search_tags].to_s.clean_whitespaces)

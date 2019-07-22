@@ -29,12 +29,12 @@ module VoshodAvtoExchange
             user_type:      ::VoshodAvtoExchange::USER_TYPE[user.user_type] || 'Неизвестно',
             date:           date,
             time:           time,
-            company:        xml_escape(user.retail? ? user.contact_person : user.company),
+            company:        xml_escape(user.company),
             first_name:     xml_escape(user.first_name),
             last_name:      xml_escape(user.last_name),
             email:          xml_escape(user.login),
             phone:          xml_escape(user.phone),
-            contact_person: xml_escape(user.contact_person)
+            contact_person: xml_escape("#{user.last_name} #{user.first_name}")
 
           }
 

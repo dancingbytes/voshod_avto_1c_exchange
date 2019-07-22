@@ -4,7 +4,8 @@ class ExchangeController < ::ApplicationController
   unloadable
 
   before_action       :auth
-  skip_before_action  :verify_authenticity_token
+  skip_before_action  :verify_authenticity_token,
+                      :analytics
 
   layout false
 
@@ -187,19 +188,19 @@ class ExchangeController < ::ApplicationController
 
   def session_id
     @session_id ||= ::SecureRandom.hex(20)
-  end # session_id
+  end
 
   def operation_id
     cookies[:exchange_1c] || params[:exchange_1c] || 0
-  end # operation_id
+  end
 
   def mode
     @mode ||= (params[:mode] || 'undefined')
-  end # mode
+  end
 
   def type
     @type ||= (params[:type] || 'undefined')
-  end # type
+  end
 
   def answer(text: nil, xml: nil)
 

@@ -7,6 +7,16 @@ module VoshodAvtoExchange
 
     class Order < Base
 
+      CHANGES_KEYS = {
+
+        state_name:       { type_of: 1, msg: '%{before} → %{after}' },
+        delivery_address: { type_of: 2, msg: '%{before} → %{after}' },
+        count:            { type_of: 3, msg: '%{before} → %{after}' },
+        price:            { type_of: 4, msg: '%{before} руб. → %{after} руб.' },
+        name:             { type_of: 6, msg: '%{before} → %{after}' }
+
+      }.freeze
+
       P_ERROR = %Q(Ошибка парсинга.\n%{tag}).freeze
 
       S_ERROR = %Q(Ошибка сохранения информации по номенклатуре заказа в базе.
@@ -110,7 +120,7 @@ module VoshodAvtoExchange
 
       def save_item
 
-        order = ::Order.where(uid: @order_params[:order_id]).take
+        order = ::Order.where(id: @order_params[:order_id]).take
 
         unless order
 
@@ -138,26 +148,15 @@ module VoshodAvtoExchange
           ci.p_code           = @item_params[:p_code].blank? ? 'VNY6' : @item_params[:p_code]
 
           # Приводим номер производителя и его название к нужному виду
-          ci.oem_num          =      ::Cross.clean(
-            (@item_params[:oem_num].try(:clean_whitespaces) || '')[0..99]
-          )
+          ci.oem_num          = @item_params[:oem_num].to_s.clean_whitespaces[0..99]
 
-          ci.oem_brand        =    ::VendorAlias.clean(
-            (@item_params[:oem_brand].try(:clean_whitespaces) || '')[0..99]
-          )
+          ci.oem_brand        = @item_params[:oem_brand].to_s.clean_whitespaces[0..99]
 
           ci.state_name       = @item_params[:state_name] || ''
 
           ci.price            = @item_params[:price].try(:to_f) || 0
           ci.total_price      = @item_params[:total_price].try(:to_f) || 0
           ci.count            = @item_params[:count].try(:to_i) || 0
-
-          ci.oem_num_original   = (@item_params[:oem_num].try(:clean_whitespaces) || '')[0..99]
-          ci.oem_brand_original = (@item_params[:oem_brand].try(:clean_whitespaces) || '')[0..99]
-
-          # Цена закупа у внешнего поставщика. Пока не будем обновлять эти данные
-          # при обмене с 1С
-          # ci.purchase_price   = @item_params[:purchase_price].try(:to_f) || 0
 
           ci.delivery_address = @item_params[:delivery_address] || ''
           ci.delivery_at      = @item_params[:delivery_at].try(:to_time)
@@ -167,12 +166,12 @@ module VoshodAvtoExchange
             ci.name       = @item_params[:name].to_s
             ci.va_item_id = @item_params[:va_item_id].to_s
 
-            changes_list  << 'Добавлен новый товар'
+            changes_list  << { type_of: 5, msg: 'Добавлен новый товар' }
 
           else
 
             changes_list.concat(
-              ::CartItemHistory.changes_for(ci.changes)
+              changes_for(ci.changes)
             )
 
           end # if
@@ -188,12 +187,13 @@ module VoshodAvtoExchange
                 total_price:    @item_params[:total_price].try(:to_f) || 0
               })
 
-              changes_list.each { |msg|
+              changes_list.each { |el|
 
                 ::CartItemHistory.add(
                   cart_item_id:   ci.id,
+                  type_of:        el[:type_of],
                   user_name:      'Менеджер',
-                  msg:            msg
+                  msg:            el[:msg]
                 )
 
               }
@@ -221,7 +221,7 @@ module VoshodAvtoExchange
         # обновляем итоговую сумму заказа
         order.update_columns({
           operation_state:  2,
-          amount:           order.basket_total_price
+          amount:           total_price_for(order.id)
         })
 
       end # save_item
@@ -251,17 +251,39 @@ module VoshodAvtoExchange
           p_code:       params[:p_code].blank? ? 'VNY6' : params[:p_code],
 
           # Приводим номер производителя и его название к нужному виду
-          oem_num:      ::Cross.clean(
-            (params[:oem_num].try(:clean_whitespaces) || '')[0..99]
-          ),
+          oem_num:      params[:oem_num].to_s.clean_whitespaces[0..99],
 
-          oem_brand:    ::VendorAlias.clean(
-            (params[:oem_brand].try(:clean_whitespaces) || '')[0..99]
-          )
+          oem_brand:    params[:oem_brand].to_s.clean_whitespaces[0..99]
 
         })
 
       end # find_item_by
+
+      def changes_for(changes)
+
+        CHANGES_KEYS.inject([]) { |arr, (key, hash)|
+
+          if (el = changes[key])
+
+            arr << {
+              type_of: hash[:type_of],
+              msg:     (hash[:msg] % { before: el[0], after: el[1] })
+            }
+
+          end
+          arr
+
+        }
+
+      end
+
+      def total_price_for(order_id)
+
+        ::CartItem.
+          where(order_id: order_id).
+          sum("cart_items.price * cart_items.count")
+
+      end
 
     end # Order < Base
 
