@@ -4,8 +4,7 @@ class ExchangeController < ::ApplicationController
   unloadable
 
   before_action       :auth
-  skip_before_action  :verify_authenticity_token,
-                      :analytics
+  skip_before_action  :verify_authenticity_token
 
   layout false
 
