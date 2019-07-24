@@ -134,18 +134,20 @@ module VoshodAvtoExchange
           log(P_ERROR % { tag: tag_debug }) and return
         end
 
-        # Список изменений товара
-        changes_list = []
+        # Количество попыток
         retry_tries  = 5
 
         begin
+
+          # Список изменений товара
+          changes_list = []
 
           ci = find_item_by(order, @item_params)
 
           ci.mog              = @item_params[:mog].to_s
 
           # Если код поставщика пуст -- используем код по-умочланию
-          ci.p_code           = @item_params[:p_code].blank? ? 'VNY6' : @item_params[:p_code]
+          ci.p_code           = 'VNY6'
 
           # Приводим номер производителя и его название к нужному виду
           ci.oem_num          = @item_params[:oem_num].to_s.clean_whitespaces[0..99]
@@ -155,7 +157,6 @@ module VoshodAvtoExchange
           ci.state_name       = @item_params[:state_name] || ''
 
           ci.price            = @item_params[:price].try(:to_f) || 0
-          ci.total_price      = @item_params[:total_price].try(:to_f) || 0
           ci.count            = @item_params[:count].try(:to_i) || 0
 
           ci.delivery_address = @item_params[:delivery_address] || ''
@@ -179,13 +180,6 @@ module VoshodAvtoExchange
           ::CartItem.transaction(requires_new: true) do
 
             if ci.save(validate: false)
-
-              # Костыль
-              ci.update_columns({
-                price:          @item_params[:price].try(:to_f) || 0,
-                purchase_price: @item_params[:purchase_price].try(:to_f) || 0,
-                total_price:    @item_params[:total_price].try(:to_f) || 0
-              })
 
               changes_list.each { |el|
 
@@ -223,6 +217,9 @@ module VoshodAvtoExchange
           operation_state:  2,
           amount:           total_price_for(order.id)
         })
+
+        # Обновление статуса заказа
+        ::Order::UpdateStatus.call(order: order)
 
       end # save_item
 
