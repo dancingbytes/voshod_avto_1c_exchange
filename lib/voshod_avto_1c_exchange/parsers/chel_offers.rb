@@ -14,7 +14,6 @@ module VoshodAvtoExchange
           oem_num,
           oem_brand,
           shipment,
-          p_delivery,
           updated_at,
           va_item_id,
           prices,
@@ -27,7 +26,6 @@ module VoshodAvtoExchange
           %{oem_num},
           %{oem_brand},
           %{shipment},
-          %{p_delivery},
           %{updated_at},
           %{va_item_id},
           %{prices},
@@ -35,7 +33,6 @@ module VoshodAvtoExchange
           %{count},
           %{storehouses}
         ) ON CONFLICT (p_code, mog, oem_num, oem_brand) DO UPDATE SET shipment = %{shipment},
-          p_delivery = %{p_delivery},
           updated_at = %{updated_at},
           va_item_id = %{va_item_id},
           prices = %{prices},
@@ -286,7 +283,6 @@ module VoshodAvtoExchange
             oem_brand:    quote(@item[:oem_brand].to_s.clean_whitespaces[0..99]),
 
             shipment:     @item[:shipment].try(:to_i) || 1,
-            p_delivery:   0,
             updated_at:   quote(::Time.now.utc),
             va_item_id:   quote(@item[:id].to_s),
             prices:       quote((@item[:prices] || {}).to_json),
