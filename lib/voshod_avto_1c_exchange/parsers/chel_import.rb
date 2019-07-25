@@ -75,7 +75,8 @@ module VoshodAvtoExchange
             coalesce( to_tsvector('ru', %{mog}),''),'A') || ' ' ||
             setweight( coalesce( to_tsvector('ru', %{name}),''),'B') || ' ' ||
             setweight( coalesce( to_tsvector('ru', %{search_tags}),''),'B') || ' ' ||
-            setweight( coalesce( to_tsvector('ru', %{oem_brand_original}),''),'A'
+            setweight( coalesce( to_tsvector('ru', %{oem_num}),''),'A') || ' ' ||
+            setweight( coalesce( to_tsvector('ru', %{oem_brand}),''),'A'
           )
         ) ON CONFLICT (p_code, mog, oem_num, oem_brand) DO UPDATE SET raw = %{raw},
           shipment = %{shipment},
@@ -92,7 +93,8 @@ module VoshodAvtoExchange
             coalesce( to_tsvector('ru', %{mog}),''),'A') || ' ' ||
             setweight( coalesce( to_tsvector('ru', %{name}),''),'B') || ' ' ||
             setweight( coalesce( to_tsvector('ru', %{search_tags}),''),'B') || ' ' ||
-            setweight( coalesce( to_tsvector('ru', %{oem_brand_original}),''),'A'
+            setweight( coalesce( to_tsvector('ru', %{oem_num}),''),'A') || ' ' ||
+            setweight( coalesce( to_tsvector('ru', %{oem_brand}),''),'A'
           )
       }.freeze
 

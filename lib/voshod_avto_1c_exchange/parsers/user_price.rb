@@ -110,7 +110,7 @@ module VoshodAvtoExchange
       def stop_user
 
         # Ищем пользователя
-        user = User.where(uid: @user_params[:user_id]).take
+        user = ::User.where(uid: @user_params[:user_id]).take
 
         unless user
 

@@ -183,7 +183,7 @@ module VoshodAvtoExchange
 
               changes_list.each { |el|
 
-                ::CartItemHistory.add(
+                ::CartItemHistoryModule.add(
                   cart_item_id:   ci.id,
                   type_of:        el[:type_of],
                   user_name:      'Менеджер',
