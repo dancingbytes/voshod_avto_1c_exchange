@@ -135,7 +135,7 @@ module VoshodAvtoExchange
             value:            rule[:persent_discount],
             fix_value:        rule[:fix_price] || 0,
             nom_name:         rule[:rule_good_name],
-            price_name:       rule[:price_type_name]
+            price_name:       rule[:price_type_name].to_s.presence || 'Неизвестная цена'
 
           )
 
