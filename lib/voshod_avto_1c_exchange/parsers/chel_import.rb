@@ -515,8 +515,13 @@ module VoshodAvtoExchange
             p_code:             quote(@item[:p_code]),
             mog:                quote(@item[:mog].to_s.clean_whitespaces[0..99]),
 
-            oem_num:            quote(@item[:oem_num].to_s.clean_whitespaces[0..99]),
-            oem_brand:          quote(@item[:oem_brand].to_s.clean_whitespaces[0..99]),
+            oem_num:            quote(
+                                  ::CrossModule.clean(@item[:oem_num].to_s.clean_whitespaces[0..99])
+                                ),
+
+            oem_brand:          quote(
+                                  ::VendorAliasModule.clean(@item[:oem_brand].to_s.clean_whitespaces[0..99])
+                                ),
 
             raw:                quote('f'),
             updated_at:         quote(::Time.now.utc),

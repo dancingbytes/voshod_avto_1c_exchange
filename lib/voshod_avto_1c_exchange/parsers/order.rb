@@ -150,9 +150,9 @@ module VoshodAvtoExchange
           ci.p_code           = 'VNY6'
 
           # Приводим номер производителя и его название к нужному виду
-          ci.oem_num          = @item_params[:oem_num].to_s.clean_whitespaces[0..99]
+          ci.oem_num          = ::CrossModule.clean(@item_params[:oem_num].to_s.clean_whitespaces[0..99])
 
-          ci.oem_brand        = @item_params[:oem_brand].to_s.clean_whitespaces[0..99]
+          ci.oem_brand        = ::VendorAliasModule.clean(@item_params[:oem_brand].to_s.clean_whitespaces[0..99])
 
           ci.state_name       = @item_params[:state_name] || ''
 
@@ -248,9 +248,9 @@ module VoshodAvtoExchange
           p_code:       params[:p_code].blank? ? 'VNY6' : params[:p_code],
 
           # Приводим номер производителя и его название к нужному виду
-          oem_num:      params[:oem_num].to_s.clean_whitespaces[0..99],
+          oem_num:      ::CrossModule.clean(params[:oem_num].to_s.clean_whitespaces[0..99]),
 
-          oem_brand:    params[:oem_brand].to_s.clean_whitespaces[0..99]
+          oem_brand:    ::VendorAliasModule.clean(params[:oem_brand].to_s.clean_whitespaces[0..99])
 
         })
 
