@@ -12,7 +12,7 @@ class ExchangeController < ::ApplicationController
   def get
 
     ::Rails.logger.tagged("[GET] /exchange [params]") {
-      ::Rails.logger.ingo("session_id: #{session_id}, operation_id: #{operation_id}")
+      ::Rails.logger.info("session_id: #{session_id}, operation_id: #{operation_id}")
       ::Rails.logger.info(params.inspect)
     }
 
