@@ -74,7 +74,7 @@ module VoshodAvtoExchange
           setweight(
             coalesce( to_tsvector('ru', %{mog}),''),'A') || ' ' ||
             setweight( coalesce( to_tsvector('ru', %{name}),''),'B') || ' ' ||
-            setweight( coalesce( to_tsvector('ru', %{search_tags}),''),'B') || ' ' ||
+            setweight( coalesce( to_tsvector('ru', %{search_tags}),''),'C') || ' ' ||
             setweight( coalesce( to_tsvector('ru', %{oem_num}),''),'A') || ' ' ||
             setweight( coalesce( to_tsvector('ru', %{oem_brand}),''),'A'
           )
@@ -92,7 +92,7 @@ module VoshodAvtoExchange
           fts = setweight(
             coalesce( to_tsvector('ru', %{mog}),''),'A') || ' ' ||
             setweight( coalesce( to_tsvector('ru', %{name}),''),'B') || ' ' ||
-            setweight( coalesce( to_tsvector('ru', %{search_tags}),''),'B') || ' ' ||
+            setweight( coalesce( to_tsvector('ru', %{search_tags}),''),'C') || ' ' ||
             setweight( coalesce( to_tsvector('ru', %{oem_num}),''),'A') || ' ' ||
             setweight( coalesce( to_tsvector('ru', %{oem_brand}),''),'A'
           )
