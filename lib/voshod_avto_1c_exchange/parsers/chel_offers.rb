@@ -277,14 +277,14 @@ module VoshodAvtoExchange
           sql(ITEM_INSERT_OR_UPDATE % {
 
             p_code:       quote(@item[:p_code]),
-            mog:          quote(@item[:mog].to_s.clean_whitespaces[0..99]),
+            mog:          quote(@item[:mog].to_s.squish[0..99]),
 
             oem_num:      quote(
-                            ::CrossModule.clean(@item[:oem_num].to_s.clean_whitespaces[0..99])
+                            ::CrossModule.clean(@item[:oem_num].to_s.squish[0..99])
                           ),
 
             oem_brand:    quote(
-                            ::VendorAliasModule.clean(@item[:oem_brand].to_s.clean_whitespaces[0..99])
+                            ::VendorAliasModule.clean(@item[:oem_brand].to_s.squish[0..99])
                           ),
 
             shipment:     @item[:shipment].try(:to_i) || 1,

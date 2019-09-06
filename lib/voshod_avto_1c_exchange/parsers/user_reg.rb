@@ -122,7 +122,7 @@ module VoshodAvtoExchange
 
             elsif usr.rejected?
               # Если отказали
-              send_reject_request(usr, params[:comment].try(:clean_whitespaces))
+              send_reject_request(usr, params[:comment].to_s.squish)
             end
 
           end # if

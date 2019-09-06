@@ -33,24 +33,6 @@ module VoshodAvtoExchange
 
     end # humanize_time
 
-    def clean_whitespaces(str)
-
-      return if str.class != String
-      clean_whitespaces!(str.clone)
-
-    end # clean_whitespaces
-
-    def clean_whitespaces!(str)
-
-      return if str.class != String
-
-      str.sub!(/\A\s+/, "")
-      str.sub!(/\s+\z/, "")
-      str.gsub!(/(\s){2,}/, '\\1')
-      str
-
-    end # clean_whitespaces
-
     def xml_escape(str)
 
       str = str.to_s.dup

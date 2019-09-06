@@ -477,7 +477,7 @@ module VoshodAvtoExchange
             raw:            quote('f'),
 
             # Название
-            name:           quote(@catalog[:name].to_s.clean_whitespaces[0..250]),
+            name:           quote(@catalog[:name].to_s.squish[0..250]),
 
             # ID родительского каталога в 1С
             va_parent_id:   quote(@catalog[:p_parent_id].to_s)
@@ -513,14 +513,14 @@ module VoshodAvtoExchange
           sql(ITEM_INSERT_OR_UPDATE % {
 
             p_code:             quote(@item[:p_code]),
-            mog:                quote(@item[:mog].to_s.clean_whitespaces[0..99]),
+            mog:                quote(@item[:mog].to_s.squish[0..99]),
 
             oem_num:            quote(
-                                  ::CrossModule.clean(@item[:oem_num].to_s.clean_whitespaces[0..99])
+                                  ::CrossModule.clean(@item[:oem_num].to_s.squish[0..99])
                                 ),
 
             oem_brand:          quote(
-                                  ::VendorAliasModule.clean(@item[:oem_brand].to_s.clean_whitespaces[0..99])
+                                  ::VendorAliasModule.clean(@item[:oem_brand].to_s.squish[0..99])
                                 ),
 
             raw:                quote('f'),
@@ -530,10 +530,10 @@ module VoshodAvtoExchange
             va_item_id:         quote(@item[:id].to_s),
             va_nom_group:       quote(@item[:nom_group].to_s),
             va_price_group:     quote(@item[:price_group].to_s),
-            name:               quote(@item[:name].to_s.clean_whitespaces[0..250]),
+            name:               quote(@item[:name].to_s.squish[0..250]),
             unit_code:          @item[:unit_code].to_i,
-            department:         quote(@item[:department].to_s.clean_whitespaces[0..99]),
-            search_tags:        quote(@item[:search_tags].to_s.clean_whitespaces)
+            department:         quote(@item[:department].to_s.squish[0..99]),
+            search_tags:        quote(@item[:search_tags].to_s.squish)
 
           })
 
