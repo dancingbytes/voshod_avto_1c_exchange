@@ -70,14 +70,7 @@ module VoshodAvtoExchange
           %{name},
           %{unit_code},
           %{department},
-          %{search_tags},
-          setweight(
-            coalesce( to_tsvector('ru', %{mog}),''),'A') || ' ' ||
-            setweight( coalesce( to_tsvector('ru', %{name}),''),'B') || ' ' ||
-            setweight( coalesce( to_tsvector('ru', %{search_tags}),''),'C') || ' ' ||
-            setweight( coalesce( to_tsvector('ru', %{oem_num}),''),'A') || ' ' ||
-            setweight( coalesce( to_tsvector('ru', %{oem_brand}),''),'A'
-          )
+          %{search_tags}
         ) ON CONFLICT (p_code, mog, oem_num, oem_brand) DO UPDATE SET raw = %{raw},
           shipment = %{shipment},
           updated_at = %{updated_at},
@@ -88,14 +81,7 @@ module VoshodAvtoExchange
           name = %{name},
           unit_code = %{unit_code},
           department = %{department},
-          search_tags = %{search_tags},
-          fts = setweight(
-            coalesce( to_tsvector('ru', %{mog}),''),'A') || ' ' ||
-            setweight( coalesce( to_tsvector('ru', %{name}),''),'B') || ' ' ||
-            setweight( coalesce( to_tsvector('ru', %{search_tags}),''),'C') || ' ' ||
-            setweight( coalesce( to_tsvector('ru', %{oem_num}),''),'A') || ' ' ||
-            setweight( coalesce( to_tsvector('ru', %{oem_brand}),''),'A'
-          )
+          search_tags = %{search_tags}
       }.freeze
 
       S_C_ERROR = %Q(Ошибка сохранения каталога в базу.
@@ -536,6 +522,11 @@ module VoshodAvtoExchange
             search_tags:        quote(@item[:search_tags].to_s.squish)
 
           })
+
+          # Ищем товар по 1C-айди
+          itm = ::Item.where(va_item_id: @item[:id].to_s).take
+          # Если нашли -- обновляем индекс
+          ::SearchModule.reindex_for(itm) if itm
 
         rescue => ex
 

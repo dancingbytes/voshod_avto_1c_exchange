@@ -1,5 +1,5 @@
 module VoshodAvtoExchange
 
-  VERSION = '0.12'.freeze
+  VERSION = '0.13'.freeze
 
 end # VoshodAvtoExchange
