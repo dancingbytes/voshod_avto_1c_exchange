@@ -53,8 +53,7 @@ module VoshodAvtoExchange
           name,
           unit_code,
           department,
-          search_tags,
-          fts
+          search_tags
         ) VALUES (
           %{p_code},
           %{mog},
