@@ -522,8 +522,24 @@ module VoshodAvtoExchange
 
           })
 
+        rescue => ex
+
+          log(S_I_ERROR % {
+            msg: [ex.message].push(ex.backtrace).join("\n")
+          })
+
+        end
+
+        reindex_for(@item[:id].to_s)
+
+      end # save_item
+
+      def reindex_for(item_id)
+
+        begin
+
           # Ищем товар по 1C-айди
-          itm = ::Item.where(va_item_id: @item[:id].to_s).take
+          itm = ::Item.where(va_item_id: item_id).take
           # Если нашли -- обновляем индекс
           ::SearchModule.reindex_for(itm) if itm
 
@@ -535,7 +551,7 @@ module VoshodAvtoExchange
 
         end
 
-      end # save_item
+      end
 
       #
       # Начало обработки каталогов
