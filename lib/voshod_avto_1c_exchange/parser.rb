@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'voshod_avto_1c_exchange/parsers/base'
 
 require 'voshod_avto_1c_exchange/parsers/user_reg'
