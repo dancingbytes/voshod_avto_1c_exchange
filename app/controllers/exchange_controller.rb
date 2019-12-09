@@ -12,8 +12,8 @@ class ExchangeController < ::ApplicationController
   def get
 
     ::Rails.logger.tagged("[GET] /exchange [params]") {
-      ::Rails.logger.info("session_id: #{session_id}, operation_id: #{operation_id}")
-      ::Rails.logger.info(params.inspect)
+      ::Rails.logger.warn("session_id: #{session_id}, operation_id: #{operation_id}")
+      ::Rails.logger.warn(params.inspect)
     }
 
     case mode
@@ -103,8 +103,8 @@ class ExchangeController < ::ApplicationController
   def post
 
     ::Rails.logger.tagged("[POST] /exchange [params]") {
-      ::Rails.logger.info("session_id: #{session_id}, operation_id: #{operation_id}")
-      ::Rails.logger.info(params.inspect)
+      ::Rails.logger.warn("session_id: #{session_id}, operation_id: #{operation_id}")
+      ::Rails.logger.warn(params.inspect)
     }
 
     case mode
@@ -155,10 +155,18 @@ class ExchangeController < ::ApplicationController
 
   def auth
 
-    return true if ::VoshodAvtoExchange::login.nil?
+    ::Rails.logger.tagged("[GET] /exchange [auth|start]") {
+      ::Rails.logger.warn(params.inspect)
+    }
 
     authenticate_or_request_with_http_basic do |login, password|
+
+      ::Rails.logger.tagged("[GET] /exchange [auth]") {
+        ::Rails.logger.warn("login: #{login}, password: #{password}")
+      }
+
       (login == ::VoshodAvtoExchange::login && password == ::VoshodAvtoExchange::password)
+
     end
 
   end # auth
