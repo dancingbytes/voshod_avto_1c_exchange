@@ -97,31 +97,31 @@ module VoshodAvtoExchange
 
       def start_parse_order
         @order_params = {}
-      end # start_parse_order
+      end
 
       def start_parse_item
         @item_params  = {}
-      end # start_parse_item
+      end
 
       def order?
         tag == 'Документ'.freeze
-      end # order?
+      end
 
       def item?
         tag == 'Товар'.freeze
-      end # item?
+      end
 
       def parse_order_params(name)
         @order_params[name] = tag_value if order?
-      end # parse_order_params
+      end
 
       def parse_item_params(name)
         @item_params[name]  = tag_value if item?
-      end # parse_item_params
+      end
 
       def save_item
 
-        order = ::Order.where(id: @order_params[:order_id]).take
+        order = ::Order.where(uid: @order_params[:order_id]).take
 
         unless order
 
