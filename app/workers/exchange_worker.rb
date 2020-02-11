@@ -12,9 +12,6 @@ class ExchangeWorker
 
   def perform(file_path)
 
-    # Задача остановлена
-    return if cancelled?
-
     ::VoshodAvtoExchange::Manager.run(
 
       file_path: file_path,
@@ -39,15 +36,11 @@ class ExchangeWorker
     )
 
     rescue Exception => ex
-      ::Rails.logger.warn(ex)
+      ::Rails.logger.error(ex)
 
     ensure
-      ::SidekiqManager.close(self.jid)
+      ::SidekiqManager.close(job_id)
 
   end # perform
-
-  def cancelled?
-    ::Sidekiq.redis {|c| c.exists("cancelled-#{jid}") }
-  end
 
 end # ExchangeWorker
