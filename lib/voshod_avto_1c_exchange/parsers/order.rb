@@ -123,14 +123,10 @@ module VoshodAvtoExchange
 
         order = ::Order.where(uid: @order_params[:order_id]).take
 
-        unless order
+        # Заказ не найден -- завершаем работу
+        return if order.nil?
 
-          log(S_ERROR % {
-            msg: "Заказ #{@order_params[:order_id]} не найден"
-          }) and return
-
-        end
-
+        # Параметры товара пусты -- пишем в лог и завершаем работу
         if @item_params.empty?
           log(P_ERROR % { tag: tag_debug }) and return
         end
