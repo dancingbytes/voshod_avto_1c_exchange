@@ -73,7 +73,7 @@ module VoshodAvtoExchange
         tlines: total_lines
       )
 
-      ::FileUtils.rm_rf(file_name)
+      ::FileUtils.rm_rf(file_name) if ::VoshodAvtoExchange.delete_file
 
       lines
 

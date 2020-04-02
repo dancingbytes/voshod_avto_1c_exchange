@@ -111,6 +111,13 @@ module VoshodAvtoExchange
 
   end # close_logger
 
+  def delete_file(val = nil)
+
+    @delete_file = (val == true)
+    @delete_file
+
+  end
+
   private
 
   def create_logger
