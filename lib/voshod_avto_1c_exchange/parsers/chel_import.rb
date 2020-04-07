@@ -70,7 +70,8 @@ module VoshodAvtoExchange
           %{name},
           %{unit_code},
           %{department},
-          %{search_tags}
+          %{search_tags},
+          %{instituted_at}
         ) ON CONFLICT (p_code, mog, oem_num, oem_brand) DO UPDATE SET raw = %{raw},
           shipment = %{shipment},
           updated_at = %{updated_at},
@@ -81,7 +82,8 @@ module VoshodAvtoExchange
           name = %{name},
           unit_code = %{unit_code},
           department = %{department},
-          search_tags = %{search_tags}
+          search_tags = %{search_tags},
+          instituted_at = %{instituted_at}
       }.freeze
 
       S_C_ERROR = %Q(Ошибка сохранения каталога в базу.
@@ -494,6 +496,8 @@ module VoshodAvtoExchange
 
         return if @item.nil? || @item.empty?
 
+        instituted_at = @item[:characters]['Дата создания номенклатуры'].try(:to_time).try(:utc)
+
         begin
 
           sql(ITEM_INSERT_OR_UPDATE % {
@@ -519,7 +523,8 @@ module VoshodAvtoExchange
             name:               quote(@item[:name].to_s.squish[0..250]),
             unit_code:          @item[:unit_code].to_i,
             department:         quote(@item[:department].to_s.squish[0..99]),
-            search_tags:        quote(@item[:search_tags].to_s.squish)
+            search_tags:        quote(@item[:search_tags].to_s.squish),
+            instituted_at:      quote(instituted_at)
 
           })
 
