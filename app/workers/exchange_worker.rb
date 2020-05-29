@@ -39,7 +39,7 @@ class ExchangeWorker
       ::Rails.logger.error(ex)
 
     ensure
-      ::SidekiqManager.close(job_id)
+      ::SidekiqManager.close(jid)
 
   end # perform
 
