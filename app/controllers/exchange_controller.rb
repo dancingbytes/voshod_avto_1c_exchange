@@ -64,7 +64,7 @@ class ExchangeController < ::ApplicationController
           when 'users_list'    then
 
             answer(xml: ::VoshodAvtoExchange::Exports::User.list(
-              users_list: User.where(id: String(params[:id]).split(','))
+              users_ids: params[:id].to_s.split(',')
             ))
 
           # GET /exchange?type=orders_list&mode=query&id=123
@@ -72,7 +72,7 @@ class ExchangeController < ::ApplicationController
           when 'orders_list'   then
 
             answer(xml: ::VoshodAvtoExchange::Exports::Order.list(
-              orders_list: Order.where(id: String(params[:id]).split(','))
+              orders_ids: params[:id].to_s.split(',')
             ))
 
           else

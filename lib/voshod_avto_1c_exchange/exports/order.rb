@@ -7,11 +7,14 @@ module VoshodAvtoExchange
 
       extend self
 
-      def list(operation_id: nil, doc: true, orders_list: nil)
+      def list(operation_id: nil, doc: true, orders_ids: nil)
 
         str           = ""
         date          = Time.now.strftime('%Y-%m-%d')
         time          = Time.now.strftime('%H:%M:%S')
+
+        orders_list   = nil
+        orders_list   = ::Order.where(id: orders_ids) if orders_ids.present?
         orders_list ||= ::Order.where(operation_state: 0)
 
         # Исключаем заказы тестового пользователя
@@ -62,7 +65,7 @@ module VoshodAvtoExchange
           next if items.blank?
 
           # Выставляем индектификатор операции
-          order.update_columns(operation_id: operation_id) unless operation_id.blank?
+          order.update_columns(operation_id: operation_id) if operation_id.present?
 
           # Формируем даныне по доставке
           if order.delivery_type == 1
