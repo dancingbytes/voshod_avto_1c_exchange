@@ -147,8 +147,15 @@ module VoshodAvtoExchange
 
           ::UserMailer.approve_mail(user).deliver
 
-        rescue ::Exception => ex
-          ::Rails.logger.error(ex)
+        rescue ::Exception => err
+
+          ::Rails.logger.tagged("[send_approve_request]") {
+            ::Rails.logger.error(
+              %Q(Не смог отправить письмо на почту #{user.login})
+            )
+            ::Rails.logger.error(err)
+          }
+
         end
 
       end
@@ -157,8 +164,15 @@ module VoshodAvtoExchange
 
         begin
           ::UserMailer.reject_mail(user, comment).deliver
-        rescue ::Exception => ex
-          ::Rails.logger.error(ex)
+        rescue ::Exception => err
+
+          ::Rails.logger.tagged("[send_reject_request]") {
+            ::Rails.logger.error(
+              %Q(Не смог отправить письмо на почту #{user.login})
+            )
+            ::Rails.logger.error(err)
+          }
+
         end
 
       end
