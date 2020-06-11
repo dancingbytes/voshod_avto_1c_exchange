@@ -57,8 +57,7 @@ module VoshodAvtoExchange
       def verify(operation_id = 0)
 
         ::User.where({
-          operation_state: 0,
-          operation_id:    operation_id
+          operation_id: operation_id
         }).update_all({
           operation_state: 1
         })
