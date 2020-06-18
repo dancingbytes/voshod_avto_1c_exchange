@@ -537,7 +537,7 @@ module VoshodAvtoExchange
 
         end
 
-        # reindex_for(@item[:id].to_s)
+        reindex_for(@item[:id].to_s)
 
       end # save_item
 
