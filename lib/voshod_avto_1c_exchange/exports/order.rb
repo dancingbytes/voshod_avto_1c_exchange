@@ -14,8 +14,8 @@ module VoshodAvtoExchange
         time          = Time.now.strftime('%H:%M:%S')
 
         orders_list   = nil
-        orders_list   = ::Order.where(id: orders_ids) if orders_ids.present?
-        orders_list ||= ::Order.where(operation_state: 0)
+        orders_list   = ::Order.confirmed.where(id: orders_ids) if orders_ids.present?
+        orders_list ||= ::Order.confirmed.where(operation_state: 0)
 
         # Исключаем заказы тестового пользователя
         orders = OrderDecorator.decorate_collection(
