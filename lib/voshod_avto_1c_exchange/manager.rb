@@ -18,6 +18,11 @@ module VoshodAvtoExchange
       process_clb   = ->(index, msg) {} unless process_clb.is_a?(::Proc)
       completed_clb = ->(total, msg) {} unless completed_clb.is_a?(::Proc)
 
+      # puts init_clb
+      # puts start_clb
+      # puts process_clb
+      # puts completed_clb
+
       # Распаковываем zip архив, если такой имеется.
       # Подготавливаем список файлов к обработке
       files = if is_zip?(file_path)
@@ -35,6 +40,8 @@ module VoshodAvtoExchange
         # Число строк в файле
         hfl[fl] = count_lines(fl)
       }
+
+      # puts 'hfl', hfl
 
       # Итоговое число строк
       total = hfl.values.sum

@@ -7,6 +7,7 @@ require 'voshod_avto_1c_exchange/parsers/order'
 require 'voshod_avto_1c_exchange/parsers/chel_import'
 require 'voshod_avto_1c_exchange/parsers/chel_offers'
 require 'voshod_avto_1c_exchange/parsers/chel_cross'
+require 'voshod_avto_1c_exchange/parsers/outlet'
 
 #
 # Фабрика по выбору парсера обработки данных
@@ -105,6 +106,10 @@ module VoshodAvtoExchange
           when 'Кросы'.freeze then
             @parser = ::VoshodAvtoExchange::Parsers::ChelCross.new
 
+          # Торговые точки
+          when 'ТорговаяТочка'.freeze then
+            @parser = ::VoshodAvtoExchange::Parsers::Outlet.new(doc_info: doc_info)
+          
         end # case
 
       end # unless
