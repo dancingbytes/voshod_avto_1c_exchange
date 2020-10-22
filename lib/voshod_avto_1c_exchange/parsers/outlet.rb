@@ -48,6 +48,7 @@ module VoshodAvtoExchange
           when "Адрес".freeze then parse_params(:address)
           when "ГУИД".freeze then parse_params(:guid)
           when "Статус".freeze then parse_params(:status)
+          when "ГУИД_РД".freeze then parse_delivery_area_id(:delivery_area_id)
           when "ТорговаяТочка".freeze then ::Outlet::Create.call(params: @params)
 
         end # case
@@ -65,6 +66,10 @@ module VoshodAvtoExchange
       def parse_params(name)
         @params[name] = tag_value
       end # parse_params
+
+      def parse_delivery_area_id
+        @params[name] = DeliveryAera.where(guid: tag_value).take.id
+      end
 
       # def params
       #   @params || {}

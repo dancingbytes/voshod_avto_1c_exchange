@@ -8,6 +8,8 @@ require 'voshod_avto_1c_exchange/parsers/chel_import'
 require 'voshod_avto_1c_exchange/parsers/chel_offers'
 require 'voshod_avto_1c_exchange/parsers/chel_cross'
 require 'voshod_avto_1c_exchange/parsers/outlet'
+require 'voshod_avto_1c_exchange/parsers/delivery_area'
+require 'voshod_avto_1c_exchange/parsers/delivery_period'
 
 #
 # Фабрика по выбору парсера обработки данных
