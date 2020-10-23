@@ -9,7 +9,6 @@ require 'voshod_avto_1c_exchange/parsers/chel_offers'
 require 'voshod_avto_1c_exchange/parsers/chel_cross'
 require 'voshod_avto_1c_exchange/parsers/outlet'
 require 'voshod_avto_1c_exchange/parsers/delivery_area'
-require 'voshod_avto_1c_exchange/parsers/delivery_period'
 
 #
 # Фабрика по выбору парсера обработки данных
@@ -111,6 +110,10 @@ module VoshodAvtoExchange
           # Торговые точки
           when 'ТорговаяТочка'.freeze then
             @parser = ::VoshodAvtoExchange::Parsers::Outlet.new(doc_info: doc_info)
+          
+          # Районы доставки
+          when 'РайонДоставки'.freeze then
+          @parser = ::VoshodAvtoExchange::Parsers::DeliveryArea.new(doc_info: doc_info)
           
         end # case
 
