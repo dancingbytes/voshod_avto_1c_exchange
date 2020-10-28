@@ -22,9 +22,11 @@ class ExchangeController < ::ApplicationController
       answer(text: "zip=yes\nfile_limit=0")
     when 'success'    then
       case type
+      
       # GET /exchange?type=catalog&mode=success
       when 'catalog'  then
         answer(text: "failure\nType `#{type}` is not implement")
+      
       # GET /exchange?type=sale&mode=success
       # Пользователи
       # Заказы
@@ -36,20 +38,27 @@ class ExchangeController < ::ApplicationController
       end # case
     when 'query' then
       case type
-      # GET /exchange?type=catalog&mode=query
+      
+        # GET /exchange?type=catalog&mode=query
       when 'catalog' then
         answer(text: "failure\nType `#{type}` is not implement")
+      
       # GET /exchange?type=sale&mode=query
       # Пользователи
       # Заказы
       when 'sale' then
         answer(xml: ::VoshodAvtoExchange::Exports.users_and_orders(operation_id))
+
+        # debug запись файла обмена заказами
+        # File.open("public/1c.xml", "w"){ |f| f << @answer[:xml]}
+
       # GET /exchange?type=users_list&mode=query&id=123
-      # Спсисок пользователей по заданному списку id
+      # Список пользователей по заданному списку id
       when 'users_list'    then
         answer(xml: ::VoshodAvtoExchange::Exports::User.list(
           users_ids: params[:id].to_s.split(',')
         ))
+      
       # GET /exchange?type=orders_list&mode=query&id=123
       # Спсисок заказов по заданному списку id
       when 'orders_list'   then
@@ -59,6 +68,7 @@ class ExchangeController < ::ApplicationController
       else
         answer(text: "failure\nType `#{type}` is not found")
       end # case
+    
     # Узнаем, пришел ли файл выгрузки
     when 'import' then
       if ::VoshodAvtoExchange.exist_job?(key: operation_id)
@@ -66,6 +76,7 @@ class ExchangeController < ::ApplicationController
       else
         answer(text: "failure\nFile `#{params[:filename]}` is not found")
       end
+    
     # На все остальное отвечаем ошибкой
     else
       answer(text: "failure\nMode `#{mode}` is not found")

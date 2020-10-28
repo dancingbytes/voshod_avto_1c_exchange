@@ -67,7 +67,7 @@ module VoshodAvtoExchange
           # Выставляем индектификатор операции
           order.update_columns(operation_id: operation_id) if operation_id.present?
 
-          # Формируем даныне по доставке
+          # Формируем данные по доставке
           if order.delivery_type == 1
             d_address = order.delivery_address
             d_type    = "Доставка"
@@ -83,7 +83,8 @@ module VoshodAvtoExchange
             date:             order.created_at.strftime('%Y-%m-%d'),
             time:             order.created_at.strftime('%H:%M:%S'),
             price:            order.amount,
-            uid:              order.user_uid,
+            # uid:              order.user_uid,
+            uid:              order.user.uid,
             company:          xml_escape( order.user.try(:company) ),
             full_company:     xml_escape( order.user.try(:full_company) ),
 
@@ -104,6 +105,7 @@ module VoshodAvtoExchange
           }
 
         } # each
+        
 
         # Итоговый документ
         doc ? (::VoshodAvtoExchange::Template::XML_BASE % {
