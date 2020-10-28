@@ -31,24 +31,24 @@ module VoshodAvtoExchange
             cistr << ::VoshodAvtoExchange::Template::ORDER_ITEM % {
 
               # ИД товара в 1С Восход-авто
-              item_id:          xml_escape(cart_item.va_item_id),
+              item_id:          xml_escape(cart_item.item.va_item_id),
 
               # Код внешнего поставщика
-              p_code:           xml_escape(cart_item.p_code),
+              p_code:           xml_escape(cart_item.item.p_code),
 
               # Бренд детали (Производитель)
-              oem_brand:        xml_escape(cart_item.oem_brand),
+              oem_brand:        xml_escape(cart_item.item.oem_brand),
 
               # Номер детали (Артикул производителя)
-              oem_num:          xml_escape(cart_item.oem_num),
+              oem_num:          xml_escape(cart_item.item.oem_num),
 
               # Артикул товара в 1С Восход-авто
-              item_mog:         xml_escape(cart_item.mog),
+              item_mog:         xml_escape(cart_item.item.mog),
 
               # Цена закупа (у внешнего поставщика)
               purchase_price:   0,
 
-              item_name:        xml_escape(cart_item.name),
+              item_name:        xml_escape(cart_item.item.name),
               item_contry_code: "643",
               item_contry_name: "РОССИЯ",
               item_gtd:         "",
