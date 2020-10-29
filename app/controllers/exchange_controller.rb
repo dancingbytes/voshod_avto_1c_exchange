@@ -82,60 +82,45 @@ class ExchangeController < ::ApplicationController
       answer(text: "failure\nMode `#{mode}` is not found")
     end # case
 
-    render(answer) and return
+    render(answer)
   end # get
 
   # POST /exchange
   def post
-
     ::Rails.logger.tagged("[POST] /exchange [params]") {
       ::Rails.logger.info("session_id: #{session_id}, operation_id: #{operation_id}")
       ::Rails.logger.info(params.inspect)
     }
 
     case mode
-
-      when 'checkauth'  then
-        answer(text: "success\nexchange_1c\n#{session_id}")
-
-      when 'init'       then
-        answer(text: "zip=no\nfile_limit=0")
-
-      when 'success'    then
-        answer(text: "success")
-
-      when 'file'
-
-        case type
-
-          # POST /exchange?type=catalog&mode=file&filename=sdsd.xml
-          when 'catalog'  then
-
-            # Получение файла из 1С
-            res = !save_file.nil?
-            answer(text: res ? "success" : "failure\nFile is not found")
-
-          # POST /exchange?type=sale&mode=file&filename=sdsd.xml
-          when 'sale'     then
-
-            # Получение файла из 1С
-            res = !save_file.nil?
-            answer(text: res ? "success" : "failure\nFile is not found")
-
-          else
-            answer(text: "failure\nType `#{type}` is not found")
-
-        end # case
-
-      # На все остальное отвечаем ошибкой
+    when 'checkauth'  then
+      answer(text: "success\nexchange_1c\n#{session_id}")
+    when 'init'       then
+      answer(text: "zip=no\nfile_limit=0")
+    when 'success'    then
+      answer(text: "success")
+    when 'file'
+      case type
+      # POST /exchange?type=catalog&mode=file&filename=sdsd.xml
+      when 'catalog'  then
+        # Получение файла из 1С
+        res = !save_file.nil?
+        answer(text: res ? "success" : "failure\nFile is not found")
+      # POST /exchange?type=sale&mode=file&filename=sdsd.xml
+      when 'sale'     then
+        # Получение файла из 1С
+        res = !save_file.nil?
+        answer(text: res ? "success" : "failure\nFile is not found")
       else
-        answer(text: "failure\nMode `#{mode}` is not found")
+        answer(text: "failure\nType `#{type}` is not found")
+      end
+    # На все остальное отвечаем ошибкой
+    else
+      answer(text: "failure\nMode `#{mode}` is not found")
+    end
 
-    end # case
-
-    render(answer) and return
-
-  end # post
+    render(answer)
+  end
 
   private
 
