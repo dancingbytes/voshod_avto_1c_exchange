@@ -131,6 +131,7 @@ module VoshodAvtoExchange
 
         # Количество попыток
         retry_tries  = 5
+        cart_items = []
 
         begin
           # Список изменений товара
@@ -138,6 +139,8 @@ module VoshodAvtoExchange
 
           # puts Item.count
           ci = find_item_by(order, @item_params)
+          cart_items << ci
+
           item = ci.item
 
           item.mog              = @item_params[:mog].to_s
@@ -187,6 +190,9 @@ module VoshodAvtoExchange
             msg: [ex.message].push(ex.backtrace).join("\n")
           })
         end
+
+        # Если позиции не пришли в файле, значит они удалены в 1С
+        order.cart_items.where.not(id: cart_items.map(&:id)).destroy_all
 
         # Помечаем заказ обоаботанным и
         # обновляем итоговую сумму заказа
