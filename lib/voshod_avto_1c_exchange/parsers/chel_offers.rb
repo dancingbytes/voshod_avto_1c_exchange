@@ -2,7 +2,7 @@
 #
 # Обработка offers-файла из 1С Челябинска
 #
-module VoshodAvtoExchange
+module VoshodAvtoExchange # offers.xml
 
   module Parsers
 
