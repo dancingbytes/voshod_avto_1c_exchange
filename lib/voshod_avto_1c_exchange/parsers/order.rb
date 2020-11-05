@@ -41,7 +41,6 @@ module VoshodAvtoExchange
       end # start_element
 
       def end_element(name)
-
         super
 
         case name
@@ -120,7 +119,6 @@ module VoshodAvtoExchange
       end
 
       def save_item
-
         order = ::Order.where(uid: @order_params[:order_id]).take
 
         # Заказ не найден -- завершаем работу
@@ -133,80 +131,68 @@ module VoshodAvtoExchange
 
         # Количество попыток
         retry_tries  = 5
+        cart_items = []
 
         begin
-
           # Список изменений товара
           changes_list = []
 
+          # puts Item.count
           ci = find_item_by(order, @item_params)
+          cart_items << ci
 
-          ci.mog              = @item_params[:mog].to_s
+          item = ci.item
 
+          item.mog              = @item_params[:mog].to_s
           # Если код поставщика пуст -- используем код по-умочланию
-          ci.p_code           = 'VNY6'
-
+          item.p_code           = 'VNY6'
           # Приводим номер производителя и его название к нужному виду
-          ci.oem_num          = ::CrossModule.clean(@item_params[:oem_num].to_s.squish[0..99])
-
-          ci.oem_brand        = ::VendorAliasModule.clean(@item_params[:oem_brand].to_s.squish[0..99])
+          item.oem_num          = ::CrossModule.clean(@item_params[:oem_num].to_s.squish[0..99])
+          item.oem_brand        = ::VendorAliasModule.clean(@item_params[:oem_brand].to_s.squish[0..99])
 
           ci.state_name       = @item_params[:state_name] || ''
-
           ci.price            = @item_params[:price].try(:to_f) || 0
           ci.count            = @item_params[:count].try(:to_i) || 0
-
           ci.delivery_address = @item_params[:delivery_address] || ''
           ci.delivery_at      = @item_params[:delivery_at].try(:to_time)
 
-          if ci.new_record?
-
-            ci.name       = @item_params[:name].to_s
-            ci.va_item_id = @item_params[:va_item_id].to_s
+          if item.new_record?
+            item.name       = @item_params[:name].to_s
+            item.va_item_id = @item_params[:va_item_id].to_s
 
             changes_list  << { type_of: 5, msg: 'Добавлен новый товар' }
-
           else
-
             changes_list.concat(
               changes_for(ci.changes)
             )
-
-          end # if
+          end
 
           ::CartItem.transaction(requires_new: true) do
-
-            if ci.save(validate: false)
-
-              changes_list.each { |el|
-
+            if ci.save(validate: false) && item.save(validate: false)
+              changes_list.each do |el|
                 ::CartItemHistoryModule.add(
-                  cart_item_id:   ci.id,
-                  type_of:        el[:type_of],
-                  user_name:      'Менеджер',
-                  msg:            el[:msg]
+                  cart_item_id: ci.id,
+                  type_of: el[:type_of],
+                  user_name: 'Менеджер',
+                  msg: el[:msg]
                 )
-
-              }
-
+              end
             end
-
           end # transaction
-
         rescue ::ActiveRecord::RecordNotUnique,
                ::PG::UniqueViolation,
                ::PG::TRDeadlockDetected
 
           retry_tries = retry_tries - 1
           retry if retry_tries > 0
-
         rescue => ex
-
           log(S_ERROR % {
             msg: [ex.message].push(ex.backtrace).join("\n")
           })
-
         end
+
+        # Если позиции не пришли в файле, значит они удалены в 1С
+        order.cart_items.where.not(id: cart_items.map(&:id)).destroy_all
 
         # Помечаем заказ обоаботанным и
         # обновляем итоговую сумму заказа
@@ -217,40 +203,29 @@ module VoshodAvtoExchange
 
         # Обновление статуса заказа
         ::Order::UpdateStatus.call(order: order)
-
       end # save_item
 
       def find_item_by(order, params)
-
         va_item_id = params[:va_item_id].to_s
 
-        ci = ::CartItem.where({
-
-          user_id:      order.user_id,
-          order_id:     order.id,
-          va_item_id:   va_item_id
-
-        }).take if va_item_id.present?
+        if va_item_id.present?
+          ci = order.cart_items.joins(:item).where(items: { va_item_id: va_item_id }).take
+        end
 
         return ci if ci
 
-        ::CartItem.find_or_initialize_by({
-
-          user_id:      order.user_id,
-          order_id:     order.id,
-
+        item = ::Item.find_or_initialize_by(
           mog:          params[:mog].to_s,
-
-          # Если код поставщика пуст -- используем код по-умочланию
+           # Если код поставщика пуст -- используем код по-умочланию
           p_code:       params[:p_code].blank? ? 'VNY6' : params[:p_code],
 
           # Приводим номер производителя и его название к нужному виду
           oem_num:      ::CrossModule.clean(params[:oem_num].to_s.squish[0..99]),
 
           oem_brand:    ::VendorAliasModule.clean(params[:oem_brand].to_s.squish[0..99])
+        )
 
-        })
-
+        order.cart_items.find_or_initialize_by(item: item)
       end # find_item_by
 
       def changes_for(changes)
