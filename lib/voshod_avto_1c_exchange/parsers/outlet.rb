@@ -13,7 +13,8 @@ module VoshodAvtoExchange
         super
 
         case name
-          when "ТорговаяТочка".freeze then start_parse_params
+          when "ТорговаяТочка".freeze then 
+            start_parse_params
         end # case
 
       end # start_element
@@ -29,7 +30,7 @@ module VoshodAvtoExchange
           when "ГУИД".freeze then parse_params(:guid)
           when "Статус".freeze then parse_params(:status)
           when "ГУИД_РД".freeze then parse_delivery_area_id(:delivery_area_id)
-          when "ТорговаяТочка".freeze then save
+          when "ТорговаяТочка".freeze then save_outlet
 
         end # case
 
@@ -53,8 +54,8 @@ module VoshodAvtoExchange
         @params[name] = ::User.find_by(uid: tag_value).try(:id)
       end
 
-      def save
-        ::Outlet::Create.call(params: @params)
+      def save_outlet
+        ::Outlet::UpdateOrCreate.call(params: @params).success?
       end
 
     end # Outlet

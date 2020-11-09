@@ -34,6 +34,7 @@ class ExchangeController < ::ApplicationController
 
           # GET /exchange?type=sale&mode=success
           # Пользователи
+          # Торговые точки
           # Заказы
           when 'sale'     then
 
@@ -55,20 +56,29 @@ class ExchangeController < ::ApplicationController
 
           # GET /exchange?type=sale&mode=query
           # Пользователи
+          # Торговые точки
           # Заказы
           when 'sale' then
             answer(xml: ::VoshodAvtoExchange::Exports.users_and_orders(operation_id))
 
           # GET /exchange?type=users_list&mode=query&id=123
-          # Спсисок пользователей по заданному списку id
-          when 'users_list'    then
+          # Список пользователей по заданному списку id
+          when 'users_list' then
 
             answer(xml: ::VoshodAvtoExchange::Exports::User.list(
               users_ids: params[:id].to_s.split(',')
             ))
 
+          # GET /exchange?type=outlets_list&mode=query&id=123
+          # Список торговых точек по заданному списку id
+          when 'outlets_list' then
+
+            answer(xml: ::VoshodAvtoExchange::Exports::Outlet.list(
+              outlets_ids: params[:id].to_s.split(',')
+            ))
+
           # GET /exchange?type=orders_list&mode=query&id=123
-          # Спсисок заказов по заданному списку id
+          # Список заказов по заданному списку id
           when 'orders_list'   then
 
             answer(xml: ::VoshodAvtoExchange::Exports::Order.list(

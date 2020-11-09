@@ -128,13 +128,18 @@ module VoshodAvtoExchange
 
       if @parser
         @parser.end_element(name)
+        
+        # TODO 
+        # сбрасываем парсер для выбора другого
+        @parser = nil if name == "РайоныДоставки".freeze
+
       else
 
         case name
 
           when 'Ид'.freeze  then
             parser_1c8_import
-            parser_1c8_offers
+            parser_1c8_offers         
 
         end
 
