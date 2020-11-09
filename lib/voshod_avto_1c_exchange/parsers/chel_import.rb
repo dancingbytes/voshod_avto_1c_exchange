@@ -617,9 +617,18 @@ module VoshodAvtoExchange
         if @full_update
 
           # Удаляем все товары, которые не были обработаны
-          sql(ITEMS_DELETE_RAW_ALL % {
-            p_code: @p_code
-          })
+          # sql(ITEMS_DELETE_RAW_ALL % {
+          #   p_code: @p_code
+          # })
+
+          # DELETE FROM items WHERE raw = 't' AND p_code = '%{p_code}
+
+          # 
+          # 2020-11-10 Заменяем удаление сбросом атрибута published
+          #
+          # TODO после првоерки удалить запрос ITEMS_DELETE_RAW_ALL 
+          #
+          Item.where('raw=? and p_code=?', 't', @p_code).update_all(published: false)
 
         end # if
 

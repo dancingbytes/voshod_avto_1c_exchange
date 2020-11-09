@@ -82,30 +82,30 @@ module VoshodAvtoExchange
 
         case name
 
-          when 'КоммерческаяИнформация'.freeze then
-            parse_doc_info(::Hash[attrs])
+        when 'КоммерческаяИнформация'.freeze then
+          parse_doc_info(::Hash[attrs])
 
-          # Регистрация клиента
-          when 'РегистрацияКлиентов'.freeze then
-            @parser = ::VoshodAvtoExchange::Parsers::UserReg.new(doc_info: doc_info)
+        # Регистрация клиента
+        when 'РегистрацияКлиентов'.freeze then
+          @parser = ::VoshodAvtoExchange::Parsers::UserReg.new(doc_info: doc_info)
 
-          # Цены клиентов
-          when 'Контрагент'.freeze          then
-            @parser = ::VoshodAvtoExchange::Parsers::UserPrice.new(doc_info: doc_info)
+        # Цены клиентов
+        when 'Контрагент'.freeze          then
+          @parser = ::VoshodAvtoExchange::Parsers::UserPrice.new(doc_info: doc_info)
 
           # Обработка заказов
-          when 'Документ'.freeze            then
+        when 'Документ'.freeze            then
             @parser = ::VoshodAvtoExchange::Parsers::Order.new(doc_info: doc_info)
 
-          # 1c (import)
-          when 'Классификатор'.freeze       then init_1c8_import
+        # 1c (import)
+        when 'Классификатор'.freeze       then init_1c8_import
 
-          # 1c (offers)
-          when 'ПакетПредложений'.freeze    then init_1c8_offers(::Hash[attrs])
+        # 1c (offers)
+        when 'ПакетПредложений'.freeze    then init_1c8_offers(::Hash[attrs])
 
-          # Кроссы из 1С Восход-авто
-          when 'Кросы'.freeze then
-            @parser = ::VoshodAvtoExchange::Parsers::ChelCross.new
+        # Кроссы из 1С Восход-авто
+        when 'Кросы'.freeze then
+          @parser = ::VoshodAvtoExchange::Parsers::ChelCross.new
 
           # Торговые точки
           when 'ТорговаяТочка'.freeze then
