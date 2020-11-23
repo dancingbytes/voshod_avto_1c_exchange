@@ -74,77 +74,56 @@ module VoshodAvtoExchange
     end # new
 
     def start_element(name, attrs = [])
-
       # Если парсер не установлен -- пытаемся его выбрать
       unless @parser
-
         case name
-
-        when 'КоммерческаяИнформация'.freeze then
+        when 'КоммерческаяИнформация'.freeze
           parse_doc_info(::Hash[attrs])
-
         # Регистрация клиента
-        when 'РегистрацияКлиентов'.freeze then
+        when 'РегистрацияКлиентов'.freeze
           @parser = ::VoshodAvtoExchange::Parsers::UserReg.new(doc_info: doc_info)
-
         # Цены клиентов
-        when 'Контрагент'.freeze          then
+        when 'Контрагент'.freeze
           @parser = ::VoshodAvtoExchange::Parsers::UserPrice.new(doc_info: doc_info)
-
-          # Обработка заказов
-        when 'Документ'.freeze            then
-            @parser = ::VoshodAvtoExchange::Parsers::Order.new(doc_info: doc_info)
-
+        # Обработка заказов
+        when 'Документ'.freeze
+          @parser = ::VoshodAvtoExchange::Parsers::Order.new(doc_info: doc_info)
         # 1c (import)
         when 'Классификатор'.freeze       then init_1c8_import
-
         # 1c (offers)
         when 'ПакетПредложений'.freeze    then init_1c8_offers(::Hash[attrs])
-
         # Кроссы из 1С Восход-авто
         when 'Кросы'.freeze then
           @parser = ::VoshodAvtoExchange::Parsers::ChelCross.new
-
         end # case
-
       end # unless
 
       # Если парсер выбран -- работаем.
       @parser.start_element(name, attrs) if @parser
-
     end # start_element
 
     def end_element(name)
-
       if @parser
         @parser.end_element(name)
       else
-
         case name
-
-          when 'Ид'.freeze  then
-            parser_1c8_import
-            parser_1c8_offers
-
+        when 'Ид'.freeze
+          parser_1c8_import
+          parser_1c8_offers
         end
-
       end # if
 
       @line += 1
 
       info_progress if @line % @counter_step == 0
-
     end # end_element
 
     def characters(str)
-
       @str = str
       @parser.try(:characters, str)
-
     end # characters
 
     def end_document
-
       @parser.try(:end_document)
       @parser = nil
 
@@ -152,7 +131,6 @@ module VoshodAvtoExchange
 
       @clb.call(@cstart + @line, "Документ обработан.")
       @final_clb.call(@cstart + @line)
-
     end # end_document
 
     def error(string)
@@ -185,46 +163,40 @@ module VoshodAvtoExchange
     end # init_1c8_offers
 
     def parser_1c8_import
-
       return unless @init_1c8_import
+
       @init_1c8_import = false
 
       case @str
+      # id выгрузки 1С Челябинск
+      when "db996b9e-3d2f-11e1-84e7-00237d443107".freeze,
+           "db996b9e-3d2f-11e1-84e7-00237d443107#".freeze
 
-        # id выгрузки 1С Челябинск
-        when "db996b9e-3d2f-11e1-84e7-00237d443107".freeze,
-             "db996b9e-3d2f-11e1-84e7-00237d443107#".freeze then
-
-          @parser = ::VoshodAvtoExchange::Parsers::ChelImport.new(
-            p_code:   ::VoshodAvtoExchange::P_CODE,
-            doc_info: doc_info
-          )
-
+        @parser = ::VoshodAvtoExchange::Parsers::ChelImport.new( #
+          p_code:   ::VoshodAvtoExchange::P_CODE,
+          doc_info: doc_info
+        )
       end # case
-
     end # parser_1c8_import
 
     def parser_1c8_offers
-
       return unless @init_1c8_offers
+
       @init_1c8_offers = false
 
       case @str
+      # id выгрузки 1С Челябинск
+      when "db996b9e-3d2f-11e1-84e7-00237d443107".freeze,
+           "db996b9e-3d2f-11e1-84e7-00237d443107#".freeze
 
-        # id выгрузки 1С Челябинск
-        when "db996b9e-3d2f-11e1-84e7-00237d443107".freeze,
-             "db996b9e-3d2f-11e1-84e7-00237d443107#".freeze then
-
-          @parser = ::VoshodAvtoExchange::Parsers::ChelOffers.new(
-            p_code:     ::VoshodAvtoExchange::P_CODE,
-            i_attrs:    @attrs_1c8_offers,
-            doc_info:   doc_info
-          )
-
+        @parser = ::VoshodAvtoExchange::Parsers::ChelOffers.new(
+          p_code:     ::VoshodAvtoExchange::P_CODE,
+          i_attrs:    @attrs_1c8_offers,
+          doc_info:   doc_info
+        )
       end # case
 
       @attrs_1c8_offers = nil
-
     end # parser_1c8_offers
 
     def info_progress

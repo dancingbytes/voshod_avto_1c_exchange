@@ -11,7 +11,6 @@ class ExchangeWorker
   end
 
   def perform(file_path)
-
     ::VoshodAvtoExchange::Manager.run(
 
       file_path: file_path,
@@ -34,13 +33,10 @@ class ExchangeWorker
       }
 
     )
-
-    rescue Exception => ex
-      ::Rails.logger.error(ex)
-
-    ensure
-      ::SidekiqManager.close(jid)
-
+  rescue Exception => ex
+    ::Rails.logger.error(ex)
+  ensure
+    ::SidekiqManager.close(jid)
   end # perform
 
 end # ExchangeWorker

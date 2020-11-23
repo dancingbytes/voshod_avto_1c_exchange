@@ -16,67 +16,58 @@ class ExchangeController < ::ApplicationController
     }
 
     case mode
-    when 'checkauth'  then
+    when 'checkauth'
       answer(text: "success\nexchange_1c\n#{session_id}")
-    when 'init'       then
+    when 'init'
       answer(text: "zip=yes\nfile_limit=0")
-    when 'success'    then
+    when 'success'
       case type
-      
       # GET /exchange?type=catalog&mode=success
-      when 'catalog'  then
+      when 'catalog'
         answer(text: "failure\nType `#{type}` is not implement")
-      
       # GET /exchange?type=sale&mode=success
       # Пользователи
       # Заказы
-      when 'sale'     then
+      when 'sale'
         ::VoshodAvtoExchange::Exports.users_and_orders_verify(operation_id)
         answer(text: "success")
       else
         answer(text: "failure\nType `#{type}` is not found")
       end # case
-    when 'query' then
+    when 'query'
       case type
-      
         # GET /exchange?type=catalog&mode=query
-      when 'catalog' then
+      when 'catalog'
         answer(text: "failure\nType `#{type}` is not implement")
-      
       # GET /exchange?type=sale&mode=query
       # Пользователи
       # Заказы
-      when 'sale' then
+      when 'sale'
         answer(xml: ::VoshodAvtoExchange::Exports.users_and_orders(operation_id))
-
         # debug запись файла обмена заказами
         # File.open("public/1c.xml", "w"){ |f| f << @answer[:xml]}
-
       # GET /exchange?type=users_list&mode=query&id=123
       # Список пользователей по заданному списку id
-      when 'users_list'    then
+      when 'users_list'
         answer(xml: ::VoshodAvtoExchange::Exports::User.list(
           users_ids: params[:id].to_s.split(',')
         ))
-      
       # GET /exchange?type=orders_list&mode=query&id=123
       # Спсисок заказов по заданному списку id
-      when 'orders_list'   then
+      when 'orders_list'
         answer(xml: ::VoshodAvtoExchange::Exports::Order.list(
           orders_ids: params[:id].to_s.split(',')
         ))
       else
         answer(text: "failure\nType `#{type}` is not found")
       end # case
-    
     # Узнаем, пришел ли файл выгрузки
-    when 'import' then
+    when 'import'
       if ::VoshodAvtoExchange.exist_job?(key: operation_id)
         answer(text: "success")
       else
         answer(text: "failure\nFile `#{params[:filename]}` is not found")
       end
-    
     # На все остальное отвечаем ошибкой
     else
       answer(text: "failure\nMode `#{mode}` is not found")
@@ -93,21 +84,21 @@ class ExchangeController < ::ApplicationController
     }
 
     case mode
-    when 'checkauth'  then
+    when 'checkauth'
       answer(text: "success\nexchange_1c\n#{session_id}")
-    when 'init'       then
+    when 'init'
       answer(text: "zip=no\nfile_limit=0")
-    when 'success'    then
+    when 'success'
       answer(text: "success")
     when 'file'
       case type
       # POST /exchange?type=catalog&mode=file&filename=sdsd.xml
-      when 'catalog'  then
+      when 'catalog'
         # Получение файла из 1С
         res = !save_file.nil?
         answer(text: res ? "success" : "failure\nFile is not found")
       # POST /exchange?type=sale&mode=file&filename=sdsd.xml
-      when 'sale'     then
+      when 'sale'
         # Получение файла из 1С
         res = !save_file.nil?
         answer(text: res ? "success" : "failure\nFile is not found")
@@ -143,7 +134,6 @@ class ExchangeController < ::ApplicationController
   end # auth
 
   def save_file
-
     return if request.raw_post.nil? || request.raw_post.blank?
 
     file_path = ::File.join(
@@ -161,7 +151,6 @@ class ExchangeController < ::ApplicationController
     ::VoshodAvtoExchange.run_async(file_path, key: operation_id)
 
     file_path
-
   end # save_file
 
   def session_id
