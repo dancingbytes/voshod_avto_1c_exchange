@@ -28,7 +28,7 @@ module VoshodAvtoExchange
           str << ::VoshodAvtoExchange::Template::OUTLET % {
 
             guid:           outlet.guid,
-            client_guid:    outlet.user.guid,
+            client_guid:    outlet.user.uid,
             status:         outlet.status,
             address:        xml_escape(outlet.address),
             date:           date,
