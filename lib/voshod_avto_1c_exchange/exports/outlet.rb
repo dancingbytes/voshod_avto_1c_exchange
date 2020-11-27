@@ -26,7 +26,8 @@ module VoshodAvtoExchange
 
           # Формируем карточку торговой точки
           str << ::VoshodAvtoExchange::Template::OUTLET % {
-
+            
+            id:             outlet.id,
             guid:           outlet.guid,
             client_guid:    outlet.user.uid,
             status:         outlet.status,
