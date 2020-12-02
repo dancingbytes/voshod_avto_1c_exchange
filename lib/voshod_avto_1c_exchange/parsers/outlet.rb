@@ -55,9 +55,8 @@ module VoshodAvtoExchange
       end
 
       def save_outlet
-        save_success = ::Outlet::UpdateOrCreate.call(params: @params).success?
-        ::Outlet::Mail.call(params: @params) if save_success
-        save_success
+        ::Outlet::Mail.call(params: @params)
+        ::Outlet::UpdateOrCreate.call(params: @params).success?
       end
 
     end # Outlet
