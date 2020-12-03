@@ -31,9 +31,7 @@ module VoshodAvtoExchange
             guid:           outlet.guid,
             client_guid:    outlet.user.uid,
             status:         outlet.status,
-            address:        xml_escape(outlet.address),
-            date:           date,
-            time:           time
+            address:        xml_escape(outlet.address)
 
           }
 

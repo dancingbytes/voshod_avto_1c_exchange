@@ -27,6 +27,7 @@ module VoshodAvtoExchange
 
           when "ИД_Контрагент".freeze then parse_user_id(:user_id)
           when "Адрес".freeze then parse_params(:address)
+          when "ИД".freeze then parse_params(:id)
           when "ГУИД".freeze then parse_params(:guid)
           when "Статус".freeze then parse_params(:status)
           when "ГУИД_РД".freeze then parse_delivery_area_id(:delivery_area_id)
