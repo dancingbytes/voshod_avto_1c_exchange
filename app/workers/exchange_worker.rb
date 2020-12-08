@@ -35,6 +35,7 @@ class ExchangeWorker
     )
   rescue Exception => ex
     ::Rails.logger.error(ex)
+    Raven.capture_exception(ex)
   ensure
     ::SidekiqManager.close(jid)
   end # perform

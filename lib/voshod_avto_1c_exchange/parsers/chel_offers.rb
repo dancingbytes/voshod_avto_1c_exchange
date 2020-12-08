@@ -254,6 +254,7 @@ module VoshodAvtoExchange # offers.xml
           log(S_I_ERROR % {
             msg: [ex.message].push(ex.backtrace).join("\n")
           })
+          Raven.capture_exception(ex)
         end
       end # save_item
 

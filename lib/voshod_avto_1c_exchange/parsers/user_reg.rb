@@ -129,11 +129,11 @@ module VoshodAvtoExchange
           end # if
 
         rescue => ex
-
           log(S_ERROR % {
             msg: [ex.message].push(ex.backtrace).join("\n")
           })
 
+          Raven.capture_exception(ex)
         end
 
       end # save_data
@@ -155,7 +155,7 @@ module VoshodAvtoExchange
             )
             ::Rails.logger.error(err)
           }
-
+          Raven.capture_exception(err)
         end
 
       end
@@ -172,7 +172,7 @@ module VoshodAvtoExchange
             )
             ::Rails.logger.error(err)
           }
-
+          Raven.capture_exception(err)
         end
 
       end

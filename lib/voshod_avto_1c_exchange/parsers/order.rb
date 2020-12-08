@@ -189,6 +189,7 @@ module VoshodAvtoExchange
           log(S_ERROR % {
             msg: [ex.message].push(ex.backtrace).join("\n")
           })
+          Raven.capture_exception(ex)
         end
 
         # Если позиции не пришли в файле, значит они удалены в 1С

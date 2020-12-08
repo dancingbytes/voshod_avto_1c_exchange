@@ -422,6 +422,7 @@ module VoshodAvtoExchange
           log(S_C_ERROR % {
             msg: [ex.message].push(ex.backtrace).join("\n")
           })
+          Raven.capture_exception(ex)
         end
       end # save_catalog
 
@@ -460,6 +461,7 @@ module VoshodAvtoExchange
           log(S_I_ERROR % {
             msg: [ex.message].push(ex.backtrace).join("\n")
           })
+          Raven.capture_exception(ex)
         end
 
         reindex_for(@item[:id].to_s)
@@ -474,6 +476,7 @@ module VoshodAvtoExchange
         log(S_I_ERROR % {
           msg: [ex.message].push(ex.backtrace).join("\n")
         })
+        Raven.capture_exception(ex)
       end
 
       #

@@ -133,6 +133,7 @@ module VoshodAvtoExchange
 
       rescue => e
         log("[extract_zip_file] #{e.backtrace.join('\n')}")
+        Raven.capture_exception(e)
       end
 
       files
