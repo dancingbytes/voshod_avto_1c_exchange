@@ -47,7 +47,7 @@ class ExchangeController < ::ApplicationController
         
         # временная запись файла обмена заказами для отладки
         order_file_name = "#{Time.now.strftime('%Y-%m-%d-%H-%M-%S')}-#{SecureRandom.urlsafe_base64}.xml"
-        File.open("tmp/exchange_1c/orders/#{order_file_name}", "w"){ |f| f << @answer[:xml]} rescue nil
+        File.open("tmp/orders/#{order_file_name}", "w"){ |f| f << @answer[:xml]} rescue nil
         #/временная запись файла обмена заказами для отладки
         
       # GET /exchange?type=users_list&mode=query&id=123
