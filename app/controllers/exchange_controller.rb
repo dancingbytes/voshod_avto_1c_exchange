@@ -44,8 +44,12 @@ class ExchangeController < ::ApplicationController
           # Заказы
           when 'sale' then
             answer(xml: ::VoshodAvtoExchange::Exports.users_and_orders(operation_id))
-          # debug запись файла обмена заказами
-          # File.open("public/1c.xml", "w"){ |f| f << @answer[:xml]}
+
+            # временная запись файла обмена заказами для отладки
+            order_file_name = "#{Time.now.strftime('%Y-%m-%d-%H-%M-%S')}-#{SecureRandom.urlsafe_base64}.xml"
+            File.open("tmp/orders/#{order_file_name}", "w"){ |f| f << @answer[:xml]} rescue nil
+            #/временная запись файла обмена заказами для отладки
+            
           # GET /exchange?type=users_list&mode=query&id=123
           # Список пользователей по заданному списку id
           when 'users_list' then

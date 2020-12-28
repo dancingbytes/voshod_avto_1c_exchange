@@ -15,8 +15,8 @@ module VoshodAvtoExchange
         time         = Time.now.strftime('%H:%M:%S')
 
         outlets_list   = nil
-        outlets_list   = ::Outlet.where(id: outlets_ids) if outlets_ids.present?
-        outlets_list ||= ::Outlet.where(operation_state: 0)
+        outlets_list   = ::Outlet.unscoped.where(id: outlets_ids) if outlets_ids.present?
+        outlets_list ||= ::Outlet.unscoped.where(operation_state: 0)
 
         # Выбраем все торговые точки на обработку
         outlets_list.each { |outlet|
