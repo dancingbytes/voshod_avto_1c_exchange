@@ -62,6 +62,12 @@ class ExchangeController < ::ApplicationController
             answer(xml: ::VoshodAvtoExchange::Exports::Outlet.list(
               outlets_ids: params[:id].to_s.split(',')
             ))
+            
+            # временная запись файла обмена торговыми точками для отладки
+            outlets_file_name = "#{Time.now.strftime('%Y-%m-%d-%H-%M-%S')}-#{SecureRandom.urlsafe_base64}.xml"
+            File.open("tmp/outlets/#{outlets_file_name}", "w"){ |f| f << @answer[:xml]} rescue nil
+            # /временная запись файла обмена торговыми точками для отладки
+
           # GET /exchange?type=orders_list&mode=query&id=123
           # Список заказов по заданному списку id
           when 'orders_list'   then
