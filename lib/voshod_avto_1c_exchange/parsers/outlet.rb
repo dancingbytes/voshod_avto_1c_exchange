@@ -24,8 +24,8 @@ module VoshodAvtoExchange
         super
 
         case name
-
-          when "ИД_Контрагент".freeze then parse_user_id(:user_id)
+          
+          when "Контрагент_ИД".freeze then parse_user_id(:user_id)
           when "Адрес".freeze then parse_params(:address)
           when "ИД".freeze then parse_params(:id)
           when "ГУИД".freeze then parse_params(:guid)
