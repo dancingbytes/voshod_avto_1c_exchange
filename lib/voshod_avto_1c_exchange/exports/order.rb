@@ -80,8 +80,10 @@ module VoshodAvtoExchange
           str << ::VoshodAvtoExchange::Template::ORDER % {
 
             kid:              order.uid,
-            date:             order.created_at.strftime('%Y-%m-%d'),
-            time:             order.created_at.strftime('%H:%M:%S'),
+#           date:             order.created_at.strftime('%Y-%m-%d'),
+#           time:             order.created_at.strftime('%H:%M:%S'),
+            date:             order.confirmed_at.strftime('%Y-%m-%d'),
+            time:             order.confirmed_at.strftime('%H:%M:%S'),
             price:            order.amount,
             # uid:              order.user_uid,
             uid:              order.user.uid,
