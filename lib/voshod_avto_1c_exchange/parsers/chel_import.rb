@@ -473,7 +473,7 @@ module VoshodAvtoExchange
         # Если нашли -- обновляем индекс
         # ::SearchModule.reindex_for(itm) if itm
         # Search v2
-        ::Elasticsearch::IndexProduct.call(product: itm)
+        ::Elasticsearch::IndexProduct.call(product: itm) if itm
       rescue => ex
         log(S_I_ERROR % {
           msg: [ex.message].push(ex.backtrace).join("\n")
