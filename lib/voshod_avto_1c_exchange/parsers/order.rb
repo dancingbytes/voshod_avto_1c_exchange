@@ -81,6 +81,9 @@ module VoshodAvtoExchange
 
           when "Статус".freeze        then
             parse_item_params(:state_name)
+          
+          when "ОбъединенаВ".freeze        then
+            parse_item_params(:info)
 
           when "АдресДоставки".freeze  then
             parse_item_params(:delivery_address)
