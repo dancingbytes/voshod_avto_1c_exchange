@@ -87,6 +87,45 @@ module VoshodAvtoExchange
           published = 't'
       SQL
 
+      PIM_ITEM_INSERT_OR_UPDATE = <<~SQL
+        INSERT INTO items (
+          shipment,
+          raw,
+          updated_at,
+          va_catalog_id,
+          va_item_id,
+          va_nom_group,
+          va_price_group,
+          unit_code,
+          department,
+          search_tags,
+          instituted_at
+        ) VALUES (
+          %{shipment},
+          %{raw},
+          %{updated_at},
+          %{va_catalog_id},
+          %{va_item_id},
+          %{va_nom_group},
+          %{va_price_group},
+          %{unit_code},
+          %{department},
+          %{search_tags},
+          %{instituted_at}
+        ) ON CONFLICT (p_code, mog, oem_num, oem_brand) DO UPDATE SET raw = %{raw},
+          shipment = %{shipment},
+          updated_at = %{updated_at},
+          va_catalog_id = %{va_catalog_id},
+          va_item_id = %{va_item_id},
+          va_nom_group = %{va_nom_group},
+          va_price_group = %{va_price_group},
+          unit_code = %{unit_code},
+          department = %{department},
+          search_tags = %{search_tags},
+          instituted_at = %{instituted_at},
+          published = 't'
+      SQL
+
       S_C_ERROR = %Q(Ошибка сохранения каталога в базу.
         %{msg}
       )
@@ -432,31 +471,50 @@ module VoshodAvtoExchange
         instituted_at = @item[:characters]['Дата создания номенклатуры'].try(:to_time).try(:utc)
 
         begin
-          sql(ITEM_INSERT_OR_UPDATE % {
-            p_code:             quote(@item[:p_code]),
-            mog:                quote(@item[:mog].to_s.squish[0..99]),
+  
+          if @item.pim # если товар есть в ПИМ, обновляем только часть
+  
+            sql(PIM_ITEM_INSERT_OR_UPDATE % {
+              raw:                quote('f'),
+              updated_at:         quote(::Time.now.utc),
+              shipment:           @item[:shipment].try(:to_i) || 1,
+              va_catalog_id:      quote(@item[:catalog_id].to_s),
+              va_item_id:         quote(@item[:id].to_s),
+              va_nom_group:       quote(@item[:nom_group].to_s),
+              va_price_group:     quote(@item[:price_group].to_s),
+              unit_code:          @item[:unit_code].to_i,
+              department:         quote(@item[:department].to_s.squish[0..99]),
+              search_tags:        quote(@item[:search_tags].to_s.squish),
+              instituted_at:      quote(instituted_at)
+            })
+            
+          else # товара нет в ПИМ
 
-            oem_num:            quote(
-                                  ::CrossModule.clean(@item[:oem_num].to_s.squish[0..99])
-                                ),
+            sql(ITEM_INSERT_OR_UPDATE % {
+              p_code:             quote(@item[:p_code]),
+              mog:                quote(@item[:mog].to_s.squish[0..99]),
+              oem_num:            quote(
+                                    ::CrossModule.clean(@item[:oem_num].to_s.squish[0..99])
+                                  ),
+              oem_brand:          quote(
+                                    ::VendorAliasModule.clean(@item[:oem_brand].to_s.squish[0..99])
+                                  ),
+              raw:                quote('f'),
+              updated_at:         quote(::Time.now.utc),
+              shipment:           @item[:shipment].try(:to_i) || 1,
+              va_catalog_id:      quote(@item[:catalog_id].to_s),
+              va_item_id:         quote(@item[:id].to_s),
+              va_nom_group:       quote(@item[:nom_group].to_s),
+              va_price_group:     quote(@item[:price_group].to_s),
+              name:               quote(@item[:name].to_s.squish[0..250]),
+              unit_code:          @item[:unit_code].to_i,
+              department:         quote(@item[:department].to_s.squish[0..99]),
+              search_tags:        quote(@item[:search_tags].to_s.squish),
+              instituted_at:      quote(instituted_at)
+            })
+          
+          end
 
-            oem_brand:          quote(
-                                  ::VendorAliasModule.clean(@item[:oem_brand].to_s.squish[0..99])
-                                ),
-
-            raw:                quote('f'),
-            updated_at:         quote(::Time.now.utc),
-            shipment:           @item[:shipment].try(:to_i) || 1,
-            va_catalog_id:      quote(@item[:catalog_id].to_s),
-            va_item_id:         quote(@item[:id].to_s),
-            va_nom_group:       quote(@item[:nom_group].to_s),
-            va_price_group:     quote(@item[:price_group].to_s),
-            name:               quote(@item[:name].to_s.squish[0..250]),
-            unit_code:          @item[:unit_code].to_i,
-            department:         quote(@item[:department].to_s.squish[0..99]),
-            search_tags:        quote(@item[:search_tags].to_s.squish),
-            instituted_at:      quote(instituted_at)
-          })
         rescue => ex
           log(S_I_ERROR % {
             msg: [ex.message].push(ex.backtrace).join("\n")

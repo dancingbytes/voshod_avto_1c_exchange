@@ -6,6 +6,34 @@
 module VoshodAvtoExchange # offers.xml
   module Parsers
     class ChelOffers < Base
+      
+      PIM_ITEM_INSERT_OR_UPDATE = <<~SQL
+      INSERT INTO items (
+        shipment,
+        updated_at,
+        va_item_id,
+        prices,
+        meta_prices,
+        count,
+        storehouses
+      ) VALUES (
+        %{shipment},
+        %{updated_at},
+        %{va_item_id},
+        %{prices},
+        %{meta_prices},
+        %{count},
+        %{storehouses}
+      ) ON CONFLICT (p_code, mog, oem_num, oem_brand) DO UPDATE SET shipment = %{shipment},
+        updated_at = %{updated_at},
+        va_item_id = %{va_item_id},
+        prices = %{prices},
+        meta_prices = %{meta_prices},
+        count = %{count},
+        storehouses = %{storehouses},
+        published = 't'
+    SQL
+
       ITEM_INSERT_OR_UPDATE = <<~SQL
         INSERT INTO items (
           p_code,
@@ -230,26 +258,41 @@ module VoshodAvtoExchange # offers.xml
         return if @item.nil? || @item.empty?
 
         begin
-          sql(ITEM_INSERT_OR_UPDATE % {
-            p_code:       quote(@item[:p_code]),
-            mog:          quote(@item[:mog].to_s.squish[0..99]),
 
-            oem_num:      quote(
-                            ::CrossModule.clean(@item[:oem_num].to_s.squish[0..99])
-                          ),
+          if @item.pim # если товар есть в ПИМ, обновляем только часть
+            
+            sql(PIM_ITEM_INSERT_OR_UPDATE % {
+              shipment:     @item[:shipment].try(:to_i) || 1,
+              updated_at:   quote(::Time.now.utc),
+              va_item_id:   quote(@item[:id].to_s),
+              prices:       quote((@item[:prices] || {}).to_json),
+              meta_prices:  quote((@item[:meta_prices] || {}).to_json),
+              count:        @item[:count].try(:to_i),
+              storehouses:  quote((@item[:storehouses] || {}).to_json)
+            })
 
-            oem_brand:    quote(
-                            ::VendorAliasModule.clean(@item[:oem_brand].to_s.squish[0..99])
-                          ),
+          else # товара нет в ПИМ
 
-            shipment:     @item[:shipment].try(:to_i) || 1,
-            updated_at:   quote(::Time.now.utc),
-            va_item_id:   quote(@item[:id].to_s),
-            prices:       quote((@item[:prices] || {}).to_json),
-            meta_prices:  quote((@item[:meta_prices] || {}).to_json),
-            count:        @item[:count].try(:to_i),
-            storehouses:  quote((@item[:storehouses] || {}).to_json)
-          })
+            sql(ITEM_INSERT_OR_UPDATE % {
+              p_code:       quote(@item[:p_code]),
+              mog:          quote(@item[:mog].to_s.squish[0..99]),
+              oem_num:      quote(
+                              ::CrossModule.clean(@item[:oem_num].to_s.squish[0..99])
+                            ),
+              oem_brand:    quote(
+                              ::VendorAliasModule.clean(@item[:oem_brand].to_s.squish[0..99])
+                            ),
+              shipment:     @item[:shipment].try(:to_i) || 1,
+              updated_at:   quote(::Time.now.utc),
+              va_item_id:   quote(@item[:id].to_s),
+              prices:       quote((@item[:prices] || {}).to_json),
+              meta_prices:  quote((@item[:meta_prices] || {}).to_json),
+              count:        @item[:count].try(:to_i),
+              storehouses:  quote((@item[:storehouses] || {}).to_json)
+            })
+          
+          end
+
         rescue => ex
           log(S_I_ERROR % {
             msg: [ex.message].push(ex.backtrace).join("\n")
