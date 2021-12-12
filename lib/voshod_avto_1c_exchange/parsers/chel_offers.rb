@@ -259,46 +259,58 @@ module VoshodAvtoExchange # offers.xml
 
         begin
 
-          if @item.pim # если товар есть в ПИМ, обновляем только часть
+          message_id = MessageBus.publish(
+            'etl.commerce.update', { 
+              sender: 'va', 
+              published_at: Time.now.to_i 
+            }.merge( {product: @item} )
+          )
+
+          # if @item.pim # если товар есть в ПИМ, обновляем только часть
             
-            sql(PIM_ITEM_INSERT_OR_UPDATE % {
-              shipment:     @item[:shipment].try(:to_i) || 1,
-              updated_at:   quote(::Time.now.utc),
-              va_item_id:   quote(@item[:id].to_s),
-              prices:       quote((@item[:prices] || {}).to_json),
-              meta_prices:  quote((@item[:meta_prices] || {}).to_json),
-              count:        @item[:count].try(:to_i),
-              storehouses:  quote((@item[:storehouses] || {}).to_json)
-            })
+          #   sql(PIM_ITEM_INSERT_OR_UPDATE % {
+          #     shipment:     @item[:shipment].try(:to_i) || 1,
+          #     updated_at:   quote(::Time.now.utc),
+          #     va_item_id:   quote(@item[:id].to_s),
+          #     prices:       quote((@item[:prices] || {}).to_json),
+          #     meta_prices:  quote((@item[:meta_prices] || {}).to_json),
+          #     count:        @item[:count].try(:to_i),
+          #     storehouses:  quote((@item[:storehouses] || {}).to_json)
+          #   })
 
-          else # товара нет в ПИМ
+          # else # товара нет в ПИМ
 
-            sql(ITEM_INSERT_OR_UPDATE % {
-              p_code:       quote(@item[:p_code]),
-              mog:          quote(@item[:mog].to_s.squish[0..99]),
-              oem_num:      quote(
-                              ::CrossModule.clean(@item[:oem_num].to_s.squish[0..99])
-                            ),
-              oem_brand:    quote(
-                              ::VendorAliasModule.clean(@item[:oem_brand].to_s.squish[0..99])
-                            ),
-              shipment:     @item[:shipment].try(:to_i) || 1,
-              updated_at:   quote(::Time.now.utc),
-              va_item_id:   quote(@item[:id].to_s),
-              prices:       quote((@item[:prices] || {}).to_json),
-              meta_prices:  quote((@item[:meta_prices] || {}).to_json),
-              count:        @item[:count].try(:to_i),
-              storehouses:  quote((@item[:storehouses] || {}).to_json)
-            })
+          #   sql(ITEM_INSERT_OR_UPDATE % {
+          #     p_code:       quote(@item[:p_code]),
+          #     mog:          quote(@item[:mog].to_s.squish[0..99]),
+          #     oem_num:      quote(
+          #                     ::CrossModule.clean(@item[:oem_num].to_s.squish[0..99])
+          #                   ),
+          #     oem_brand:    quote(
+          #                     ::VendorAliasModule.clean(@item[:oem_brand].to_s.squish[0..99])
+          #                   ),
+          #     shipment:     @item[:shipment].try(:to_i) || 1,
+          #     updated_at:   quote(::Time.now.utc),
+          #     va_item_id:   quote(@item[:id].to_s),
+          #     prices:       quote((@item[:prices] || {}).to_json),
+          #     meta_prices:  quote((@item[:meta_prices] || {}).to_json),
+          #     count:        @item[:count].try(:to_i),
+          #     storehouses:  quote((@item[:storehouses] || {}).to_json)
+          #   })
           
-          end
+          # end
 
         rescue => ex
-          log(S_I_ERROR % {
-            msg: [ex.message].push(ex.backtrace).join("\n")
-          })
-          Raven.capture_exception(ex)
+
+          # log(S_I_ERROR % {
+          #   msg: [ex.message].push(ex.backtrace).join("\n")
+          # })
+          # Raven.capture_exception(ex)
+          
+          puts ex.message
+
         end
+
       end # save_item
 
       def sql(str)
